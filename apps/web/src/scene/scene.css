@@ -1,0 +1,53 @@
+/* 3D-сцена острова. Все классы с префиксом isl-, чтобы не пересекаться с UI. */
+.isl-root {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: #FBE3C8;
+}
+.isl-root canvas { display: block; touch-action: none; }
+
+/* «Миниатюра»: размытие краёв кадра, как у макро-съёмки диорамы.
+   Полосы обрамляют свободную от интерфейса часть экрана (--isl-inset задаёт IslandScene). */
+.isl-tilt {
+  position: absolute; left: 0; right: 0; pointer-events: none;
+  height: calc(26% * (1 - var(--isl-inset, 0)));
+  backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  transition: height .5s ease, bottom .5s ease;
+}
+.isl-tilt-top { top: 0; mask-image: linear-gradient(to bottom, #000, transparent); -webkit-mask-image: linear-gradient(to bottom, #000, transparent); }
+.isl-tilt-bottom { bottom: calc(100% * var(--isl-inset, 0)); mask-image: linear-gradient(to top, #000, transparent); -webkit-mask-image: linear-gradient(to top, #000, transparent); }
+.isl-vignette {
+  position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(31, 42, 68, 0.22) 100%);
+}
+/* в шторм края темнеют сильнее */
+.isl-storm-veil {
+  position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 1.5s ease;
+  background: radial-gradient(ellipse at 50% 45%, rgba(46, 58, 85, 0) 35%, rgba(46, 58, 85, 0.38) 100%);
+}
+.isl-storm .isl-storm-veil { opacity: 1; }
+
+/* Всплывающие суммы */
+.isl-floats { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.isl-float { position: absolute; left: 0; top: 0; will-change: transform; }
+.isl-float-inner {
+  display: flex; align-items: center; gap: 5px; padding: 5px 10px 5px 6px; border-radius: 99px;
+  background: rgba(255, 251, 243, 0.92); box-shadow: 0 4px 12px rgba(31, 42, 68, 0.18);
+  font: 700 13px 'Unbounded', sans-serif; white-space: nowrap;
+  animation: isl-rise 2s ease-out forwards;
+}
+.isl-float.pos .isl-float-inner { color: #23935E; }
+.isl-float.neg .isl-float-inner { color: #DC4B43; padding-left: 10px; }
+.isl-coin {
+  flex: none; width: 15px; height: 15px; border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #FFE7A3 0 18%, #F5B83D 45%, #D9931C 100%);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.35), 0 1px 0 #B9781A;
+}
+@keyframes isl-rise {
+  0% { opacity: 0; transform: translate(-50%, -60%) scale(.7); }
+  15% { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+  75% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -260%) scale(1); }
+}

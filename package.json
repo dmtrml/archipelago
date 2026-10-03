@@ -1,0 +1,16 @@
+{
+  "name": "archipelago",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @arch/web",
+    "build": "npm run build -w @arch/web",
+    "test": "npm run test -w @arch/engine",
+    "sim": "npm run sim -w @arch/engine",
+    "typecheck": "npm run typecheck -w @arch/engine && npm run typecheck -w @arch/web"
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/scene", "src/sandbox", "src/vite-env.d.ts"]
+}

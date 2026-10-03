@@ -1,0 +1,58 @@
+// Создание нового мира: человек + три соседа-бота, первая доска сделок.
+import { initialMarket } from './market';
+import { fillInitialBoard } from './offers';
+import { Rng } from './rng';
+import * as R from './rules';
+import type { BotStyle, PlayerState, WorldState } from './types';
+
+export const HUMAN_ID = 'p1';
+
+export const BOT_ROSTER: { id: string; name: string; islandName: string; botStyle: BotStyle }[] = [
+  { id: 'bot-mia', name: 'Мия', islandName: 'Ракушка', botStyle: 'saver' },
+  { id: 'bot-timur', name: 'Тимур', islandName: 'Маяк', botStyle: 'spender' },
+  { id: 'bot-boris', name: 'Борис', islandName: 'Пеликан', botStyle: 'gambler' },
+];
+
+function newPlayer(id: string, name: string, islandName: string, botStyle?: BotStyle): PlayerState {
+  const player: PlayerState = {
+    id,
+    name,
+    islandName,
+    isBot: botStyle !== undefined,
+    cash: R.START_CASH,
+    salary: R.SALARY,
+    living: R.LIVING,
+    happiness: R.START_HAPPINESS,
+    knowledge: 0,
+    studiedThisWeek: false,
+    restedThisWeek: false,
+    extraShift: false,
+    insured: false,
+    loans: [],
+    owned: [],
+    freedomWeek: null,
+  };
+  if (botStyle) player.botStyle = botStyle;
+  return player;
+}
+
+export function createWorld(opts: { seed: number; playerName: string; islandName: string }): WorldState {
+  const world: WorldState = {
+    version: 1,
+    seed: opts.seed,
+    rng: opts.seed >>> 0,
+    nextUid: 1,
+    week: 1,
+    market: initialMarket(1),
+    players: [
+      newPlayer(HUMAN_ID, opts.playerName, opts.islandName),
+      ...BOT_ROSTER.map((b) => newPlayer(b.id, b.name, b.islandName, b.botStyle)),
+    ],
+    offers: [],
+    lastReport: null,
+  };
+  const rng = new Rng(world.rng);
+  fillInitialBoard(world, rng, R.START_CASH);
+  world.rng = rng.state;
+  return world;
+}
