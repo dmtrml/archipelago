@@ -35,7 +35,7 @@ const HULL_N = 0.77;               // высота начала координа
 const KEELWAY_TOP = -0.07;
 const PIVOT_X = 5;                 // вокруг этой точки «дышит» наведение
 const HULL_AT: V3 = [HULL_D * COS + HULL_N * SIN, RAMP_Y0 - HULL_D * SIN + HULL_N * COS, 0];
-const PROPS_AT: V3 = [2.0, 0, 3.4];
+const PROPS_AT: V3 = [1.5, 0, 2.9];
 
 /** Точка из системы склона (d вдоль рельсов, n от верха рельсов, z) в систему стапеля. */
 const slopePoint = (d: number, n: number): [number, number] => [d * COS + n * SIN, RAMP_Y0 - d * SIN + n * COS];
@@ -106,7 +106,7 @@ function YardProps() {
     hook.current.rotation.z = Math.sin(t * 0.9) * 0.07;
     hook.current.rotation.x = Math.cos(t * 0.7) * 0.05;
   });
-  const armTip: V3 = [0.2, 1.8, -1.55];
+  const armTip: V3 = [0.2, 1.8, -1.35];
   return (
     <>
       <Baked id="dream:0:props">
@@ -137,7 +137,7 @@ function YardProps() {
         <M g={box(0.55, 0.12, 0.55)} c={PAL.rock} p={[0.2, 0.06, -0.95]} />
         <Beam a={[0.2, 0.1, -0.95]} b={[0.2, 2.15, -0.95]} t={0.15} c={PAL.woodDark} />
         <Beam a={[0.2, 2.15, -0.95]} b={armTip} t={0.11} c={PAL.woodDark} />
-        <Beam a={[0.2, 0.55, -0.95]} b={[0.2, 1.5, -1.35]} t={0.09} c={PAL.wood} />
+        <Beam a={[0.2, 0.55, -0.95]} b={[0.2, 1.5, -1.2]} t={0.09} c={PAL.wood} />
         <M g={box(0.3, 0.1, 0.3)} c={PAL.gold} p={[0.2, 2.22, -0.95]} />
       </Baked>
       {/* груз на тросе слегка раскачивается */}
@@ -296,7 +296,7 @@ export function Shipyard({ dream, clickRef }: Props) {
               </Slope>
             </Pop>
             <Pop show={building} origin={PROPS_AT} ripple={{ pos: [PROPS_AT[0], 0.15, PROPS_AT[2]], size: 0.9 }}>
-              <group position={PROPS_AT} scale={1.2}><YardProps /></group>
+              <group position={PROPS_AT} scale={1.1}><YardProps /></group>
             </Pop>
           </group>
           <Pop
