@@ -1,38 +1,38 @@
 {
   "newGame": [
     {
-      "t": 1170.7000000178814,
+      "t": 1252.300000011921,
       "cue": "ui.click",
       "bus": "sfx",
       "source": "synth"
     },
     {
-      "t": 1186.300000011921,
+      "t": 1259.4000000059605,
       "cue": "amb.sea",
       "bus": "ambience",
       "source": "synth"
     },
     {
-      "t": 1188.2000000178814,
+      "t": 1260.4000000059605,
       "cue": "amb.wind",
       "bus": "ambience",
       "source": "synth"
     },
     {
-      "t": 1330.6000000238419,
+      "t": 1392.7000000178814,
       "cue": "music.island",
       "bus": "music",
       "source": "file",
       "variant": 0
     },
     {
-      "t": 1351.5,
+      "t": 1416.7000000178814,
       "cue": "amb.sea",
       "bus": "ambience",
       "source": "file"
     },
     {
-      "t": 1359.4000000059605,
+      "t": 1422.4000000059605,
       "cue": "amb.wind",
       "bus": "ambience",
       "source": "file"
@@ -40,176 +40,185 @@
   ],
   "buyAsset": [
     {
-      "t": 663.0999999940395,
-      "cue": "music.island",
-      "bus": "music",
-      "source": "file",
-      "variant": 0
-    },
-    {
-      "t": 669,
+      "t": 638.4000000059605,
       "cue": "coins.pay",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 725.1999999880791,
+      "t": 674.2000000178814,
       "cue": "amb.sea",
       "bus": "ambience",
       "source": "file"
     },
     {
-      "t": 729.1999999880791,
+      "t": 677.6000000238419,
       "cue": "amb.wind",
       "bus": "ambience",
       "source": "file"
     },
     {
-      "t": 743.5999999940395,
+      "t": 723.3000000119209,
       "cue": "build.pop",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "buyStatus": [
     {
-      "t": 658.5,
+      "t": 635.7999999821186,
       "cue": "coins.pay",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 692.5999999940395,
-      "cue": "music.island",
-      "bus": "music",
-      "source": "file",
-      "variant": 0
-    },
-    {
-      "t": 710.5,
-      "cue": "amb.sea",
-      "bus": "ambience",
-      "source": "file"
-    },
-    {
-      "t": 713.4000000059605,
-      "cue": "amb.wind",
-      "bus": "ambience",
-      "source": "file"
-    },
-    {
-      "t": 737.9000000059605,
+      "t": 723.8999999761581,
       "cue": "build.pop",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 829.0999999940395,
+      "t": 803.7999999821186,
       "cue": "status.joy",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "buyScam": [
     {
-      "t": 623.6999999880791,
-      "cue": "music.island",
-      "bus": "music",
-      "source": "file",
-      "variant": 0
-    },
-    {
-      "t": 629.5,
+      "t": 641.1999999880791,
       "cue": "coins.pay",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 688.2999999821186,
-      "cue": "amb.wind",
-      "bus": "ambience",
-      "source": "file"
-    },
-    {
-      "t": 689.6999999880791,
+      "t": 681,
       "cue": "amb.sea",
       "bus": "ambience",
       "source": "file"
     },
     {
-      "t": 723.0999999940395,
+      "t": 682.5,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 714.7999999821186,
       "cue": "build.pop",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "buyNoCash": [
     {
-      "t": 660.5,
+      "t": 599.1999999880791,
+      "cue": "ui.error",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 600.4000000059605,
       "cue": "music.island",
       "bus": "music",
       "source": "file",
       "variant": 0
-    },
-    {
-      "t": 664.7999999821186,
-      "cue": "ui.error",
-      "bus": "sfx",
-      "source": "file"
     }
   ],
   "sellAsset": [
     {
-      "t": 615.3000000119209,
+      "t": 602.3000000119209,
+      "cue": "coins.get",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 628.8000000119209,
       "cue": "music.island",
       "bus": "music",
       "source": "file",
       "variant": 0
     },
     {
-      "t": 621.2000000178814,
-      "cue": "coins.get",
-      "bus": "sfx",
-      "source": "file"
-    },
-    {
-      "t": 665.6000000238419,
+      "t": 645.3000000119209,
       "cue": "amb.wind",
       "bus": "ambience",
       "source": "file"
     },
     {
-      "t": 668.6000000238419,
+      "t": 683.0999999940395,
+      "cue": "build.remove",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "upgradeAsset": [
+    {
+      "t": 612.7000000178814,
+      "cue": "music.island",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 618.5,
+      "cue": "coins.pay",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 652.5,
       "cue": "amb.sea",
       "bus": "ambience",
       "source": "file"
     },
     {
-      "t": 703.2000000178814,
-      "cue": "build.remove",
-      "bus": "sfx",
+      "t": 659.1000000238419,
+      "cue": "amb.wind",
+      "bus": "ambience",
       "source": "file"
+    },
+    {
+      "t": 833.1000000238419,
+      "cue": "upgrade",
+      "bus": "sfx",
+      "source": "synth"
     }
   ],
-  "upgradeAsset": [
+  "repairAsset": [
     {
-      "t": 628.5999999940395,
+      "t": 623.7000000178814,
       "cue": "music.island",
       "bus": "music",
       "source": "file",
       "variant": 0
     },
     {
-      "t": 630.2999999821186,
+      "t": 628.1000000238419,
       "cue": "coins.pay",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 675.5,
-      "cue": "amb.wind",
-      "bus": "ambience",
-      "source": "file"
+      "t": 705.8000000119209,
+      "cue": "repair",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "takeLoan": [
+    {
+      "t": 638.5999999940395,
+      "cue": "music.island",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 645.5,
+      "cue": "coins.get",
+      "bus": "sfx",
+      "source": "synth"
     },
     {
       "t": 680.7999999821186,
@@ -218,206 +227,127 @@
       "source": "file"
     },
     {
-      "t": 838.1999999880791,
-      "cue": "upgrade",
-      "bus": "sfx",
-      "source": "file"
-    }
-  ],
-  "repairAsset": [
-    {
-      "t": 626.5999999940395,
-      "cue": "coins.pay",
-      "bus": "sfx",
-      "source": "file"
-    },
-    {
-      "t": 667.4000000059605,
-      "cue": "amb.sea",
-      "bus": "ambience",
-      "source": "file"
-    },
-    {
-      "t": 672.8000000119209,
+      "t": 684,
       "cue": "amb.wind",
       "bus": "ambience",
       "source": "file"
     },
     {
-      "t": 715.9000000059605,
-      "cue": "repair",
-      "bus": "sfx",
-      "source": "file"
-    }
-  ],
-  "takeLoan": [
-    {
-      "t": 674.4000000059605,
-      "cue": "music.island",
-      "bus": "music",
-      "source": "file",
-      "variant": 0
-    },
-    {
-      "t": 679.6999999880791,
-      "cue": "coins.get",
-      "bus": "sfx",
-      "source": "file"
-    },
-    {
-      "t": 718.9000000059605,
-      "cue": "amb.sea",
-      "bus": "ambience",
-      "source": "file"
-    },
-    {
-      "t": 720.8000000119209,
-      "cue": "amb.wind",
-      "bus": "ambience",
-      "source": "file"
-    },
-    {
-      "t": 751.5999999940395,
+      "t": 729.2999999821186,
       "cue": "loan.take",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "repayLoan": [
     {
-      "t": 672.8000000119209,
+      "t": 631.3000000119209,
       "cue": "loan.repay",
       "bus": "sfx",
-      "source": "file"
-    },
-    {
-      "t": 712.2000000178814,
-      "cue": "amb.wind",
-      "bus": "ambience",
-      "source": "file"
-    },
-    {
-      "t": 713.7000000178814,
-      "cue": "amb.sea",
-      "bus": "ambience",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "study": [
     {
-      "t": 615.1999999880791,
-      "cue": "music.island",
-      "bus": "music",
-      "source": "file",
-      "variant": 0
-    },
-    {
-      "t": 621.0999999940395,
+      "t": 607.7999999821186,
       "cue": "coins.pay",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 662.5999999940395,
-      "cue": "amb.wind",
-      "bus": "ambience",
-      "source": "file"
-    },
-    {
-      "t": 665.5999999940395,
+      "t": 645.4000000059605,
       "cue": "amb.sea",
       "bus": "ambience",
       "source": "file"
     },
     {
-      "t": 697.5,
+      "t": 648.0999999940395,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 700.0999999940395,
       "cue": "study",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "rest": [
     {
-      "t": 623.4000000059605,
-      "cue": "music.island",
-      "bus": "music",
-      "source": "file",
-      "variant": 0
-    },
-    {
-      "t": 629.5,
+      "t": 634.7999999821186,
       "cue": "coins.pay",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 667.0999999940395,
+      "t": 670.8999999761581,
       "cue": "amb.sea",
       "bus": "ambience",
       "source": "file"
     },
     {
-      "t": 672.4000000059605,
+      "t": 672.5,
       "cue": "amb.wind",
       "bus": "ambience",
       "source": "file"
     },
     {
-      "t": 708.9000000059605,
+      "t": 708.3999999761581,
       "cue": "rest",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "setExtraShift": [
     {
-      "t": 657.9000000059605,
+      "t": 592.5,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 595.2999999821186,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 600.2999999821186,
       "cue": "music.island",
       "bus": "music",
       "source": "file",
       "variant": 0
     },
     {
-      "t": 665,
+      "t": 612.7999999821186,
       "cue": "shift.on",
       "bus": "sfx",
-      "source": "file"
-    },
-    {
-      "t": 713.5,
-      "cue": "amb.wind",
-      "bus": "ambience",
-      "source": "file"
-    },
-    {
-      "t": 717.5,
-      "cue": "amb.sea",
-      "bus": "ambience",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "quitJob": [
     {
-      "t": 635.8000000119209,
+      "t": 636.7999999821186,
       "cue": "job.quit",
       "bus": "sfx",
       "source": "synth"
     },
     {
-      "t": 676.5,
+      "t": 669.2999999821186,
       "cue": "music.free",
       "bus": "music",
       "source": "file",
       "variant": 0
     },
     {
-      "t": 698.9000000059605,
+      "t": 692,
       "cue": "amb.wind",
       "bus": "ambience",
       "source": "file"
     },
     {
-      "t": 700.6000000238419,
+      "t": 693.8999999761581,
       "cue": "amb.sea",
       "bus": "ambience",
       "source": "file"
@@ -425,212 +355,205 @@
   ],
   "returnToWork": [
     {
-      "t": 649,
+      "t": 655.2000000178814,
       "cue": "job.return",
       "bus": "sfx",
       "source": "synth"
+    },
+    {
+      "t": 698.7000000178814,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 700.1000000238419,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
     }
   ],
   "buildDream": [
     {
-      "t": 701.2999999821186,
-      "cue": "music.free",
-      "bus": "music",
-      "source": "file",
-      "variant": 0
-    },
-    {
-      "t": 705.0999999940395,
+      "t": 678.3000000119209,
       "cue": "coins.pay",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 768.1999999880791,
-      "cue": "amb.wind",
-      "bus": "ambience",
-      "source": "file"
-    },
-    {
-      "t": 771.9000000059605,
+      "t": 727.5999999940395,
       "cue": "amb.sea",
       "bus": "ambience",
       "source": "file"
     },
     {
-      "t": 776.6999999880791,
+      "t": 729.1999999880791,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 754.8000000119209,
       "cue": "dream.start",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "coinWeek": [
     {
-      "t": 662,
+      "t": 635,
       "cue": "music.island",
       "bus": "music",
       "source": "file",
       "variant": 0
     },
     {
-      "t": 696.5,
+      "t": 677.3000000119209,
       "cue": "ui.click",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 698.6999999880791,
+      "t": 679.2000000178814,
       "cue": "week.next",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 731,
-      "cue": "amb.sea",
-      "bus": "ambience",
-      "source": "file"
-    },
-    {
-      "t": 731.4000000059605,
+      "t": 710.2000000178814,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 0
     },
     {
-      "t": 752.4000000059605,
-      "cue": "amb.wind",
-      "bus": "ambience",
-      "source": "file"
-    },
-    {
-      "t": 884.4000000059605,
+      "t": 855.0999999940395,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 1
     },
     {
-      "t": 1040.4000000059605,
+      "t": 1034.800000011921,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 2
     },
     {
-      "t": 1213.300000011921,
+      "t": 1195.9000000059605,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 3
     },
     {
-      "t": 1389.5999999940395,
+      "t": 1368,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 4
     },
     {
-      "t": 1560.300000011921,
+      "t": 1538.7000000178814,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 5
     },
     {
-      "t": 1726.9000000059605,
+      "t": 1709.2000000178814,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 6
     },
     {
-      "t": 1891.699999988079,
+      "t": 1876.0999999940395,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 7
     },
     {
-      "t": 2059.9000000059605,
+      "t": 2044,
       "cue": "coin.minus",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "storm": [
     {
-      "t": 642.6999999880791,
+      "t": 699.0999999940395,
       "cue": "music.island",
       "bus": "music",
       "source": "file",
       "variant": 0
     },
     {
-      "t": 684.3000000119209,
+      "t": 735.0999999940395,
       "cue": "amb.sea",
       "bus": "ambience",
       "source": "file"
     },
     {
-      "t": 688.8000000119209,
+      "t": 736.5999999940395,
       "cue": "amb.wind",
       "bus": "ambience",
       "source": "file"
     },
     {
-      "t": 691.8000000119209,
+      "t": 761.9000000059605,
       "cue": "ui.click",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 692.5,
+      "t": 763.0999999940395,
       "cue": "week.next",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 693,
+      "t": 763.6999999880791,
       "cue": "amb.rain",
       "bus": "ambience",
       "source": "file"
     },
     {
-      "t": 722.6999999880791,
+      "t": 794.5,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 0
     },
     {
-      "t": 870.0999999940395,
+      "t": 936.4000000059605,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 1
     },
     {
-      "t": 1802.199999988079,
+      "t": 1867.0999999940395,
       "cue": "ui.open",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 1802.5999999940395,
+      "t": 1868.7999999821186,
       "cue": "storm",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 1802.800000011921,
+      "t": 1869.7999999821186,
       "cue": "event.bad",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 5104.9000000059605,
+      "t": 5449.699999988079,
       "cue": "amb.thunder",
       "bus": "ambience",
       "source": "file"
@@ -638,1054 +561,1035 @@
   ],
   "freedom": [
     {
-      "t": 650.5999999940395,
+      "t": 658.4000000059605,
       "cue": "music.island",
       "bus": "music",
       "source": "file",
       "variant": 0
     },
     {
-      "t": 703.2000000178814,
-      "cue": "amb.wind",
-      "bus": "ambience",
-      "source": "file"
-    },
-    {
-      "t": 705.5999999940395,
+      "t": 702,
       "cue": "amb.sea",
       "bus": "ambience",
       "source": "file"
     },
     {
-      "t": 711,
+      "t": 703.8000000119209,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 733.5999999940395,
       "cue": "ui.click",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 711.9000000059605,
+      "t": 734.5999999940395,
       "cue": "week.next",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 747.7000000178814,
+      "t": 770.0999999940395,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 0
     },
     {
-      "t": 888.0999999940395,
+      "t": 914.7000000178814,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 1
     },
     {
-      "t": 1053.800000011921,
+      "t": 1085.800000011921,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 2
     },
     {
-      "t": 1232.5,
+      "t": 1246.2000000178814,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 3
     },
     {
-      "t": 1397.9000000059605,
+      "t": 1418.2000000178814,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 4
     },
     {
-      "t": 1570.9000000059605,
+      "t": 1588.0999999940395,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 5
     },
     {
-      "t": 1741.300000011921,
+      "t": 1757.800000011921,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 6
     },
     {
-      "t": 1819.4000000059605,
+      "t": 1839.0999999940395,
       "cue": "ui.open",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 1820.2000000178814,
+      "t": 1845.5,
       "cue": "freedom",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 1820.7000000178814,
+      "t": 1847,
       "cue": "event.good",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 1853.5,
+      "t": 1880.9000000059605,
       "cue": "music.free",
       "bus": "music",
       "source": "file",
       "variant": 1
     },
     {
-      "t": 1912.4000000059605,
+      "t": 1930.0999999940395,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 7
     },
     {
-      "t": 2077.7000000178814,
+      "t": 2098.7000000178814,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 7
     },
     {
-      "t": 2248.4000000059605,
+      "t": 2267.800000011921,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 7
     },
     {
-      "t": 2412.7000000178814,
+      "t": 2436.7000000178814,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 7
     }
   ],
   "freedomLevel": [
     {
-      "t": 727.6999999880791,
-      "cue": "music.free",
-      "bus": "music",
-      "source": "file",
-      "variant": 0
-    },
-    {
-      "t": 768.5,
+      "t": 725.8999999761581,
       "cue": "amb.sea",
       "bus": "ambience",
       "source": "file"
     },
     {
-      "t": 773.7999999821186,
+      "t": 728.6999999880791,
       "cue": "amb.wind",
       "bus": "ambience",
       "source": "file"
     },
     {
-      "t": 776.7999999821186,
+      "t": 733.7999999821186,
       "cue": "ui.click",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 777.5999999940395,
+      "t": 734.7999999821186,
       "cue": "week.next",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 819.2999999821186,
+      "t": 771.5999999940395,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 0
     },
     {
-      "t": 950.4000000059605,
+      "t": 906.8999999761581,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 1
     },
     {
-      "t": 1121.5999999940395,
+      "t": 1080.0999999940395,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 2
     },
     {
-      "t": 1293,
+      "t": 1250.699999988079,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 3
     },
     {
-      "t": 1459.0999999940395,
+      "t": 1422.8999999761581,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 4
     },
     {
-      "t": 1637,
+      "t": 1591,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 5
     },
     {
-      "t": 1803.4000000059605,
+      "t": 1760.699999988079,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 6
     },
     {
-      "t": 1887.7999999821186,
+      "t": 1844.5999999940395,
       "cue": "ui.open",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 1888.2999999821186,
+      "t": 1846.5,
       "cue": "freedom.level",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 1888.699999988079,
+      "t": 1847.5999999940395,
       "cue": "event.bad",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 1975.7999999821186,
+      "t": 1927.7999999821186,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 7
     },
     {
-      "t": 2140.0999999940395,
+      "t": 2096.7999999821186,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 7
     },
     {
-      "t": 2309,
+      "t": 2278.5,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 7
     },
     {
-      "t": 2490.199999988079,
+      "t": 2445.199999988079,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 7
     },
     {
-      "t": 2654.2999999821186,
+      "t": 2607.7999999821186,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 7
     }
   ],
   "dreamStage": [
     {
-      "t": 656,
+      "t": 635.4000000059605,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 638.7000000178814,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 644.9000000059605,
       "cue": "music.free",
       "bus": "music",
       "source": "file",
       "variant": 0
     },
     {
-      "t": 699.4000000059605,
-      "cue": "amb.sea",
-      "bus": "ambience",
-      "source": "file"
-    },
-    {
-      "t": 700.9000000059605,
-      "cue": "amb.wind",
-      "bus": "ambience",
-      "source": "file"
-    },
-    {
-      "t": 703.4000000059605,
+      "t": 693.3000000119209,
       "cue": "ui.click",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 704.4000000059605,
+      "t": 694.3000000119209,
       "cue": "week.next",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 770.5999999940395,
+      "t": 752.9000000059605,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 0
     },
     {
-      "t": 884.5,
+      "t": 875.4000000059605,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 1
     },
     {
-      "t": 1048.800000011921,
+      "t": 1038.2000000178814,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 2
     },
     {
-      "t": 1216,
+      "t": 1208.2000000178814,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 3
     },
     {
-      "t": 1386.300000011921,
+      "t": 1387.5999999940395,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 4
     },
     {
-      "t": 1559.5,
+      "t": 1557.5,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 5
     },
     {
-      "t": 1733.4000000059605,
+      "t": 1718,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 6
     },
     {
-      "t": 1810.0999999940395,
+      "t": 1805.9000000059605,
       "cue": "ui.open",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 1810.699999988079,
+      "t": 1806.800000011921,
       "cue": "dream.stage",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 1811.4000000059605,
+      "t": 1808.5999999940395,
       "cue": "threat",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 1900.5999999940395,
+      "t": 1889.300000011921,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 7
     },
     {
-      "t": 2066.9000000059605,
+      "t": 2057.5,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 7
     },
     {
-      "t": 2240,
+      "t": 2227.9000000059605,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 7
     }
   ],
   "dreamDone": [
     {
-      "t": 748.2999999821186,
+      "t": 686.3000000119209,
       "cue": "music.free",
       "bus": "music",
       "source": "file",
       "variant": 0
     },
     {
-      "t": 787.5999999940395,
-      "cue": "amb.wind",
-      "bus": "ambience",
-      "source": "file"
-    },
-    {
-      "t": 789.0999999940395,
-      "cue": "amb.sea",
-      "bus": "ambience",
-      "source": "file"
-    },
-    {
-      "t": 800.5,
+      "t": 727,
       "cue": "ui.click",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 801.6999999880791,
+      "t": 728.3000000119209,
       "cue": "week.next",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 802.3999999761581,
+      "t": 729.2000000178814,
       "cue": "amb.rain",
       "bus": "ambience",
       "source": "file"
     },
     {
-      "t": 857.6999999880791,
+      "t": 783.5,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 0
     },
     {
-      "t": 858,
+      "t": 784.2000000178814,
       "cue": "dream.launch",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 977.2999999821186,
+      "t": 906,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 1
     },
     {
-      "t": 1143.2999999821186,
+      "t": 1072,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 2
     },
     {
-      "t": 1316.199999988079,
+      "t": 1239.9000000059605,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 3
     },
     {
-      "t": 1483.7999999821186,
+      "t": 1409.5,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 4
     },
     {
-      "t": 1668,
+      "t": 1579.5,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 5
     },
     {
-      "t": 1832.5999999940395,
+      "t": 1749.5,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 6
     },
     {
-      "t": 1917.2999999821186,
+      "t": 1838.4000000059605,
       "cue": "ui.open",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 1940.8999999761581,
+      "t": 1866.7000000178814,
       "cue": "music.epilogue",
       "bus": "music",
       "source": "file",
       "variant": 0
     },
     {
-      "t": 1941,
+      "t": 1866.9000000059605,
       "cue": "epilogue",
       "bus": "music",
       "source": "file",
       "variant": 0
     },
     {
-      "t": 2000.3999999761581,
+      "t": 1919.5999999940395,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 7
     },
     {
-      "t": 2168.5,
+      "t": 2093.4000000059605,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 7
     },
     {
-      "t": 2332.7999999821186,
+      "t": 2260.5999999940395,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 7
     },
     {
-      "t": 2503.699999988079,
+      "t": 2429.4000000059605,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 7
     },
     {
-      "t": 2672.899999976158,
+      "t": 2599.2000000178814,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 7
     },
     {
-      "t": 5539.5999999940395,
+      "t": 4998.300000011921,
       "cue": "amb.thunder",
       "bus": "ambience",
       "source": "file"
+    },
+    {
+      "t": 8640.5,
+      "cue": "music.free",
+      "bus": "music",
+      "source": "file",
+      "variant": 1
     }
   ],
   "neighborFree": [
     {
-      "t": 681.3999999761581,
-      "cue": "music.island",
-      "bus": "music",
-      "source": "file",
-      "variant": 0
-    },
-    {
-      "t": 722.2999999821186,
-      "cue": "amb.wind",
-      "bus": "ambience",
-      "source": "file"
-    },
-    {
-      "t": 723.8999999761581,
+      "t": 687,
       "cue": "amb.sea",
       "bus": "ambience",
       "source": "file"
     },
     {
-      "t": 729.1999999880791,
+      "t": 688.9000000059605,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 717.8000000119209,
       "cue": "ui.click",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 730.0999999940395,
+      "t": 718.6999999880791,
       "cue": "week.next",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 764.5999999940395,
+      "t": 751.6999999880791,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 0
     },
     {
-      "t": 909,
+      "t": 894.4000000059605,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 1
     },
     {
-      "t": 1078.3999999761581,
+      "t": 1060.699999988079,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 2
     },
     {
-      "t": 1244.3999999761581,
+      "t": 1234.5999999940395,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 3
     },
     {
-      "t": 1426.0999999940395,
+      "t": 1410,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 4
     },
     {
-      "t": 1592.0999999940395,
+      "t": 1576.800000011921,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 5
     },
     {
-      "t": 1751.699999988079,
+      "t": 1740.800000011921,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 6
     },
     {
-      "t": 1842.5,
+      "t": 1822.5,
       "cue": "neighbor.free",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 1923.5999999940395,
+      "t": 1922.199999988079,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 7
     },
     {
-      "t": 2092,
+      "t": 2083.5999999940395,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 7
     },
     {
-      "t": 2261.899999976158,
+      "t": 2253.4000000059605,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 7
     }
   ],
   "scamCollapse": [
     {
-      "t": 649.3999999761581,
-      "cue": "music.island",
-      "bus": "music",
-      "source": "file",
-      "variant": 0
-    },
-    {
-      "t": 692.6999999880791,
-      "cue": "ui.click",
-      "bus": "sfx",
-      "source": "file"
-    },
-    {
-      "t": 693.6999999880791,
-      "cue": "week.next",
-      "bus": "sfx",
-      "source": "file"
-    },
-    {
-      "t": 735.2999999821186,
+      "t": 691.1999999880791,
       "cue": "amb.sea",
       "bus": "ambience",
       "source": "file"
     },
     {
-      "t": 735.5999999940395,
-      "cue": "coin.tick",
-      "bus": "sfx",
-      "source": "file",
-      "pitchStep": 0
-    },
-    {
-      "t": 755.0999999940395,
+      "t": 696.9000000059605,
       "cue": "amb.wind",
       "bus": "ambience",
       "source": "file"
     },
     {
-      "t": 866.5,
+      "t": 711.8000000119209,
+      "cue": "ui.click",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 713.0999999940395,
+      "cue": "week.next",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 756.9000000059605,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
+      "pitchStep": 0
+    },
+    {
+      "t": 892,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
       "pitchStep": 1
     },
     {
-      "t": 1042.2999999821186,
+      "t": 1060.300000011921,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 2
     },
     {
-      "t": 1206.5,
+      "t": 1229.5,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 3
     },
     {
-      "t": 1380.8999999761581,
+      "t": 1398.699999988079,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 4
     },
     {
-      "t": 1550,
+      "t": 1568.9000000059605,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 5
     },
     {
-      "t": 1721.5,
+      "t": 1738.699999988079,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 6
     },
     {
-      "t": 1801,
+      "t": 1822.199999988079,
       "cue": "ui.open",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 1801.199999988079,
+      "t": 1823.199999988079,
       "cue": "scam.collapse",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     },
     {
-      "t": 1801.2999999821186,
+      "t": 1823.5999999940395,
       "cue": "event.bad",
       "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 1905.800000011921,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    },
+    {
+      "t": 2079.300000011921,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    },
+    {
+      "t": 2249.199999988079,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    }
+  ],
+  "mixed-source-profile-persists-and-controls-game": [
+    {
+      "t": 664,
+      "cue": "coins.pay",
+      "bus": "sfx",
       "source": "file"
     },
     {
-      "t": 1888.0999999940395,
-      "cue": "coin.tick",
+      "t": 742.5999999940395,
+      "cue": "build.pop",
       "bus": "sfx",
-      "source": "file",
-      "pitchStep": 7
-    },
-    {
-      "t": 2054.7999999821186,
-      "cue": "coin.tick",
-      "bus": "sfx",
-      "source": "file",
-      "pitchStep": 7
-    },
-    {
-      "t": 2238.699999988079,
-      "cue": "coin.tick",
-      "bus": "sfx",
-      "source": "file",
-      "pitchStep": 7
+      "source": "synth"
     }
   ],
   "catalog:ui.click": [
     {
-      "t": 497.89999997615814,
+      "t": 528.8000000119209,
       "cue": "ui.click",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:ui.toggle": [
     {
-      "t": 628,
+      "t": 708.1999999880791,
       "cue": "ui.toggle",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:ui.error": [
     {
-      "t": 783.5,
+      "t": 859,
       "cue": "ui.error",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:ui.open": [
     {
-      "t": 900.0999999940395,
+      "t": 989.9000000059605,
       "cue": "ui.open",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:coins.pay": [
     {
-      "t": 1021,
+      "t": 1090.5,
       "cue": "coins.pay",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:coins.get": [
     {
-      "t": 1126.3999999761581,
+      "t": 1189.800000011921,
       "cue": "coins.get",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:build.pop": [
     {
-      "t": 1245.199999988079,
+      "t": 1290.199999988079,
       "cue": "build.pop",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:status.joy": [
     {
-      "t": 1363.7999999821186,
+      "t": 1406.800000011921,
       "cue": "status.joy",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:build.remove": [
     {
-      "t": 1498.5999999940395,
+      "t": 1490.800000011921,
       "cue": "build.remove",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:upgrade": [
     {
-      "t": 1616,
+      "t": 1557.300000011921,
       "cue": "upgrade",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:repair": [
     {
-      "t": 1715.0999999940395,
+      "t": 1623.5,
       "cue": "repair",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:loan.take": [
     {
-      "t": 1831.0999999940395,
+      "t": 1689.9000000059605,
       "cue": "loan.take",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:loan.repay": [
     {
-      "t": 1934.5,
+      "t": 1756.800000011921,
       "cue": "loan.repay",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:study": [
     {
-      "t": 2037.0999999940395,
+      "t": 1823.5,
       "cue": "study",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:rest": [
     {
-      "t": 2134,
+      "t": 1889.800000011921,
       "cue": "rest",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:shift.on": [
     {
-      "t": 2243.199999988079,
+      "t": 1956.9000000059605,
       "cue": "shift.on",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:job.quit": [
     {
-      "t": 2359.5999999940395,
+      "t": 2023.300000011921,
       "cue": "job.quit",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:job.return": [
     {
-      "t": 2447.7999999821186,
+      "t": 2106.5,
       "cue": "job.return",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:dream.start": [
     {
-      "t": 2548.399999976158,
+      "t": 2206.300000011921,
       "cue": "dream.start",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:week.next": [
     {
-      "t": 2630.5999999940395,
+      "t": 2306.5,
       "cue": "week.next",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:coin.tick": [
     {
-      "t": 2730.699999988079,
+      "t": 2423.300000011921,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:coin.minus": [
     {
-      "t": 2807.0999999940395,
+      "t": 2507.4000000059605,
       "cue": "coin.minus",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:event.good": [
     {
-      "t": 2916.2999999821186,
+      "t": 2590.0999999940395,
       "cue": "event.good",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:event.bad": [
     {
-      "t": 3017.899999976158,
+      "t": 2659.4000000059605,
       "cue": "event.bad",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:storm": [
     {
-      "t": 3135.2999999821186,
+      "t": 2741.0999999940395,
       "cue": "storm",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:scam.collapse": [
     {
-      "t": 3232.699999988079,
+      "t": 2823.5,
       "cue": "scam.collapse",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:loan.emergency": [
     {
-      "t": 3349.2999999821186,
+      "t": 2891,
       "cue": "loan.emergency",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:threat": [
     {
-      "t": 3453,
+      "t": 2957,
       "cue": "threat",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:neighbor.free": [
     {
-      "t": 3549.5999999940395,
+      "t": 3023.5,
       "cue": "neighbor.free",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:freedom": [
     {
-      "t": 3654.899999976158,
+      "t": 3106.9000000059605,
       "cue": "freedom",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:freedom.level": [
     {
-      "t": 3760.7999999821186,
+      "t": 3223.699999988079,
       "cue": "freedom.level",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:dream.stage": [
     {
-      "t": 3839.7999999821186,
+      "t": 3323.300000011921,
       "cue": "dream.stage",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:dream.launch": [
     {
-      "t": 3924.199999988079,
+      "t": 3424.4000000059605,
       "cue": "dream.launch",
       "bus": "sfx",
-      "source": "file"
+      "source": "synth"
     }
   ],
   "catalog:epilogue": [
     {
-      "t": 4027.899999976158,
-      "cue": "music.epilogue",
-      "bus": "music",
-      "source": "file",
-      "variant": 0
-    },
-    {
-      "t": 4028,
+      "t": 3524.5999999940395,
       "cue": "epilogue",
       "bus": "music",
       "source": "file",
@@ -1694,7 +1598,7 @@
   ],
   "catalog:amb.sea": [
     {
-      "t": 4137.899999976158,
+      "t": 3608.699999988079,
       "cue": "amb.sea",
       "bus": "ambience",
       "source": "file"
@@ -1702,7 +1606,7 @@
   ],
   "catalog:amb.wind": [
     {
-      "t": 4244.199999988079,
+      "t": 3675.5999999940395,
       "cue": "amb.wind",
       "bus": "ambience",
       "source": "file"
@@ -1710,7 +1614,7 @@
   ],
   "catalog:amb.gulls": [
     {
-      "t": 4370.699999988079,
+      "t": 3741.9000000059605,
       "cue": "amb.gulls",
       "bus": "ambience",
       "source": "file"
@@ -1718,7 +1622,7 @@
   ],
   "catalog:amb.rain": [
     {
-      "t": 4469.0999999940395,
+      "t": 3810.5,
       "cue": "amb.rain",
       "bus": "ambience",
       "source": "file"
@@ -1726,7 +1630,7 @@
   ],
   "catalog:amb.thunder": [
     {
-      "t": 4589.199999988079,
+      "t": 3875,
       "cue": "amb.thunder",
       "bus": "ambience",
       "source": "file"
@@ -1734,16 +1638,16 @@
   ],
   "catalog:music.island": [
     {
-      "t": 4694.0999999940395,
+      "t": 3959.0999999940395,
       "cue": "music.island",
       "bus": "music",
       "source": "file",
-      "variant": 1
+      "variant": 0
     }
   ],
   "catalog:music.free": [
     {
-      "t": 4825.5,
+      "t": 4058.199999988079,
       "cue": "music.free",
       "bus": "music",
       "source": "file",
@@ -1752,7 +1656,7 @@
   ],
   "catalog:music.epilogue": [
     {
-      "t": 4943.0999999940395,
+      "t": 4180.199999988079,
       "cue": "music.epilogue",
       "bus": "music",
       "source": "file",
@@ -1761,66 +1665,405 @@
   ],
   "showcase-all-42-cues-and-cascade": [
     {
-      "t": 5046.5,
+      "t": 4273.5999999940395,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
-      "delayMs": 0,
+      "source": "synth",
       "pitchStep": 0
     },
     {
-      "t": 5217.799999982119,
+      "t": 4452.199999988079,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 1
     },
     {
-      "t": 5390.0999999940395,
+      "t": 4614.0999999940395,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 2
     },
     {
-      "t": 5557.699999988079,
+      "t": 4784.199999988079,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 3
     },
     {
-      "t": 5730,
+      "t": 4954.199999988079,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 4
     },
     {
-      "t": 5900.5999999940395,
+      "t": 5124.0999999940395,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 5
     },
     {
-      "t": 6067.899999976158,
+      "t": 5294.5999999940395,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 6
     },
     {
-      "t": 6237.5,
+      "t": 5464.199999988079,
       "cue": "coin.tick",
       "bus": "sfx",
-      "source": "file",
+      "source": "synth",
       "pitchStep": 7
+    }
+  ],
+  "recording:ui.click": [
+    {
+      "t": 5596.0999999940395,
+      "cue": "ui.click",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:ui.toggle": [
+    {
+      "t": 5711.699999988079,
+      "cue": "ui.toggle",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:ui.error": [
+    {
+      "t": 5818.4000000059605,
+      "cue": "ui.error",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:ui.open": [
+    {
+      "t": 5921.5999999940395,
+      "cue": "ui.open",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:coins.pay": [
+    {
+      "t": 6021.699999988079,
+      "cue": "coins.pay",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:coins.get": [
+    {
+      "t": 6123.300000011921,
+      "cue": "coins.get",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:build.pop": [
+    {
+      "t": 6222,
+      "cue": "build.pop",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:status.joy": [
+    {
+      "t": 6325.5999999940395,
+      "cue": "status.joy",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:build.remove": [
+    {
+      "t": 6421.5,
+      "cue": "build.remove",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:upgrade": [
+    {
+      "t": 6523.5,
+      "cue": "upgrade",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:repair": [
+    {
+      "t": 6645,
+      "cue": "repair",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:loan.take": [
+    {
+      "t": 6748.300000011921,
+      "cue": "loan.take",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:loan.repay": [
+    {
+      "t": 6862.300000011921,
+      "cue": "loan.repay",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:study": [
+    {
+      "t": 6971.699999988079,
+      "cue": "study",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:rest": [
+    {
+      "t": 7073.4000000059605,
+      "cue": "rest",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:shift.on": [
+    {
+      "t": 7171.5,
+      "cue": "shift.on",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:job.quit": [
+    {
+      "t": 7273.0999999940395,
+      "cue": "job.quit",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:job.return": [
+    {
+      "t": 7371.4000000059605,
+      "cue": "job.return",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:dream.start": [
+    {
+      "t": 7472.9000000059605,
+      "cue": "dream.start",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:week.next": [
+    {
+      "t": 7573.300000011921,
+      "cue": "week.next",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:coin.tick": [
+    {
+      "t": 7694.5999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:coin.minus": [
+    {
+      "t": 7811.300000011921,
+      "cue": "coin.minus",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:event.good": [
+    {
+      "t": 7927,
+      "cue": "event.good",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:event.bad": [
+    {
+      "t": 8024,
+      "cue": "event.bad",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:storm": [
+    {
+      "t": 8109.9000000059605,
+      "cue": "storm",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:scam.collapse": [
+    {
+      "t": 8206.09999999404,
+      "cue": "scam.collapse",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:loan.emergency": [
+    {
+      "t": 8307.59999999404,
+      "cue": "loan.emergency",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:threat": [
+    {
+      "t": 8406,
+      "cue": "threat",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:neighbor.free": [
+    {
+      "t": 8506.59999999404,
+      "cue": "neighbor.free",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:freedom": [
+    {
+      "t": 8679.09999999404,
+      "cue": "freedom",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:freedom.level": [
+    {
+      "t": 8818.800000011921,
+      "cue": "freedom.level",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:dream.stage": [
+    {
+      "t": 8930.199999988079,
+      "cue": "dream.stage",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:dream.launch": [
+    {
+      "t": 9051.40000000596,
+      "cue": "dream.launch",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "recording:epilogue": [
+    {
+      "t": 9154.699999988079,
+      "cue": "epilogue",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    }
+  ],
+  "recording:amb.sea": [
+    {
+      "t": 9241.40000000596,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    }
+  ],
+  "recording:amb.wind": [
+    {
+      "t": 9308,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    }
+  ],
+  "recording:amb.gulls": [
+    {
+      "t": 9374.59999999404,
+      "cue": "amb.gulls",
+      "bus": "ambience",
+      "source": "file"
+    }
+  ],
+  "recording:amb.rain": [
+    {
+      "t": 9442.300000011921,
+      "cue": "amb.rain",
+      "bus": "ambience",
+      "source": "file"
+    }
+  ],
+  "recording:amb.thunder": [
+    {
+      "t": 9509.40000000596,
+      "cue": "amb.thunder",
+      "bus": "ambience",
+      "source": "file"
+    }
+  ],
+  "recording:music.island": [
+    {
+      "t": 9591.59999999404,
+      "cue": "music.island",
+      "bus": "music",
+      "source": "file",
+      "variant": 1
+    }
+  ],
+  "recording:music.free": [
+    {
+      "t": 9700.90000000596,
+      "cue": "music.free",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    }
+  ],
+  "recording:music.epilogue": [
+    {
+      "t": 9812.59999999404,
+      "cue": "music.epilogue",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
     }
   ],
   "real-files-all-cues-streamed-music-and-second-variant": [
     {
-      "t": 6342.5,
+      "t": 9930.5,
       "cue": "music.island",
       "bus": "music",
       "source": "file",
@@ -1829,13 +2072,13 @@
   ],
   "corrupt-file-fallback": [
     {
-      "t": 570.4000000059605,
+      "t": 563.5999999940395,
       "cue": "ui.toggle",
       "bus": "sfx",
       "source": "synth"
     },
     {
-      "t": 657,
+      "t": 662.0999999940395,
       "cue": "music.island",
       "bus": "music",
       "source": "synth",

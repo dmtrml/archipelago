@@ -2,13 +2,29 @@
   "runner": "Actual engine modules through tsx, controlled AudioContext, decoded files, HTMLAudioElement and timers",
   "checks": [
     {
+      "name": "Defaults restore synthesized effects and retain recorded music and nature",
+      "passed": true
+    },
+    {
       "name": "Before first gesture: no context, media element or file request",
       "passed": true
     },
     {
-      "name": "First catalogue effect waits for decode and uses file; fetch shared with preload",
+      "name": "Selected synth effect neither preloads nor fetches its recording",
+      "passed": true
+    },
+    {
+      "name": "Explicit recording audition waits for decode and leaves the game choice unchanged",
       "passed": true,
       "fetchCount": 1
+    },
+    {
+      "name": "Saved per-effect source controls normal game playback in both directions",
+      "passed": true
+    },
+    {
+      "name": "Epilogue event and theme share one saved choice and report their actual source",
+      "passed": true
     },
     {
       "name": "Explicit second catalogue effect variant uses the selected decoded URL",
@@ -19,11 +35,23 @@
       "passed": true
     },
     {
+      "name": "A newer comparison cancels an older recording still decoding",
+      "passed": true
+    },
+    {
+      "name": "A/B comparison replaces the previous full track while preserving music and nature layers",
+      "passed": true
+    },
+    {
       "name": "Decode failure auditions synth fallback",
       "passed": true
     },
     {
       "name": "Runtime decoded-source failure falls back without a false file log",
+      "passed": true
+    },
+    {
+      "name": "Active music and nature crossfade file to synth and back without resetting scene or weather",
       "passed": true
     },
     {
@@ -68,7 +96,27 @@
       "passed": true
     },
     {
+      "name": "Recorded music fallback retains its requested choice and does not restart on reconciliation",
+      "passed": true
+    },
+    {
+      "name": "Undecodable nature fallback retains file choice without repeated crossfades",
+      "passed": true
+    },
+    {
+      "name": "Decoded nature source failing at playback retains one fallback instead of restarting",
+      "passed": true
+    },
+    {
       "name": "Nature crossfades from initial fallback to decoded file loop",
+      "passed": true
+    },
+    {
+      "name": "Existing volume-only storage preserves volumes and receives the preferred default source profile",
+      "passed": true
+    },
+    {
+      "name": "Malformed source preferences discard invalid values and unknown cues while retaining valid choices",
       "passed": true
     }
   ],

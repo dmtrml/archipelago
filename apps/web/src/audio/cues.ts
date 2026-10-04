@@ -49,7 +49,7 @@ const catalog = {
   'loan.take': effect('loan.take', 'Кредит — бумага и штамп', 'Действия', 0.55, 0.6),
   'loan.repay': effect('loan.repay', 'Погашение — штамп и облегчение', 'Действия', 0.9, 0.6),
   study: effect('study', 'Учёба — страница и звон', 'Действия', 0.8, 0.55),
-  rest: effect('rest', 'Отдых — мягкое укулеле', 'Действия', 1.15, 0.5),
+  rest: effect('rest', 'Отдых', 'Действия', 1.15, 0.5),
   'shift.on': effect('shift.on', 'Подработка — два тика часов', 'Действия', 0.4, 0.6),
   'job.quit': effect('job.quit', 'Уход с работы — светлый аккорд', 'Действия', 1, 0.6),
   'job.return': effect('job.return', 'На работу — две ноты вниз', 'Действия', 0.85, 0.6),
@@ -79,8 +79,8 @@ const catalog = {
   'amb.rain': ambience('amb.rain', 'Шторм — дождь', true, 4, 0.45),
   'amb.thunder': ambience('amb.thunder', 'Шторм — мягкий гром', false, 2.8, 0.65),
 
-  'music.island': music('music.island', 'Остров — две темы укулеле'),
-  'music.free': music('music.free', 'Свобода — светлая акустическая тема'),
+  'music.island': music('music.island', 'Остров — уютная тема'),
+  'music.free': music('music.free', 'Свобода — светлая тема'),
   'music.epilogue': music('music.epilogue', 'Эпилог — завершение', 'Музыка', 7.5),
 } satisfies Record<string, CueDefinition>;
 

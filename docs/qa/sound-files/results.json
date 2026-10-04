@@ -1,5 +1,6 @@
 {
   "checks": [
+    "default-synth-effects-recorded-music-and-nature",
     "newGame",
     "buyAsset",
     "buyStatus",
@@ -24,6 +25,8 @@
     "dreamDone",
     "neighborFree",
     "scamCollapse",
+    "live-source-switches-preserve-music-scene-and-storm",
+    "mixed-source-profile-persists-and-controls-game",
     "settings-persistence-mute-and-buses",
     "visibility-suspend-resume-and-race",
     "voice-limit-fast-nature-toggle-and-reset",
