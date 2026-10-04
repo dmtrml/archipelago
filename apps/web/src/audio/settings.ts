@@ -1,4 +1,5 @@
-import { CUES, CUE_IDS, type CueId } from './cues';
+import { CUE_IDS, type CueId } from './cues';
+import { DEFAULT_AUDIO_SOURCES } from './defaultSources';
 
 export type AudioSource = 'file' | 'synth';
 export interface AudioSettings {
@@ -11,7 +12,7 @@ const listeners = new Set<() => void>();
 // The milestone and its musical scene use the same recording and preference.
 const sourceCue = (cue: CueId): CueId => cue === 'epilogue' ? 'music.epilogue' : cue;
 export function getCueSource(cue: CueId, state = settings): AudioSource {
-  return state.sources[sourceCue(cue)] ?? (CUES[cue].bus === 'sfx' ? 'synth' : 'file');
+  return state.sources[sourceCue(cue)] ?? DEFAULT_AUDIO_SOURCES[sourceCue(cue)];
 }
 
 function sanitize(raw: unknown): AudioSettings {

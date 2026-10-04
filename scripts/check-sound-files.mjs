@@ -110,9 +110,14 @@ try {
   CUES['music.island'].files = ['/qa/island-a.mp3', '/qa/island-b.mp3'];
   CUES['music.free'].files = ['/qa/free.mp3'];
   CUES['music.epilogue'].files = ['/qa/epilogue.mp3'];
-  const { getCueSource, getAudioSettings, updateCueSource, AUDIO_SETTINGS_KEY } = await import(pathToFileURL(resolve('apps/web/src/audio/settings.ts')).href);
-  for (const cue of CUE_IDS) assert.equal(getCueSource(cue), CUES[cue].bus === 'sfx' ? 'synth' : 'file');
-  record('Defaults restore synthesized effects and retain recorded music and nature');
+  const { getCueSource, getAudioSettings, updateCueSource, updateAudioSettings, AUDIO_SETTINGS_KEY } = await import(pathToFileURL(resolve('apps/web/src/audio/settings.ts')).href);
+  const ownerRecordings = new Set(['ui.error', 'amb.rain', 'amb.thunder', 'music.island', 'music.free']);
+  for (const cue of CUE_IDS) assert.equal(getCueSource(cue), ownerRecordings.has(cue) ? 'file' : 'synth');
+  record('Defaults match all 42 owner selections: five recordings and 37 synthesized sounds');
+  updateCueSource('ui.click', 'file'); updateCueSource('music.epilogue', 'file');
+  updateAudioSettings({ sources: {} });
+  for (const cue of CUE_IDS) assert.equal(getCueSource(cue), ownerRecordings.has(cue) ? 'file' : 'synth');
+  record('Resetting personal choices restores the exact owner-selected default profile');
   responses.set('/qa/sea.mp3', { duration: 45 });
   let releaseClick;
   responses.set('/qa/click.mp3', new Promise((resolve) => { releaseClick = resolve; }));
@@ -197,7 +202,7 @@ try {
   assert.deepEqual(window.__audioLog.map((entry) => entry.source), ['synth']);
   record('Runtime decoded-source failure falls back without a false file log');
 
-  reset(); audio.setScene('island'); audio.setAmbience(true); audio.setWeather('storm'); await flush();
+  reset(); updateCueSource('amb.sea', 'file'); await flush(); audio.setScene('island'); audio.setAmbience(true); audio.setWeather('storm'); await flush();
   const originalStream = audio.musicVoice;
   assert.equal(originalStream.source, 'file');
   assert.equal(audio.voices.findLast((voice) => voice.cue === 'amb.sea').source, 'file');
@@ -309,6 +314,7 @@ try {
 
   reset(); CUES['amb.wind'].files = ['/qa/wind-late.mp3'];
   let releaseWind; responses.set('/qa/wind-late.mp3', new Promise((resolve) => { releaseWind = resolve; }));
+  updateCueSource('amb.wind', 'file');
   const loadingWind = audio.load('/qa/wind-late.mp3').then(() => audio.reconcile());
   audio.setAmbience(true); assert.equal(audio.voices.find((voice) => voice.cue === 'amb.wind').source, 'synth');
   releaseWind({ duration: 40 }); await loadingWind; await flush();
@@ -322,7 +328,7 @@ try {
   storedSettings.set(AUDIO_SETTINGS_KEY, JSON.stringify({ enabled: false, music: 0.17, sfx: 0.66, ambience: 0.44 }));
   const legacySettings = await import(pathToFileURL(resolve('apps/web/src/audio/settings.ts')).href + '?qa=legacy');
   assert.deepEqual(legacySettings.getAudioSettings(), { enabled: false, music: 0.17, sfx: 0.66, ambience: 0.44, sources: {} });
-  for (const cue of CUE_IDS) assert.equal(legacySettings.getCueSource(cue), CUES[cue].bus === 'sfx' ? 'synth' : 'file');
+  for (const cue of CUE_IDS) assert.equal(legacySettings.getCueSource(cue), ownerRecordings.has(cue) ? 'file' : 'synth');
   record('Existing volume-only storage preserves volumes and receives the preferred default source profile');
 
   storedSettings.set(AUDIO_SETTINGS_KEY, JSON.stringify({ sources: { 'ui.click': 'file', 'coins.pay': 'invalid', 'music.island': true, 'epilogue': 'synth', unknown: 'file' } }));

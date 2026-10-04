@@ -102,15 +102,17 @@ try {
   await page.waitForFunction(() => ['music.island', 'amb.sea', 'amb.wind'].every((cue) => (window.__audioLog ?? []).some((entry) => entry.cue === cue)));
   const initial = await logs();
   assert(initial.some((entry) => entry.cue === 'ui.click' && entry.source === 'synth'));
-  await waitSnapshot((state) => ['music.island', 'amb.sea', 'amb.wind'].every((cue) => state.voices.some((voice) => voice.cue === cue && voice.source === 'file' && voice.choice === 'file')));
+  await waitSnapshot((state) => ['music.island', 'amb.sea', 'amb.wind'].every((cue) => state.voices.some((voice) => voice.cue === cue && voice.source === (cue === 'music.island' ? 'file' : 'synth') && voice.choice === voice.source)));
   for (const cue of ['music.island', 'amb.sea', 'amb.wind']) assert(initial.some((entry) => entry.cue === cue), `Missing starting layer ${cue}`);
   const defaults = await page.evaluate(async () => {
     const { CUE_IDS, CUES } = await import('/src/audio/cues.ts'); const { getCueSource } = await import('/src/audio/settings.ts');
     return CUE_IDS.map((cue) => ({ cue, bus: CUES[cue].bus, source: getCueSource(cue) }));
   });
-  for (const item of defaults) assert.equal(item.source, item.bus === 'sfx' ? 'synth' : 'file', `${item.cue}: unexpected default`);
-  assert(!(await page.evaluate(() => window.__audioRequests)).some((path) => path.includes('/sfx/')), 'Synth defaults still preload recorded effects');
-  checks.push('default-synth-effects-recorded-music-and-nature');
+  const ownerRecordings = new Set(['ui.error', 'amb.rain', 'amb.thunder', 'music.island', 'music.free']);
+  for (const item of defaults) assert.equal(item.source, ownerRecordings.has(item.cue) ? 'file' : 'synth', `${item.cue}: unexpected default`);
+  assert(!(await page.evaluate(() => window.__audioRequests)).some((path) => path.includes('/sfx/') && !path.endsWith('/ui-error.mp3')), 'Synth defaults still preload recorded effects');
+  assert(!(await page.evaluate(() => window.__audioRequests)).some((path) => /amb-(sea|wind|gulls)/.test(path)), 'Synth nature defaults loaded their recordings');
+  checks.push('owner-selected-default-five-recordings-and-37-synthesized-sounds');
   await record('newGame');
 
   const actionCues = {
@@ -193,6 +195,7 @@ try {
 
   await load('buyAsset');
   await page.goto(`${url}/?sound`); await page.getByRole('heading', { name: 'Звуки острова' }).waitFor();
+  await choose('amb.sea', 'file');
   await page.locator('.sound-scene').filter({ hasText: /▶ Остров/ }).click();
   await page.locator('.sound-nature button').click();
   await page.getByRole('switch', { name: /Шторм/ }).check();

@@ -2,7 +2,11 @@
   "runner": "Actual engine modules through tsx, controlled AudioContext, decoded files, HTMLAudioElement and timers",
   "checks": [
     {
-      "name": "Defaults restore synthesized effects and retain recorded music and nature",
+      "name": "Defaults match all 42 owner selections: five recordings and 37 synthesized sounds",
+      "passed": true
+    },
+    {
+      "name": "Resetting personal choices restores the exact owner-selected default profile",
       "passed": true
     },
     {
