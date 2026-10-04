@@ -366,7 +366,7 @@ describe('готовая мечта', () => {
   it('радость мечты прибавляется к счастью каждую неделю', () => {
     const jobless = endWeek(dreamWorld());
     expect(jobless.lastReport!.players.p1.happinessDelta).toBe(DREAMS.schooner.joy);
-    expect(player(jobless).happiness).toBe(50 + 6);
+    expect(player(jobless).happiness).toBe(50 + DREAMS.schooner.joy);
     const busy = endWeek(dreamWorld(true));
     expect(busy.lastReport!.players.p1.happinessDelta).toBe(R.HAPPINESS_DRIFT + DREAMS.schooner.joy);
   });

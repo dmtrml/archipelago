@@ -124,7 +124,7 @@ export const DREAMS: Record<string, DreamDef> = {
       { title: 'Мачты и паруса', description: 'Две мачты, снасти и белые паруса — и шхуна сходит на воду.', cost: 900, work: 6 },
     ],
     upkeep: 20,
-    joy: 6,
+    joy: 4,
   },
 };
 
