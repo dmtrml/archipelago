@@ -20,6 +20,11 @@ export function coinsGenitive(n: number): string {
   return `${n} ${pluralForm(n, 'монеты', 'монет', 'монет')}`;
 }
 
+/** «1 неделя», «3 недели», «5 недель». */
+export function weeksText(n: number): string {
+  return `${n} ${pluralForm(n, 'неделя', 'недели', 'недель')}`;
+}
+
 /** «на 34-й неделе». */
 export function weekOrdinal(n: number): string {
   return `${n}-й`;
@@ -53,6 +58,14 @@ export const ERRORS = {
   restedThisWeek: 'Отдыхать можно раз в неделю',
   restDuringShift: 'В неделю подработки отдохнуть не выйдет',
   shiftAfterRest: 'Эта неделя — для отдыха, подработку уже не взять',
+  quitBeforeFreedom: 'Уйти с работы можно после финансовой свободы',
+  alreadyQuit: 'Вы уже не работаете',
+  alreadyEmployed: 'Вы и так работаете',
+  shiftUnemployed: 'Подработка бывает только у тех, кто работает',
+  noDream: 'Мечты пока нет',
+  dreamBeforeFreedom: 'Строить мечту можно после финансовой свободы',
+  dreamBusy: 'Этот этап ещё строится',
+  dreamDone: 'Мечта уже готова',
 } as const;
 
 export function needKnowledge(level: number): string {

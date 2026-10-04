@@ -67,6 +67,15 @@ export const BOOM_TOURISM_SHOCK = 0.35;
 export const CRISIS_TOURISM_SHOCK = -0.35;
 export const CRISIS_FISH_SHOCK = -0.15;
 
+// ───────────── Второй акт ─────────────
+export const DREAM_ID = 'schooner';         // мечта человека (выбор мечты — следующий этап)
+export const DREAM_WORK_EMPLOYED = 1;       // дней в неделю на стройку мечты, пока работаешь
+export const DREAM_WORK_FREE = 3;           // … и без работы
+export const THREAT_WEEKS = 4;              // столько недель без свободы без работы — и придётся вернуться
+export const RETURN_SALARY_MUL = 0.85;      // зарплата при возвращении на работу (округляется до 5)
+/** Пороги уровней свободы: пассивный доход / расходы. Названия — в content.ts. */
+export const FREEDOM_LEVEL_RATIOS = [1, 1.5, 2] as const;
+
 // ───────────── Рынок ─────────────
 export const FISH_MIN = 0.6;
 export const FISH_MAX = 1.5;

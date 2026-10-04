@@ -1,5 +1,5 @@
 // Контент: все сделки архипелага. Числа — базовые, конкретное предложение отклоняется от них случайно.
-import type { AssetDef, DealKind } from './types';
+import type { AssetDef, DealKind, DreamDef } from './types';
 
 export const ASSET_DEFS: Record<string, AssetDef> = {
   boat: {
@@ -111,3 +111,22 @@ export const DEAL_ACCUSATIVE: Record<string, string> = {
   yacht: 'яхту',
   garden: 'цветущий сад',
 };
+
+/** Мечты. Пока одна — шхуна; выбор мечты на старте появится вместе с профессиями. */
+export const DREAMS: Record<string, DreamDef> = {
+  schooner: {
+    id: 'schooner',
+    title: 'Шхуна для кругосветки',
+    description: 'Своя шхуна, на которой можно обойти весь мир. Её строят на стапеле у берега — этап за этапом.',
+    stages: [
+      { title: 'Стапель и киль', description: 'Наклонные рельсы к воде и дубовый киль — хребет будущей шхуны.', cost: 400, work: 4 },
+      { title: 'Корпус', description: 'Рёбра-шпангоуты обшивают досками, конопатят и смолят.', cost: 700, work: 5 },
+      { title: 'Мачты и паруса', description: 'Две мачты, снасти и белые паруса — и шхуна сходит на воду.', cost: 900, work: 6 },
+    ],
+    upkeep: 20,
+    joy: 6,
+  },
+};
+
+/** Названия уровней свободы (пороги — FREEDOM_LEVEL_RATIOS в rules.ts). */
+export const FREEDOM_LEVEL_TITLES = ['Свобода', 'Уверенность', 'Богатство'] as const;

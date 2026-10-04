@@ -3,7 +3,7 @@ import { initialMarket } from './market';
 import { fillInitialBoard } from './offers';
 import { Rng } from './rng';
 import * as R from './rules';
-import type { BotStyle, PlayerState, WorldState } from './types';
+import type { BotStyle, DreamState, PlayerState, WorldState } from './types';
 
 export const HUMAN_ID = 'p1';
 
@@ -12,6 +12,11 @@ export const BOT_ROSTER: { id: string; name: string; islandName: string; botStyl
   { id: 'bot-timur', name: 'Тимур', islandName: 'Маяк', botStyle: 'spender' },
   { id: 'bot-boris', name: 'Борис', islandName: 'Пеликан', botStyle: 'gambler' },
 ];
+
+/** Чистая мечта: ничего не построено. Используется и при миграции старых сохранений. */
+export function newDreamState(): DreamState {
+  return { id: R.DREAM_ID, built: 0, building: false, progress: 0, doneWeek: null };
+}
 
 function newPlayer(id: string, name: string, islandName: string, botStyle?: BotStyle): PlayerState {
   const player: PlayerState = {
@@ -31,6 +36,11 @@ function newPlayer(id: string, name: string, islandName: string, botStyle?: BotS
     loans: [],
     owned: [],
     freedomWeek: null,
+    employed: true,
+    threatWeeks: 0,
+    bestLevel: 0,
+    // Мечта есть только у человека; соседи-боты остаются на работе без мечты.
+    dream: botStyle ? null : newDreamState(),
   };
   if (botStyle) player.botStyle = botStyle;
   return player;
@@ -38,7 +48,7 @@ function newPlayer(id: string, name: string, islandName: string, botStyle?: BotS
 
 export function createWorld(opts: { seed: number; playerName: string; islandName: string }): WorldState {
   const world: WorldState = {
-    version: 1,
+    version: 2,
     seed: opts.seed,
     rng: opts.seed >>> 0,
     nextUid: 1,

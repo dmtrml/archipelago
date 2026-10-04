@@ -36,6 +36,32 @@ export interface AssetDef {
   collapseWeeks?: [number, number];
 }
 
+// ───────────── Мечта (второй акт) ─────────────
+
+export interface DreamStageDef {
+  title: string;
+  description: string;
+  cost: number;              // платится при начале этапа
+  work: number;              // дней работы, чтобы закончить этап
+}
+
+export interface DreamDef {
+  id: string;
+  title: string;
+  description: string;
+  stages: DreamStageDef[];
+  upkeep: number;            // содержание готовой мечты в неделю
+  joy: number;               // + к счастью каждую неделю, когда мечта готова
+}
+
+export interface DreamState {
+  id: string;
+  built: number;             // сколько этапов уже готово (0..stages.length)
+  building: boolean;         // этап номер `built` оплачен и строится
+  progress: number;          // дней работы, вложенных в текущий этап
+  doneWeek: number | null;   // неделя, когда мечта готова целиком
+}
+
 // ───────────── Состояние мира ─────────────
 
 export type BotStyle = 'saver' | 'spender' | 'gambler';
@@ -79,6 +105,10 @@ export interface PlayerState {
   loans: Loan[];
   owned: OwnedAsset[];
   freedomWeek: number | null; // неделя, когда впервые достигнута свобода
+  employed: boolean;         // работает ли; уйти с работы можно только после свободы
+  threatWeeks: number;       // недель подряд без работы и без свободы («свобода под угрозой»)
+  bestLevel: number;         // высший достигнутый уровень свободы (0 — ещё нет, 1..FREEDOM_LEVELS.length)
+  dream: DreamState | null;  // у соседей-ботов мечты нет
 }
 
 export interface MarketState {
@@ -136,7 +166,7 @@ export interface WeekReport {
 }
 
 export interface WorldState {
-  version: 1;
+  version: 2;
   seed: number;
   rng: number;               // текущее состояние ГПСЧ — вся случайность только через него
   nextUid: number;
@@ -159,6 +189,9 @@ export type Action =
   | { type: 'setExtraShift'; playerId: string; on: boolean }
   | { type: 'study'; playerId: string }
   | { type: 'rest'; playerId: string }
+  | { type: 'quitJob'; playerId: string }
+  | { type: 'returnToWork'; playerId: string }
+  | { type: 'buildDream'; playerId: string }
   | { type: 'endWeek' };
 
 export interface ActionResult {
@@ -183,6 +216,9 @@ export interface FinanceView {
   freedomRatio: number;      // passiveIncome / expenses.total
   netWorth: number;          // cash + стоимость активов − долги
   debt: number;
+  employed: boolean;
+  /** Уровень свободы по freedomRatio: 0 — ещё нет, дальше индекс в FREEDOM_LEVELS + 1. */
+  level: number;
 }
 
 export interface OfferView {
@@ -199,6 +235,8 @@ export interface OfferView {
   locked: boolean;           // не хватает знаний
   canAfford: boolean;
   slotFull: boolean;
+  /** Доля свободы (как FinanceView.freedomRatio) сразу после покупки. */
+  freedomAfter: number;
 }
 
 export interface AssetView {
@@ -208,6 +246,23 @@ export interface AssetView {
   upkeep: number;
   saleValue: number;
   repairCost: number;        // 0, если не повреждён
+}
+
+export interface DreamView {
+  def: DreamDef;
+  state: DreamState;
+  /** Этап, который строится или будет следующим; null — мечта готова. */
+  stage: DreamStageDef | null;
+  stageIndex: number;
+  /** Дней работы над мечтой в неделю сейчас: работая — меньше, без работы — больше. */
+  workPerWeek: number;
+  /** Недель до конца текущего этапа (если строится) или сколько займёт следующий; 0 — мечта готова. */
+  weeksLeft: number;
+  /** Можно ли начать следующий этап прямо сейчас; иначе — причина для игрока. */
+  canStart: boolean;
+  reason?: string;
+  /** Доля свободы, когда мечта будет готова (с её содержанием и радостью). */
+  freedomAfterDone: number;
 }
 
 export interface LeaderboardRow {

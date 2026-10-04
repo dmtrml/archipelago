@@ -1,6 +1,6 @@
 // Действия игрока внутри недели (всё, кроме endWeek). Каждое либо целиком применяется, либо отказ.
 import {
-  freeSlotIndex, getDef, loanLimit, repairCost, saleValue, studyCost,
+  freeSlotIndex, getDef, getDream, loanLimit, repairCost, saleValue, studyCost,
 } from './economy';
 import { nextUid } from './offers';
 import { Rng } from './rng';
@@ -112,6 +112,7 @@ const setInsurance: Handler<Extract<PlayerAction, { type: 'setInsurance' }>> = (
 };
 
 const setExtraShift: Handler<Extract<PlayerAction, { type: 'setExtraShift' }>> = (_world, player, action) => {
+  if (action.on && !player.employed) return ERRORS.shiftUnemployed;
   if (action.on && player.restedThisWeek) return ERRORS.shiftAfterRest;
   player.extraShift = action.on;
   return null;
@@ -138,8 +139,47 @@ const rest: Handler<Extract<PlayerAction, { type: 'rest' }>> = (_world, player) 
   return null;
 };
 
+// ───────────── Второй акт ─────────────
+
+/** Возвращение на работу — своей волей или по угрозе свободе: зарплата ниже прежней, кратно 5. */
+export function returnToJob(player: PlayerState): void {
+  player.employed = true;
+  player.threatWeeks = 0;
+  player.salary = Math.max(5, Math.round((player.salary * R.RETURN_SALARY_MUL) / 5) * 5);
+}
+
+const quitJob: Handler<Extract<PlayerAction, { type: 'quitJob' }>> = (_world, player) => {
+  if (player.freedomWeek === null) return ERRORS.quitBeforeFreedom;
+  if (!player.employed) return ERRORS.alreadyQuit;
+  player.employed = false;
+  player.extraShift = false;
+  player.threatWeeks = 0;
+  return null;
+};
+
+const returnToWork: Handler<Extract<PlayerAction, { type: 'returnToWork' }>> = (_world, player) => {
+  if (player.employed) return ERRORS.alreadyEmployed;
+  returnToJob(player);
+  return null;
+};
+
+const buildDream: Handler<Extract<PlayerAction, { type: 'buildDream' }>> = (_world, player) => {
+  const dream = player.dream;
+  if (!dream) return ERRORS.noDream;
+  if (player.freedomWeek === null) return ERRORS.dreamBeforeFreedom;
+  if (dream.doneWeek !== null) return ERRORS.dreamDone;
+  if (dream.building) return ERRORS.dreamBusy;
+  const stage = getDream(dream.id).stages[dream.built];
+  if (player.cash < stage.cost) return notEnoughCash(stage.cost - player.cash);
+  player.cash -= stage.cost;
+  dream.building = true;
+  dream.progress = 0;
+  return null;
+};
+
 const HANDLERS: { [T in PlayerAction['type']]: Handler<Extract<PlayerAction, { type: T }>> } = {
   buyOffer, sellAsset, repairAsset, takeLoan, repayLoan, setInsurance, setExtraShift, study, rest,
+  quitJob, returnToWork, buildDream,
 };
 
 export function applyPlayerAction(input: WorldState, action: PlayerAction): ActionResult {

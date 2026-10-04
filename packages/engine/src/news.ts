@@ -42,3 +42,7 @@ export function freedomNews(player: PlayerState, week: number): NewsItem {
     : `${player.name}: финансовая свобода на ${weekOrdinal(week)} неделе!`;
   return { playerId: player.id, text };
 }
+
+export function dreamNews(player: PlayerState): NewsItem {
+  return { playerId: player.id, text: `${player.name}: шхуна готова и уходит в кругосветку!` };
+}

@@ -1,14 +1,16 @@
 // Подсчёт итогов недели (шаги 2–8 из endWeek). Работает на уже скопированном мире.
-import { addLoan } from './actions';
+import { addLoan, returnToJob } from './actions';
 import {
-  clamp, currentIncome, insurancePremium, isFree, loanInterest,
+  clamp, currentIncome, DREAM_UPKEEP_UID, dreamUpkeep, dreamWorkPerWeek, freedomLevel, getDream,
+  insurancePremium, isFree, loanInterest, realFreedomRatio,
 } from './economy';
 import {
-  burnoutEvent, emergencyLoanEvent, freedomEvent, rollBurnout, rollPersonalEvent, rollWorldEvent,
-  scamCollapseEvent, weeklyHappinessDelta,
+  backToWorkEvent, burnoutEvent, dreamDoneEvent, dreamStageEvent, emergencyLoanEvent, freedomEvent,
+  freedomLevelEvent, freedomThreatEvent, rollBurnout, rollPersonalEvent, rollWorldEvent,
+  scamCollapseEvent, threatOverEvent, weeklyHappinessDelta,
 } from './events';
 import { advanceMarket, snapshotMarket } from './market';
-import { emergencyNews, freedomNews, scamNews, type NewsItem } from './news';
+import { dreamNews, emergencyNews, freedomNews, scamNews, type NewsItem } from './news';
 import { expireOffers, refillBoard } from './offers';
 import { Rng } from './rng';
 import * as R from './rules';
@@ -24,16 +26,19 @@ function settlePlayer(world: WorldState, player: PlayerState, rng: Rng): PlayerW
   const week = world.week;
   const events: GameEvent[] = [];
 
-  const burnout = rollBurnout(player, rng);
+  // Без работы нет ни зарплаты, ни выгорания (ГПСЧ при этом не трогаем).
+  const burnout = player.employed && rollBurnout(player, rng);
   if (burnout) events.push(burnoutEvent());
-  const salary = Math.round(
-    player.salary * (player.extraShift ? 1 + R.EXTRA_SHIFT_BONUS : 1) * (burnout ? R.BURNOUT_SALARY_MUL : 1),
-  );
+  const salary = player.employed
+    ? Math.round(player.salary * (player.extraShift ? 1 + R.EXTRA_SHIFT_BONUS : 1) * (burnout ? R.BURNOUT_SALARY_MUL : 1))
+    : 0;
 
   const assetIncome = player.owned
     .map((a) => ({ assetUid: a.uid, amount: isCollapsing(a, week) ? 0 : currentIncome(a, world.market, player.knowledge) }))
     .filter((e) => e.amount > 0);
   const upkeep = player.owned.filter((a) => a.upkeep > 0).map((a) => ({ assetUid: a.uid, amount: a.upkeep }));
+  const dreamCost = dreamUpkeep(player); // готовая мечта стоит денег каждую неделю
+  if (dreamCost > 0) upkeep.push({ assetUid: DREAM_UPKEEP_UID, amount: dreamCost });
   const living = player.living;
   const interest = player.loans.reduce((sum, l) => sum + loanInterest(l), 0);
   const insurance = player.insured ? insurancePremium(player) : 0;
@@ -96,6 +101,28 @@ function coverNegativeCash(world: WorldState, reports: Record<string, PlayerWeek
   }
 }
 
+/** Шаг 6а: стройка мечты — каждый строящийся этап получает дни работы этой недели. */
+function progressDreams(world: WorldState, reports: Record<string, PlayerWeekReport>, news: NewsItem[]): void {
+  for (const player of world.players) {
+    const dream = player.dream;
+    if (!dream || !dream.building) continue;
+    const def = getDream(dream.id);
+    dream.progress += dreamWorkPerWeek(player);
+    if (dream.progress < def.stages[dream.built].work) continue;
+    const finished = dream.built;
+    dream.built += 1;
+    dream.building = false;
+    dream.progress = 0;
+    if (dream.built >= def.stages.length) {
+      dream.doneWeek = world.week;
+      reports[player.id].events.push(dreamDoneEvent(def));
+      news.push(dreamNews(player));
+    } else {
+      reports[player.id].events.push(dreamStageEvent(def, finished));
+    }
+  }
+}
+
 /** Шаг 6: проверка свободы (по настоящему пассивному доходу, без афер). */
 function checkFreedom(world: WorldState, reports: Record<string, PlayerWeekReport>, news: NewsItem[]): void {
   for (const player of world.players) {
@@ -104,6 +131,38 @@ function checkFreedom(world: WorldState, reports: Record<string, PlayerWeekRepor
     reports[player.id].freedomReached = true;
     reports[player.id].events.push(freedomEvent());
     news.push(freedomNews(player, world.week));
+  }
+}
+
+/** Шаг 6б: уровни свободы. Первый уровень празднует freedomEvent, здесь — запас прочности (2 и выше). */
+function updateLevels(world: WorldState, reports: Record<string, PlayerWeekReport>): void {
+  for (const player of world.players) {
+    const level = freedomLevel(realFreedomRatio(player, world.market));
+    if (level <= player.bestLevel) continue;
+    player.bestLevel = level;
+    if (level >= 2) reports[player.id].events.push(freedomLevelEvent(level));
+  }
+}
+
+/** Шаг 6в: свобода под угрозой. Без работы и без запаса — недели считаются, потом возврат на работу. */
+function checkThreat(world: WorldState, reports: Record<string, PlayerWeekReport>): void {
+  for (const player of world.players) {
+    if (player.employed) continue;
+    const events = reports[player.id].events;
+    if (isFree(player, world.market)) {
+      if (player.threatWeeks > 0) {
+        events.push(threatOverEvent());
+        player.threatWeeks = 0;
+      }
+      continue;
+    }
+    player.threatWeeks += 1;
+    if (player.threatWeeks >= R.THREAT_WEEKS) {
+      returnToJob(player);
+      events.push(backToWorkEvent(player.salary));
+    } else {
+      events.push(freedomThreatEvent(R.THREAT_WEEKS - player.threatWeeks));
+    }
   }
 }
 
@@ -125,7 +184,10 @@ export function settleWeek(world: WorldState, news: NewsItem[]): WorldState {
   const worldEvents = rollWorldEvent(world, rng, reports);
   collapseScams(world, reports, news);
   coverNegativeCash(world, reports, news);
+  progressDreams(world, reports, news);
   checkFreedom(world, reports, news);
+  updateLevels(world, reports);
+  checkThreat(world, reports);
   for (const player of world.players) reports[player.id].cashAfter = player.cash;
 
   world.week = endedWeek + 1;
