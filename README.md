@@ -26,4 +26,4 @@ concept/          — исходный визуальный концепт (эт
 docs/             — спецификация MVP и арт-дирекшн
 ```
 
-Документы: [спецификация MVP](docs/MVP_SPEC.md) · [арт-дирекшн](docs/ART_DIRECTION.md)
+Документы: [спецификация MVP](docs/MVP_SPEC.md) · [арт-дирекшн](docs/ART_DIRECTION.md) · [дорожная карта](docs/ROADMAP.md)
