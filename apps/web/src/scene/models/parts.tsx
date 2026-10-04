@@ -1,10 +1,10 @@
 // Общие детали моделей: меш с кэшированным материалом, дом из концепта, дымок.
 import { useContext, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { type BufferGeometry, type InstancedMesh, Object3D } from 'three';
+import { type BufferGeometry, Euler, ExtrudeGeometry, type InstancedMesh, Object3D, Quaternion, Shape, Vector3 } from 'three';
 import { PAL } from '../palette';
 import { DamageContext, useBus } from '../bus';
-import { WINDOW_OPTS, box, damagedColor, gableRoof, ico, mat, shade, type MatOpts } from '../materials';
+import { WINDOW_OPTS, box, cached, cone, cyl, damagedColor, gableRoof, ico, mat, shade, type MatOpts } from '../materials';
 
 export type V3 = [number, number, number];
 /** Нулевой вектор: условные rotation/position всегда задаём явно (R3F не сбрасывает убранные пропсы). */
@@ -36,8 +36,103 @@ export function M({ g, c, o, p, r, s, shadow = true }: MProps) {
   return <mesh geometry={g} material={material} position={p ?? Z} rotation={r ?? Z} scale={s ?? 1} castShadow={shadow} receiveShadow />;
 }
 
-export function Win({ p, r, w = 0.44, h = 0.44 }: { p: V3; r?: V3; w?: number; h?: number }) {
-  return <M g={box(w, h, 0.08)} c={PAL.window} o={WINDOW_OPTS} p={p} r={r} shadow={false} />;
+/** Окна, в которых «горит свет» (улучшенные объекты): ярче обычных. */
+export const LIT_OPTS: MatOpts = { emissive: PAL.window, emissiveIntensity: 0.85 };
+
+export function Win({ p, r, w = 0.44, h = 0.44, lit = false }: { p: V3; r?: V3; w?: number; h?: number; lit?: boolean }) {
+  return <M g={box(w, h, 0.08)} c={PAL.window} o={lit ? LIT_OPTS : WINDOW_OPTS} p={p} r={r} shadow={false} />;
+}
+
+// ───── Бруски, гирлянды, флажки ─────
+const UNIT = box(1, 1, 1);
+const AX = new Vector3(1, 0, 0);
+const qa = new Quaternion(), ea = new Euler(), va = new Vector3();
+
+/** Брусок между двумя точками (сечение t×t). */
+export function Beam({ a, b, t = 0.1, c }: { a: V3; b: V3; t?: number; c: number }) {
+  va.set(b[0] - a[0], b[1] - a[1], b[2] - a[2]);
+  const len = va.length();
+  ea.setFromQuaternion(qa.setFromUnitVectors(AX, va.divideScalar(len || 1)));
+  return (
+    <M
+      g={UNIT}
+      c={c}
+      p={[(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2]}
+      r={[ea.x, ea.y, ea.z]}
+      s={[len || 0.001, t, t]}
+    />
+  );
+}
+
+/** Точка на провисающей нити от a до b (k = 0..1). */
+const sagPoint = (a: V3, b: V3, k: number, sag: number): V3 => [
+  a[0] + (b[0] - a[0]) * k,
+  a[1] + (b[1] - a[1]) * k - sag * 4 * k * (1 - k),
+  a[2] + (b[2] - a[2]) * k,
+];
+
+/** Гирлянда: тёплые лампочки на провисающей нити (светятся, как окна). */
+export function Garland({ a, b, n = 7, sag = 0.22 }: { a: V3; b: V3; n?: number; sag?: number }) {
+  return (
+    <>
+      {Array.from({ length: n }, (_, i) => (
+        <M key={i} g={ico(0.065)} c={PAL.window} o={LIT_OPTS} p={sagPoint(a, b, (i + 0.5) / n, sag)} shadow={false} />
+      ))}
+    </>
+  );
+}
+
+const pennantGeo = () =>
+  cached('pennant', () => {
+    const s = new Shape();
+    s.moveTo(-0.1, 0); s.lineTo(0.1, 0); s.lineTo(0, -0.24); s.closePath();
+    return new ExtrudeGeometry(s, { depth: 0.02, bevelEnabled: false }).translate(0, 0, -0.01);
+  });
+const PENNANTS = [PAL.roofCoral, PAL.roofGold, PAL.white, PAL.roofTeal];
+
+/** Флажки-треугольники на провисающей верёвке от a до b. */
+export function Bunting({ a, b, n = 6, sag = 0.18 }: { a: V3; b: V3; n?: number; sag?: number }) {
+  const rotY = -Math.atan2(b[2] - a[2], b[0] - a[0]);
+  return (
+    <>
+      {Array.from({ length: n }, (_, i) => (
+        <M key={i} g={pennantGeo()} c={PENNANTS[i % PENNANTS.length]} p={sagPoint(a, b, (i + 0.5) / n, sag)} r={[0, rotY, 0]} shadow={false} />
+      ))}
+    </>
+  );
+}
+
+/** Пляжный зонтик (основание на песке/настиле). r — радиус купола; tilt — упавший зонтик. */
+export function Umbrella({ p, color, r = 1.0, h = 1.8, tilt }: { p: V3; color: number; r?: number; h?: number; tilt?: V3 }) {
+  return (
+    <group position={p} rotation={tilt ?? Z}>
+      <M g={cyl(0.04, 0.04, h, 6)} c={PAL.white} p={[0, h / 2, 0]} />
+      <M g={cone(r, r * 0.45, 8)} c={color} p={[0, h + 0.05, 0]} />
+    </group>
+  );
+}
+
+/** Шезлонг: лежак со спинкой. */
+export function Lounger({ p, rotY = 0 }: { p: V3; rotY?: number }) {
+  return (
+    <group position={p} rotation={[0, rotY, 0]}>
+      <M g={box(1.0, 0.12, 0.48)} c={PAL.white} p={[0.1, 0.2, 0]} />
+      <M g={box(0.42, 0.1, 0.48)} c={PAL.white} p={[-0.52, 0.33, 0]} r={[0, 0, -0.55]} />
+      <M g={box(0.08, 0.16, 0.42)} c={PAL.woodDark} p={[0.5, 0.08, 0]} />
+      <M g={box(0.08, 0.16, 0.42)} c={PAL.woodDark} p={[-0.3, 0.08, 0]} />
+    </group>
+  );
+}
+
+/** Ящик с рейками (на пирсе, у цеха). */
+export function Crate({ p, s = 0.5, rotY = 0, c = PAL.wood }: { p: V3; s?: number; rotY?: number; c?: number }) {
+  return (
+    <group position={p} rotation={[0, rotY, 0]}>
+      <M g={box(s, s * 0.84, s)} c={c} p={[0, s * 0.42, 0]} />
+      <M g={box(s + 0.02, s * 0.1, s + 0.02)} c={PAL.woodDark} p={[0, s * 0.72, 0]} />
+      <M g={box(s + 0.02, s * 0.1, s + 0.02)} c={PAL.woodDark} p={[0, s * 0.14, 0]} />
+    </group>
+  );
 }
 
 export interface HouseProps {

@@ -5,7 +5,7 @@ import { signed } from '../format';
 import { DealsTab } from './DealsTab';
 import { IslandTab } from './IslandTab';
 import { ActionsTab } from './ActionsTab';
-import { NeighborsTab } from './NeighborsTab';
+import { NeighborsBar } from './Neighbors';
 import { DreamBlock } from './DreamBlock';
 import { FreedomBlock, Statement } from './ReportPanel';
 
@@ -25,7 +25,6 @@ const TAB_LABEL: Record<Tab, string> = {
   deals: 'Сделки',
   island: 'Остров',
   actions: 'Действия',
-  neighbors: 'Соседи',
 };
 
 function TabContent({ tab }: { tab: Tab }) {
@@ -33,7 +32,6 @@ function TabContent({ tab }: { tab: Tab }) {
     case 'deals': return <DealsTab />;
     case 'island': return <IslandTab />;
     case 'actions': return <ActionsTab />;
-    case 'neighbors': return <NeighborsTab />;
     case 'report': return <div className="tab-body"><FreedomBlock /><DreamBlock /><Statement /></div>;
   }
 }
@@ -83,9 +81,10 @@ export function DesktopLayout() {
         <div className="panel pad scroll"><Statement /></div>
       </aside>
       <aside className="col-right panel">
-        <Tabs tabs={['deals', 'island', 'actions', 'neighbors']} />
+        <Tabs tabs={['deals', 'island', 'actions']} />
         <div className="tab-scroll"><TabContent tab={current} /></div>
       </aside>
+      <div className="col-top"><NeighborsBar /></div>
       <div className="col-center"><NextWeekButton /></div>
     </>
   );
@@ -102,7 +101,7 @@ export function MobileLayout() {
         <span />
       </button>
       {!open && <div className="sheet-freedom"><FreedomBlock /></div>}
-      <Tabs tabs={['report', 'deals', 'island', 'actions', 'neighbors']} />
+      <Tabs tabs={['report', 'deals', 'island', 'actions']} />
       {open && <div className="tab-scroll"><TabContent tab={tab} /></div>}
       <div className="sheet-cta"><NextWeekButton compact /></div>
     </div>

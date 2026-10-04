@@ -47,6 +47,7 @@ export function giveAsset(world: WorldState, playerId: string, defId: string, ov
     price: def.price,
     income: def.income,
     upkeep: def.upkeep,
+    level: 1,
     damaged: false,
     slotIndex: freeSlotIndex(p, def.slot) ?? 0,
     ...overrides,

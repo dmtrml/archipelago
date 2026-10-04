@@ -3,7 +3,7 @@ import { ASSET_DEFS, DREAMS } from './content';
 import * as R from './rules';
 import { SLOT_CAPACITY } from './slots';
 import type {
-  AssetDef, DreamDef, Loan, MarketState, Offer, OwnedAsset, PlayerState, Sector, SlotType,
+  AssetDef, DreamDef, Loan, MarketState, Offer, OwnedAsset, PlayerState, Sector, SlotType, UpgradeDef,
 } from './types';
 
 /** id строки содержания готовой мечты в отчёте недели (и якорь мечты в UI/3D). */
@@ -43,6 +43,47 @@ export function currentIncome(asset: OwnedAsset, market: MarketState, knowledge:
 
 export function offerIncome(offer: Offer, market: MarketState, knowledge: number): number {
   return incomeFor(offer.income, getDef(offer.defId), market, knowledge);
+}
+
+// ───────────── Улучшения ─────────────
+
+/** Сколько всего уровней у сделки: 1 — улучшений нет. */
+export function maxLevel(def: AssetDef): number {
+  return 1 + (def.upgrades?.length ?? 0);
+}
+
+/** Следующая ступень улучшения актива; null — улучшать нечего. */
+export function nextUpgrade(asset: OwnedAsset): UpgradeDef | null {
+  return getDef(asset.defId).upgrades?.[asset.level - 1] ?? null;
+}
+
+/** Название с учётом уровня: «Траулер», а не «Рыбацкая лодка». */
+export function assetTitle(asset: OwnedAsset): string {
+  const def = getDef(asset.defId);
+  return (asset.level > 1 ? def.upgrades?.[asset.level - 2]?.title : undefined) ?? def.title;
+}
+
+/**
+ * На сколько вырастет доход в неделю по текущему рынку (без учёта поломки): разница дохода до и после,
+ * поэтому округление то же, что и у настоящего дохода.
+ */
+export function upgradeIncomeGain(asset: OwnedAsset, up: UpgradeDef, market: MarketState, knowledge: number): number {
+  const def = getDef(asset.defId);
+  return incomeFor(asset.income + up.income, def, market, knowledge) - incomeFor(asset.income, def, market, knowledge);
+}
+
+/**
+ * Актив после улучшения (новый объект): доход и содержание растут, а вложенное прибавляется к цене —
+ * поэтому и продажа, и ремонт, и страховка считаются от всего, что в актив вложено.
+ */
+export function upgradedAsset(asset: OwnedAsset, up: UpgradeDef): OwnedAsset {
+  return {
+    ...asset,
+    income: asset.income + up.income,
+    upkeep: asset.upkeep + up.upkeep,
+    price: asset.price + up.cost,
+    level: asset.level + 1,
+  };
 }
 
 export function repairCost(asset: OwnedAsset): number {
@@ -163,6 +204,11 @@ export function studyCost(player: PlayerState): number | null {
 
 export function slotUsage(player: PlayerState, slot: SlotType): number {
   return player.owned.filter((a) => getDef(a.defId).slot === slot).length;
+}
+
+/** Все места этого типа заняты: расти здесь можно только улучшениями. */
+export function isSlotFull(player: PlayerState, slot: SlotType): boolean {
+  return slotUsage(player, slot) >= SLOT_CAPACITY[slot];
 }
 
 /** Наименьший свободный номер места в слоте; null — мест нет. */

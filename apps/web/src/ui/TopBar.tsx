@@ -2,6 +2,7 @@ import { financeView, getPlayer } from '@arch/engine';
 import { HUMAN, useGame } from '../store';
 import { fmt } from '../format';
 import { Coin, ConfirmButton, Meter } from './common';
+import { NeighborsBar } from './Neighbors';
 
 export function Emblem() {
   return (
@@ -29,6 +30,7 @@ export function TopBar() {
           <div className="title">{me.islandName}</div>
           <div className="sub">Неделя {world.week}{me.freedomWeek ? ` · свобода с ${me.freedomWeek}-й недели` : ''}{me.employed ? '' : ' · без работы'}</div>
         </div>
+        <NeighborsBar compact />
         <ConfirmButton className="icon-btn" confirmText="Начать заново?" onConfirm={resetGame}>
           <span aria-label="Новая игра">↺</span>
         </ConfirmButton>

@@ -1,4 +1,12 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { percent } from './text';
+
+/** «Свобода: 92% → 99%» — что покупка или улучшение сделает со шкалой свободы. */
+export function FreedomLine({ before, after }: { before: number; after: number }) {
+  const a = percent(before), b = percent(after);
+  const tone = b > a ? 'pos' : b < a ? 'neg' : '';
+  return <div className={`freedom-line ${tone}`}>Свобода: {a}% → {b}%</div>;
+}
 
 export function Coin({ size = 'md' }: { size?: 'sm' | 'md' }) {
   return <span className={`coin ${size === 'sm' ? 'sm' : ''}`} aria-hidden />;

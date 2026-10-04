@@ -4,6 +4,7 @@ import { dreamProgress, placedItems, useGame } from './store';
 import { TopBar } from './ui/TopBar';
 import { DesktopLayout, MobileLayout, useMediaQuery } from './ui/Panels';
 import { ToastView, WeekModal, WelcomeModal } from './ui/Modals';
+import { NeighborModal } from './ui/Neighbors';
 
 /** Какую долю ширины экрана занимают боковые колонки интерфейса (только раскладка для компьютера). */
 function useSideInsets(enabled: boolean): [number, number] {
@@ -59,6 +60,7 @@ export default function App() {
         </div>
       )}
       {!world && <WelcomeModal />}
+      {world && isMobile && <NeighborModal />}
       <WeekModal />
       <ToastView />
     </>

@@ -50,6 +50,8 @@ export const ERRORS = {
   offerGone: 'Это предложение уже ушло с доски',
   noSuchAsset: 'Такого объекта у тебя нет',
   notDamaged: 'Этот объект не повреждён',
+  noUpgrade: 'Улучшать больше некуда',
+  repairFirst: 'Сначала почините',
   badAmount: 'Укажи сумму больше нуля',
   noCredit: 'Банк больше не даёт в долг',
   noSuchLoan: 'Такого кредита нет',

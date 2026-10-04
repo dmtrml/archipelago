@@ -1,6 +1,13 @@
 // Контент: все сделки архипелага. Числа — базовые, конкретное предложение отклоняется от них случайно.
 import type { AssetDef, DealKind, DreamDef } from './types';
 
+// Улучшения (`upgrades`) стоят дороже самой сделки и окупаются медленнее новой покупки: при рынке 1.0
+// вторая ступень — за 20–24 недели, третья — за 28 (новые сделки — 13–22). Пока на острове есть место,
+// выгоднее купить новое; когда места кончились — расти можно, вкладывая в то, что уже есть.
+// У большого дела и расходы большие: содержание ступени — больше трети её дохода, а страховка считается
+// от всей вложенной цены. Поэтому полностью улучшенный остров подходит к «Богатству» (200%), но не уходит
+// далеко за него: дальше растут знания, доли в артели и (позже) соседние острова. Числа подобраны симулятором.
+
 export const ASSET_DEFS: Record<string, AssetDef> = {
   boat: {
     id: 'boat', kind: 'asset',
@@ -8,6 +15,18 @@ export const ASSET_DEFS: Record<string, AssetDef> = {
     description: 'Каждое утро выходит в море и привозит улов на продажу — только штормов боится.',
     price: 250, income: 20, upkeep: 4, sector: 'fish', joy: 0,
     slot: 'pier', model: 'boat', minKnowledge: 0, stormRisk: 0.35, resaleRate: 0.6,
+    upgrades: [
+      {
+        title: 'Баркас',
+        description: 'Лодка побольше, с мотором и крепкими сетями: уходит дальше в море, но и топлива ей нужно больше.',
+        cost: 400, income: 32, upkeep: 12, minKnowledge: 0,
+      },
+      {
+        title: 'Траулер',
+        description: 'Настоящее рыболовное судно с трюмом-холодильником — улова хватает на весь рынок, только чинить его дорого.',
+        cost: 700, income: 40, upkeep: 15, minKnowledge: 1,
+      },
+    ],
   },
   smokehouse: {
     id: 'smokehouse', kind: 'asset',
@@ -15,6 +34,18 @@ export const ASSET_DEFS: Record<string, AssetDef> = {
     description: 'Превращает свежую рыбу в ароматную копчёную, которую соседи раскупают к ужину.',
     price: 500, income: 35, upkeep: 6, sector: 'fish', joy: 0,
     slot: 'plot', model: 'smokehouse', minKnowledge: 0, stormRisk: 0.1, resaleRate: 0.6,
+    upgrades: [
+      {
+        title: 'Рыбный цех',
+        description: 'Рядом с коптильней появляются засолка и сушка — рыбу берут и к ужину, и в дальнюю дорогу.',
+        cost: 600, income: 48, upkeep: 18, minKnowledge: 0,
+      },
+      {
+        title: 'Консервный заводик',
+        description: 'Рыба в жестяных баночках хранится годами и уплывает на соседние острова — тут надо хорошо знать дело.',
+        cost: 900, income: 52, upkeep: 20, minKnowledge: 2,
+      },
+    ],
   },
   cottage: {
     id: 'cottage', kind: 'asset',
@@ -22,6 +53,18 @@ export const ASSET_DEFS: Record<string, AssetDef> = {
     description: 'Уютный домик, за который жильцы платят каждую неделю — спокойно и надёжно.',
     price: 700, income: 38, upkeep: 6, sector: 'stable', joy: 0,
     slot: 'plot', model: 'cottage', minKnowledge: 0, stormRisk: 0.05, resaleRate: 0.85,
+    upgrades: [
+      {
+        title: 'Гостевой дом',
+        description: 'Второй этаж и ещё три комнаты — теперь здесь гостят сразу несколько семей.',
+        cost: 800, income: 52, upkeep: 18, minKnowledge: 0,
+      },
+      {
+        title: 'Мини-отель',
+        description: 'Маленький отель с завтраками и цветами на подоконниках — гости возвращаются сюда каждый год.',
+        cost: 1100, income: 63, upkeep: 24, minKnowledge: 1,
+      },
+    ],
   },
   bungalow: {
     id: 'bungalow', kind: 'asset',
@@ -29,6 +72,18 @@ export const ASSET_DEFS: Record<string, AssetDef> = {
     description: 'Туристы платят за ночь у моря: в сезон — много, в межсезонье — меньше.',
     price: 600, income: 42, upkeep: 8, sector: 'tourism', joy: 0,
     slot: 'beach', model: 'bungalow', minKnowledge: 0, stormRisk: 0.3, resaleRate: 0.65,
+    upgrades: [
+      {
+        title: 'Бунгало с террасой',
+        description: 'Широкая терраса над водой и гамаки — за такой вид туристы охотно платят больше.',
+        cost: 700, income: 54, upkeep: 20, minKnowledge: 0,
+      },
+      {
+        title: 'Пляжный клуб',
+        description: 'Несколько домиков, бассейн и вечерние праздники у костра — сюда приезжают на весь отпуск.',
+        cost: 1000, income: 58, upkeep: 22, minKnowledge: 1,
+      },
+    ],
   },
   cafe: {
     id: 'cafe', kind: 'asset',
@@ -36,6 +91,18 @@ export const ASSET_DEFS: Record<string, AssetDef> = {
     description: 'Кормит отдыхающих мороженым и лимонадом — чтобы вести такое дело, нужно немного знаний.',
     price: 900, income: 64, upkeep: 12, sector: 'tourism', joy: 0,
     slot: 'beach', model: 'cafe', minKnowledge: 1, stormRisk: 0.15, resaleRate: 0.6,
+    upgrades: [
+      {
+        title: 'Ресторан у моря',
+        description: 'Вместо мороженого — рыба на гриле и столики под фонариками до самой ночи.',
+        cost: 1000, income: 76, upkeep: 28, minKnowledge: 1,
+      },
+      {
+        title: 'Ресторан на сваях',
+        description: 'Зал прямо над лагуной, к которому подплывают на лодках, — самое известное место архипелага.',
+        cost: 1400, income: 81, upkeep: 31, minKnowledge: 2,
+      },
+    ],
   },
   deposit: {
     id: 'deposit', kind: 'asset',
@@ -110,6 +177,33 @@ export const DEAL_ACCUSATIVE: Record<string, string> = {
   statue: 'золотую статую',
   yacht: 'яхту',
   garden: 'цветущий сад',
+};
+
+/**
+ * Названия ступеней улучшения для новостей — по порядку, как в `upgrades`:
+ * винительный падеж («Борис улучшил баркас») и именительный («— теперь это траулер»).
+ */
+export const UPGRADE_NAMES: Record<string, { accusative: string; nominative: string }[]> = {
+  boat: [
+    { accusative: 'баркас', nominative: 'баркас' },
+    { accusative: 'траулер', nominative: 'траулер' },
+  ],
+  smokehouse: [
+    { accusative: 'рыбный цех', nominative: 'рыбный цех' },
+    { accusative: 'консервный заводик', nominative: 'консервный заводик' },
+  ],
+  cottage: [
+    { accusative: 'гостевой дом', nominative: 'гостевой дом' },
+    { accusative: 'мини-отель', nominative: 'мини-отель' },
+  ],
+  bungalow: [
+    { accusative: 'бунгало с террасой', nominative: 'бунгало с террасой' },
+    { accusative: 'пляжный клуб', nominative: 'пляжный клуб' },
+  ],
+  cafe: [
+    { accusative: 'ресторан у моря', nominative: 'ресторан у моря' },
+    { accusative: 'ресторан на сваях', nominative: 'ресторан на сваях' },
+  ],
 };
 
 /** Мечты. Пока одна — шхуна; выбор мечты на старте появится вместе с профессиями. */

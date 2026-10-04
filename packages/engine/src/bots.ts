@@ -1,12 +1,12 @@
 // Соседи-боты. Политика смотрит на мир через селекторы и выбирает следующее действие;
 // действия применяются тем же applyPlayerAction, что и у человека, — никаких обходных путей.
 import { applyPlayerAction, type PlayerAction } from './actions';
-import { studyCost } from './economy';
-import { boughtNews, loanNews, repayNews, soldNews, type NewsItem } from './news';
+import { isSlotFull, studyCost } from './economy';
+import { boughtNews, loanNews, repayNews, soldNews, upgradedNews, type NewsItem } from './news';
 import { hashString, peekRandom } from './rng';
 import * as R from './rules';
 import { assetViews, loanLimit, offerViews } from './selectors';
-import type { BotStyle, OfferView, PlayerState, WorldState } from './types';
+import type { AssetView, BotStyle, OfferView, PlayerState, UpgradeView, WorldState } from './types';
 
 export type Policy = (world: WorldState, me: PlayerState) => PlayerAction | null;
 
@@ -40,6 +40,24 @@ function buy(me: PlayerState, v: OfferView): PlayerAction {
   return { type: 'buyOffer', playerId: me.id, offerUid: v.offer.uid };
 }
 
+/** Актив, у которого есть следующее улучшение (вид с гарантированным `upgrade`). */
+type Upgradable = AssetView & { upgrade: UpgradeView };
+
+function upgradable(world: WorldState, me: PlayerState): Upgradable[] {
+  return assetViews(world, me.id).filter((v): v is Upgradable => v.upgrade !== null);
+}
+
+/** Улучшения, доступные прямо сейчас с запасом `buffer`, — самые быстрые по окупаемости первыми. */
+function affordableUpgrades(world: WorldState, me: PlayerState, buffer: number): Upgradable[] {
+  return upgradable(world, me)
+    .filter((v) => v.upgrade.canUpgrade && v.upgrade.paybackWeeks !== null && me.cash - v.upgrade.cost >= buffer)
+    .sort((a, b) => (a.upgrade.paybackWeeks ?? 0) - (b.upgrade.paybackWeeks ?? 0));
+}
+
+function upgrade(me: PlayerState, v: AssetView): PlayerAction {
+  return { type: 'upgradeAsset', playerId: me.id, assetUid: v.asset.uid };
+}
+
 /** Детерминированная «монетка» бота на эту неделю (не трогает состояние ГПСЧ). */
 function botCoin(world: WorldState, me: PlayerState, purpose: string): number {
   return peekRandom(world.rng, hashString(`${me.id}:${purpose}:${world.week}`));
@@ -59,24 +77,38 @@ const saver: Policy = (world, me) => {
     ?? (me.knowledge === 0 && !me.studiedThisWeek && cost !== null && me.cash >= cost
       ? { type: 'study', playerId: me.id } : null)
     ?? restIfTired(me, 24, SAVER_BUFFER)
-    ?? bestPaybackBuy(world, me)
+    ?? saverInvest(world, me)
     // Пока силы есть — берёт подработку и откладывает.
     ?? (me.happiness >= SAVER_SHIFT_MOOD && !me.extraShift && !me.restedThisWeek
       ? { type: 'setExtraShift', playerId: me.id, on: true } : null);
 };
 
-function bestPaybackBuy(world: WorldState, me: PlayerState): PlayerAction | null {
-  const best = offerViews(world, me.id)
+/**
+ * Лучшее вложение по окупаемости: новая сделка с доски или улучшение своего.
+ * Улучшает, если это окупается быстрее лучшей доступной сделки или если места этого типа кончились.
+ */
+function saverInvest(world: WorldState, me: PlayerState): PlayerAction | null {
+  const offer = bestPaybackOffer(world, me);
+  const better = affordableUpgrades(world, me, SAVER_BUFFER)
+    .filter((v) => (v.upgrade.paybackWeeks ?? Infinity) <= SAVER_MAX_PAYBACK)
+    .find((v) => isSlotFull(me, v.def.slot)
+      || (offer !== undefined && (v.upgrade.paybackWeeks ?? Infinity) < (offer.paybackWeeks ?? Infinity)));
+  if (better) return upgrade(me, better);
+  return offer ? buy(me, offer) : null;
+}
+
+function bestPaybackOffer(world: WorldState, me: PlayerState): OfferView | undefined {
+  return offerViews(world, me.id)
     .filter((v) => buyable(v) && v.def.kind !== 'status' && !v.warning)
     .filter((v) => v.paybackWeeks !== null && v.paybackWeeks <= SAVER_MAX_PAYBACK)
     .filter((v) => me.cash - v.offer.price >= SAVER_BUFFER)
     .sort((a, b) => (a.paybackWeeks ?? 0) - (b.paybackWeeks ?? 0))[0];
-  return best ? buy(me, best) : null;
 }
 
 // ───────────── Тимур: транжира ─────────────
 
 const SPENDER_PANIC_DEBT = 1500;
+const SPENDER_UPGRADE_CHANCE = 0.04;
 
 const spender: Policy = (world, me) => {
   const usury = me.loans.find((l) => l.emergency)?.principal ?? 0;
@@ -85,8 +117,16 @@ const spender: Policy = (world, me) => {
   return restIfTired(me, 45, 0)
     ?? statusBuy(world, me)
     ?? (botCoin(world, me, 'asset') < 0.3 ? anyAssetBuy(world, me) : null)
+    // Изредка, под настроение, улучшает самое видное — статус ему всё равно милее.
+    ?? (botCoin(world, me, 'upgrade') < SPENDER_UPGRADE_CHANCE ? showyUpgrade(world, me) : null)
     ?? repayDebts(me, 200, true);
 };
+
+/** Самое дорогое улучшение, на которое хватает денег: чтобы все видели. */
+function showyUpgrade(world: WorldState, me: PlayerState): PlayerAction | null {
+  const pick = affordableUpgrades(world, me, 0).sort((a, b) => b.upgrade.cost - a.upgrade.cost)[0];
+  return pick ? upgrade(me, pick) : null;
+}
 
 function statusBuy(world: WorldState, me: PlayerState): PlayerAction | null {
   const ownedCount = (defId: string) => me.owned.filter((a) => a.defId === defId).length;
@@ -120,8 +160,25 @@ const gambler: Policy = (world, me) =>
   restIfTired(me, 15, 0)
   ?? repairDamaged(world, me, GAMBLER_KEEP)
   ?? leveragedBuy(world, me)
+  ?? leveragedUpgrade(world, me)
   ?? sellForJackpot(world, me)
   ?? (me.cash > GAMBLER_RICH ? repayDebts(me, GAMBLER_KEEP, false) : null);
+
+/**
+ * Когда на доске нечего взять, раздувает самый доходный актив: улучшает его, даже если для этого
+ * нужен кредит, — лишь бы прибавка покрывала проценты.
+ */
+function leveragedUpgrade(world: WorldState, me: PlayerState): PlayerAction | null {
+  const limit = loanLimit(world, me.id);
+  const target = upgradable(world, me)
+    .filter((v) => !v.asset.damaged && me.knowledge >= v.upgrade.def.minKnowledge)
+    .filter((v) => v.upgrade.netGain > v.upgrade.cost * R.LOAN_RATE && v.upgrade.cost <= me.cash + limit)
+    .sort((a, b) => b.currentIncome - a.currentIncome)[0];
+  if (!target) return null;
+  if (me.cash >= target.upgrade.cost) return upgrade(me, target);
+  const gap = Math.ceil((target.upgrade.cost - me.cash) / R.LOAN_STEP) * R.LOAN_STEP;
+  return { type: 'takeLoan', playerId: me.id, amount: Math.min(gap, limit) };
+}
 
 /** Самая доходная сделка на доске; если не хватает — берёт кредит. Аферы не распознаёт. */
 function leveragedBuy(world: WorldState, me: PlayerState): PlayerAction | null {
@@ -175,7 +232,11 @@ function describe(world: WorldState, me: PlayerState, action: PlayerAction): New
     }
     case 'sellAsset': {
       const asset = me.owned.find((a) => a.uid === action.assetUid);
-      return asset ? soldNews(me, asset.defId) : null;
+      return asset ? soldNews(me, asset.defId, asset.level) : null;
+    }
+    case 'upgradeAsset': {
+      const asset = me.owned.find((a) => a.uid === action.assetUid);
+      return asset ? upgradedNews(me, asset.defId, asset.level) : null;
     }
     case 'takeLoan':
       return loanNews(me, action.amount);
