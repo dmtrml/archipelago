@@ -13,13 +13,14 @@ import { Decor } from './world/Decor';
 import { Home, Lighthouse } from './world/Landmarks';
 import { Clouds, Gulls, Neighbors, Rain } from './world/Ambient';
 import { Items } from './Items';
+import { Shipyard } from './world/Shipyard';
 import { FloatLabels } from './FloatLabels';
 import { CameraRig } from './CameraRig';
 import './scene.css';
 
 const GL = { antialias: true, toneMapping: NeutralToneMapping, toneMappingExposure: 1.05 };
 
-export function IslandScene({ items, floats, weather, bottomInset = 0, sideInsets, onItemClick }: IslandSceneProps) {
+export function IslandScene({ items, floats, weather, dream, bottomInset = 0, sideInsets, onItemClick }: IslandSceneProps) {
   const storm = weather === 'storm';
   // шина создаётся один раз; погода стартует сразу в нужном состоянии
   const bus = useMemo(() => createBus(weather === 'storm'), []);
@@ -57,6 +58,7 @@ export function IslandScene({ items, floats, weather, bottomInset = 0, sideInset
           <Gulls />
           <Rain count={small ? 600 : 900} />
           <Items items={items} clickRef={clickRef} />
+          {dream && <Shipyard dream={dream} clickRef={clickRef} />}
           <FloatLabels floats={floats} items={items} />
           <CameraRig bottomInset={bottomInset} sideInsets={sideInsets} />
         </BusContext.Provider>

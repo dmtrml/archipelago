@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 import {
-  applyAction, createWorld, ASSET_DEFS,
+  applyAction, createWorld, getPlayer, migrateWorld, ASSET_DEFS, DREAMS, DREAM_UPKEEP_UID,
   type Action, type GameEvent, type WeekReport, type WorldState,
 } from '@arch/engine';
-import type { FloatLabel, PlacedItem, Weather } from './scene/contract';
+import type { DreamProgress, FloatLabel, PlacedItem, Weather } from './scene/contract';
 import { fmt, signed } from './format';
 
 export const HUMAN = 'p1';
@@ -12,17 +12,21 @@ const SAVE_KEY = 'archipelago.save.v1';
 export type Tab = 'deals' | 'island' | 'actions' | 'neighbors' | 'report';
 
 export interface Toast { id: number; text: string; tone: 'good' | 'bad' | 'neutral' }
-export interface WeekModal { report: WeekReport; events: GameEvent[]; freedom: boolean }
+/** `epilogue` — на этой неделе достроена мечта: вместо обычных итогов недели показываем эпилог. */
+export interface WeekModal { report: WeekReport; events: GameEvent[]; freedom: boolean; epilogue: boolean }
 export interface NewsItem { week: number; text: string }
 
 interface Saved { world: WorldState; news: NewsItem[] }
 
+/** Сохранение любой поддерживаемой версии мира → мир версии 2. Непонятное сохранение игнорируем. */
 function load(): Saved | null {
   try {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return null;
-    const saved = JSON.parse(raw) as Saved;
-    return saved?.world?.version === 1 ? saved : null;
+    const saved = JSON.parse(raw) as { world?: unknown; news?: NewsItem[] } | null;
+    const world = migrateWorld(saved?.world);
+    if (!world) return null;
+    return { world, news: Array.isArray(saved?.news) ? saved.news : [] };
   } catch {
     return null;
   }
@@ -61,6 +65,7 @@ interface GameStore {
 }
 
 const saved = load();
+if (saved) save(saved); // старое сохранение переписываем в версии 2 — ключ тот же
 let toastSeq = 0;
 let floatSeq = 0;
 
@@ -143,6 +148,11 @@ export const useGame = create<GameStore>((set, get) => {
       const labels: Omit<FloatLabel, 'id'>[] = [{ anchor: 'home', text: `+${fmt(mine.salary)}`, tone: 'pos' }];
       for (const a of mine.assetIncome) if (a.amount > 0) labels.push({ anchor: a.assetUid, text: `+${fmt(a.amount)}`, tone: 'pos' });
       for (const u of mine.upkeep) {
+        // Готовая шхуна тоже стоит денег каждую неделю — красный минус над стапелем
+        if (u.assetUid === DREAM_UPKEEP_UID && u.amount > 0) {
+          labels.push({ anchor: 'dream', text: `−${fmt(u.amount)}`, tone: 'neg' });
+          continue;
+        }
         const asset = owned.get(u.assetUid);
         if (asset && u.amount > 0 && ASSET_DEFS[asset.defId].kind === 'status') labels.push({ anchor: u.assetUid, text: `−${fmt(u.amount)}`, tone: 'neg' });
       }
@@ -153,16 +163,18 @@ export const useGame = create<GameStore>((set, get) => {
         setTimeout(() => set({ weather: 'clear' }), 7000);
       }
 
-      // Событие 'freedom' показываем отдельным праздничным заголовком, а не карточкой
+      // Событие 'freedom' показываем отдельным праздничным заголовком, а не карточкой;
+      // 'dreamDone' открывает эпилог вместо обычного окна недели
       const events = [...report.worldEvents, ...mine.events.filter((e) => e.id !== 'freedom')];
+      const epilogue = mine.events.some((e) => e.id === 'dreamDone');
       setTimeout(() => {
-        if (events.length > 0 || mine.freedomReached) {
-          set({ modal: { report, events, freedom: mine.freedomReached }, busy: false });
+        if (events.length > 0 || mine.freedomReached || epilogue) {
+          set({ modal: { report, events, freedom: mine.freedomReached, epilogue }, busy: false });
         } else {
           set({ busy: false });
           get().showToast(`Неделя ${report.week}: ${signed(mine.net)} · наличные ${fmt(mine.cashAfter)}`, mine.net >= 0 ? 'good' : 'bad');
         }
-      }, events.length > 0 || mine.freedomReached ? 1100 : 500);
+      }, events.length > 0 || mine.freedomReached || epilogue ? 1100 : 500);
     },
 
     closeModal() { set({ modal: null }); },
@@ -170,7 +182,13 @@ export const useGame = create<GameStore>((set, get) => {
     setSheetOpen(open) { set({ sheetOpen: open }); },
 
     focusItem(uid) {
-      set({ tab: 'island', sheetOpen: true, highlightUid: uid });
+      if (uid === 'dream') {
+        // Мечта живёт в блоке «Мечта»: на телефоне — во вкладке «Отчёт», на компьютере он всегда на виду
+        const mobile = window.matchMedia('(max-width: 1023px)').matches;
+        set(mobile ? { tab: 'report', sheetOpen: true, highlightUid: uid } : { highlightUid: uid });
+      } else {
+        set({ tab: 'island', sheetOpen: true, highlightUid: uid });
+      }
       setTimeout(() => { if (get().highlightUid === uid) set({ highlightUid: null }); }, 2200);
     },
 
@@ -188,4 +206,11 @@ export function placedItems(world: WorldState): PlacedItem[] {
     const def = ASSET_DEFS[a.defId];
     return { uid: a.uid, model: def.model, slot: def.slot, slotIndex: a.slotIndex, damaged: a.damaged };
   });
+}
+
+/** Мечта игрока в формате сцены; null — мечты нет. */
+export function dreamProgress(world: WorldState): DreamProgress | null {
+  const dream = getPlayer(world, HUMAN).dream;
+  if (!dream) return null;
+  return { built: dream.built, stages: DREAMS[dream.id].stages.length, building: dream.building };
 }

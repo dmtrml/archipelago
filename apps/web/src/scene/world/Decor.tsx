@@ -13,7 +13,7 @@ import {
   BEACH_Y, GRASS_Y, HILL_POS, LAMP_ANGLES, LIGHT_A, LIGHT_POS, PIER_A, PIER_LANDING, PIER_LEN, PIER_START,
   PLAZA_ANNEX_POS, PLAZA_ANNEX_R, PLAZA_POS, PLAZA_R, type Reserve, isFreeIn, lerp, makeRng, onBeach, onGrass,
 } from '../layout';
-import { SLOT_RESERVES } from '../slots';
+import { DREAM_RESERVES, SLOT_RESERVES } from '../slots';
 import { useBus } from '../bus';
 
 interface Crown { geo: BufferGeometry; pos: Vector3; rotY: number; local: Vector3; phase: number }
@@ -96,7 +96,8 @@ function buildDecor() {
     const r = rock(rng, rr(0.4, 0.75));
     const p = onBeach(LIGHT_A + rr(-0.35, 0.35), rr(0.4, 1.0));
     r.position.set(p.x, BEACH_Y + rr(-0.2, 0.1), p.z);
-    root.add(r);
+    // камень создан и бросок сделан в любом случае (последовательность ГПСЧ не меняется), но на резерве его нет
+    if (isFreeIn(DREAM_RESERVES, p.x, p.z, 0.5)) root.add(r);
   }
 
   const addPalm = (pos: Vector3, h?: number) => {
