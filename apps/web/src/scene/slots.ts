@@ -1,6 +1,7 @@
 // Места на острове для каждого слота. Вместимость обязана совпадать с SLOT_CAPACITY
 // из packages/engine/src/slots.ts: pier 4, plot 6, beach 3, plaza 2, sea 2 (finance — один банк).
 import type { SlotType } from '@arch/engine';
+import type { DreamProgress } from './contract';
 import {
   BEACH_Y, FACE_CAMERA, GRASS_Y, PIER_A, PIER_START, PLAZA_ANNEX_POS, PLAZA_POS,
   fromScreen, onBeach, type Reserve,
@@ -83,6 +84,19 @@ export const dreamPoint = (lx: number, lz: number): { x: number; z: number } => 
  * чтобы не лезть на сваи стапеля и вписаться в кадр. yaw — доворот носа относительно оси спуска.
  */
 export const DREAM_SHIP_AT = { lx: 8.2, lz: 3.1, yaw: 0.12 };
+/** Центр стапеля и стройплощадки (система стапеля): здесь их рисует Shipyard, сюда же поворачивается камера. */
+export const DREAM_SLIP_AT = { lx: 4.2, lz: 0 };
+export const DREAM_PROPS_AT = { lx: 1.5, lz: 2.9 };
+
+/**
+ * На что смотреть камере, когда мечта меняется: шхуна на воде, стапель с судном или (до первого этапа) стройплощадка.
+ * null — рисовать пока нечего, поворачиваться не к чему.
+ */
+export function dreamFocusPoint({ built, stages, building }: DreamProgress): { x: number; z: number } | null {
+  if (built >= Math.max(1, stages)) return dreamPoint(DREAM_SHIP_AT.lx, DREAM_SHIP_AT.lz);
+  if (built >= 1) return dreamPoint(DREAM_SLIP_AT.lx, DREAM_SLIP_AT.lz);
+  return building ? dreamPoint(DREAM_PROPS_AT.lx, DREAM_PROPS_AT.lz) : null;
+}
 
 /** Стапель (по оси до воды) и стройплощадка рядом — декор сюда не лезет. */
 export const DREAM_RESERVES: Reserve[] = [

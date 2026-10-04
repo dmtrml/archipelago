@@ -12,7 +12,7 @@ import type { DreamProgress } from '../contract';
 import { PAL } from '../palette';
 import { box, cyl, shade } from '../materials';
 import { BEACH_Y, clamp01, easeOutBack, lerp } from '../layout';
-import { DREAM_PLACE, DREAM_SHIP_AT } from '../slots';
+import { DREAM_PLACE, DREAM_PROPS_AT, DREAM_SHIP_AT, DREAM_SLIP_AT } from '../slots';
 import { useBus } from '../bus';
 import { Baked } from '../models/Baked';
 import { M, Smoke, Z, type V3 } from '../models/parts';
@@ -35,7 +35,7 @@ const HULL_N = 0.77;               // высота начала координа
 const KEELWAY_TOP = -0.07;
 const PIVOT_X = 5;                 // вокруг этой точки «дышит» наведение
 const HULL_AT: V3 = [HULL_D * COS + HULL_N * SIN, RAMP_Y0 - HULL_D * SIN + HULL_N * COS, 0];
-const PROPS_AT: V3 = [1.5, 0, 2.9];
+const PROPS_AT: V3 = [DREAM_PROPS_AT.lx, 0, DREAM_PROPS_AT.lz];
 
 /** Точка из системы склона (d вдоль рельсов, n от верха рельсов, z) в систему стапеля. */
 const slopePoint = (d: number, n: number): [number, number] => [d * COS + n * SIN, RAMP_Y0 - d * SIN + n * COS];
@@ -279,7 +279,7 @@ export function Shipyard({ dream, clickRef }: Props) {
       <group ref={hov} position={[PIVOT_X, 0, 0]}>
         <group position={[-PIVOT_X, 0, 0]}>
           <group position={[0, BEACH_Y, 0]}>
-            <Pop show={slip} origin={[4.2, 0, 0]} ripple={{ pos: [3.6, 0.15, 0], size: 1.7 }}>
+            <Pop show={slip} origin={[DREAM_SLIP_AT.lx, 0, DREAM_SLIP_AT.lz]} ripple={{ pos: [3.6, 0.15, 0], size: 1.7 }}>
               <Slipway />
             </Pop>
             <Pop show={shores} origin={HULL_AT} delay={0.1}>
