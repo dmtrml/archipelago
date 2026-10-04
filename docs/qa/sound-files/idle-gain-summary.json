@@ -1,0 +1,42 @@
+{
+  "sourceChanged": false,
+  "result": "Scheduled gain is correct; an inactive bus AudioParam.value retains the last computed value until a source renders",
+  "muted": [
+    {
+      "waitMs": 0,
+      "settingsSfx": 0.23,
+      "busGetterSfx": 0.800000011920929
+    },
+    {
+      "waitMs": 50,
+      "settingsSfx": 0.23,
+      "busGetterSfx": 0.800000011920929
+    },
+    {
+      "waitMs": 200,
+      "settingsSfx": 0.23,
+      "busGetterSfx": 0.800000011920929
+    },
+    {
+      "waitMs": 1000,
+      "settingsSfx": 0.23,
+      "busGetterSfx": 0.800000011920929
+    }
+  ],
+  "unmutedIdleGetterSfx": 0.800000011920929,
+  "unmutedWithWeekNextGetterSfx": 0.23000000417232513,
+  "unmutedWithWeekNextBuses": {
+    "music": 0.23000000417232513,
+    "sfx": 0.23000000417232513,
+    "ambience": 0.23000000417232513
+  },
+  "offline": {
+    "getterBeforeRender": 1,
+    "getterAfterRender": 0.23000000417232513,
+    "outputMin": 0.23000000417232513,
+    "outputMax": 0.23000000417232513,
+    "rms": 0.2300000041723247,
+    "expectedGain": 0.23
+  },
+  "runtimeErrors": []
+}

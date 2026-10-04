@@ -5,9 +5,10 @@ import { audio } from './engine';
 import { useUiSound } from './useUiSound';
 
 const GROUPS = [...new Set(CUE_IDS.map((cue) => CUES[cue].group))];
+const FILE_CUES = CUE_IDS.filter((cue) => CUES[cue].files?.length).length;
 const SCENES = [
-  { id: 'island', label: 'Остров', description: 'Тихая маримба до свободы' },
-  { id: 'free', label: 'Свобода', description: 'Светлее и выше регистр' },
+  { id: 'island', label: 'Остров', description: 'Уютная островная акустика' },
+  { id: 'free', label: 'Свобода', description: 'Светлая акустическая тема' },
   { id: 'epilogue', label: 'Эпилог', description: 'Короткая тема → свобода' },
 ] as const;
 
@@ -20,9 +21,9 @@ export default function SoundShowcase() {
   const [lastCue, setLastCue] = useState<CueId | null>(null);
   useEffect(() => () => audio.stop(), []);
 
-  const preview = (cue: CueId) => {
+  const preview = (cue: CueId, variant?: number) => {
     audio.unlock();
-    audio.play(cue);
+    void audio.audition(cue, { variant });
     setLastCue(cue);
   };
   const stop = () => {
@@ -38,7 +39,7 @@ export default function SoundShowcase() {
           <div>
             <p className="sound-eyebrow">Архипелаг · мастерская</p>
             <h1>Звуки острова</h1>
-            <p className="sound-intro">Послушайте звуки по отдельности или вместе. Пока все они синтезированы; здесь можно выбрать настроение будущих записей.</p>
+            <p className="sound-intro">Послушайте звуки по отдельности или вместе. Пометка «файл» означает запись; если она недоступна, прозвучит запасной синтез.</p>
           </div>
           <a className="btn ghost sm" href="/" data-ui-sound="none">← К игре</a>
         </header>
@@ -86,7 +87,7 @@ export default function SoundShowcase() {
         </div>
 
         <div className="sound-catalog-heading">
-          <div><h2>Каталог</h2><p>{CUE_IDS.length} звука · все — синтез</p></div>
+          <div><h2>Каталог</h2><p>{CUE_IDS.length} звука · {FILE_CUES} из файлов · {CUE_IDS.length - FILE_CUES} — синтез</p></div>
           <button
             type="button" className="btn primary sm" data-ui-sound="none"
             onClick={() => {
@@ -96,7 +97,7 @@ export default function SoundShowcase() {
             }}
           >▶ Каскад монет ×8</button>
         </div>
-        <p className="sound-preview-status" role="status">{lastCue ? `Последний образец: ${CUES[lastCue].label} · ${lastCue}` : 'Нажмите ▶, чтобы послушать образец. Музыка и природа в каталоге звучат отдельным фрагментом.'}</p>
+        <p className="sound-preview-status" role="status">{lastCue ? `Последний образец: ${CUES[lastCue].label} · ${lastCue}` : 'Нажмите ▶, чтобы послушать образец. Музыкальные записи звучат целиком; петли природы — фрагментом.'}</p>
         <div className="sound-catalog">
           {GROUPS.map((group) => (
             <section className="panel sound-group" key={group} aria-label={group}>
@@ -105,8 +106,17 @@ export default function SoundShowcase() {
                 {CUE_IDS.filter((cue) => CUES[cue].group === group).map((cue) => (
                   <li className="sound-cue" key={cue}>
                     <button type="button" className="sound-play" aria-label={`Послушать: ${CUES[cue].label}`} data-ui-sound="none" onClick={() => preview(cue)}>▶</button>
-                    <div className="sound-cue-info"><b>{CUES[cue].label}</b><code>{cue}</code></div>
-                    <span className="sound-source">синтез</span>
+                    <div className="sound-cue-info">
+                      <b>{CUES[cue].label}</b><code>{cue}</code>
+                      {(CUES[cue].files?.length ?? 0) > 1 && (
+                        <div className="sound-variants" aria-label="Варианты записи">
+                          {CUES[cue].files!.map((_, variant) => (
+                            <button type="button" key={variant} className="sound-variant" aria-label={`Послушать: ${CUES[cue].label}, вариант ${variant + 1}`} data-ui-sound="none" onClick={() => preview(cue, variant)}>{variant + 1}</button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <span className="sound-source">{CUES[cue].files?.length ? 'файл' : 'синтез'}</span>
                   </li>
                 ))}
               </ul>

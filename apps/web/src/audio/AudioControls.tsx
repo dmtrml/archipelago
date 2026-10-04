@@ -140,6 +140,7 @@ export function AudioControls() {
             <button type="button" className="icon-btn" aria-label="Закрыть настройки звука" onClick={() => close(true)}>×</button>
           </div>
           <AudioSliders />
+          <a className="audio-credits" href="/audio/CREDITS.md" target="_blank" rel="noreferrer">Авторы и лицензии звуков ↗</a>
         </div>,
         document.body,
       )}

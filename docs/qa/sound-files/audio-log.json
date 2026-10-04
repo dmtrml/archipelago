@@ -1,0 +1,1845 @@
+{
+  "newGame": [
+    {
+      "t": 1170.7000000178814,
+      "cue": "ui.click",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 1186.300000011921,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "synth"
+    },
+    {
+      "t": 1188.2000000178814,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "synth"
+    },
+    {
+      "t": 1330.6000000238419,
+      "cue": "music.island",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 1351.5,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 1359.4000000059605,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    }
+  ],
+  "buyAsset": [
+    {
+      "t": 663.0999999940395,
+      "cue": "music.island",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 669,
+      "cue": "coins.pay",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 725.1999999880791,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 729.1999999880791,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 743.5999999940395,
+      "cue": "build.pop",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "buyStatus": [
+    {
+      "t": 658.5,
+      "cue": "coins.pay",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 692.5999999940395,
+      "cue": "music.island",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 710.5,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 713.4000000059605,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 737.9000000059605,
+      "cue": "build.pop",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 829.0999999940395,
+      "cue": "status.joy",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "buyScam": [
+    {
+      "t": 623.6999999880791,
+      "cue": "music.island",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 629.5,
+      "cue": "coins.pay",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 688.2999999821186,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 689.6999999880791,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 723.0999999940395,
+      "cue": "build.pop",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "buyNoCash": [
+    {
+      "t": 660.5,
+      "cue": "music.island",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 664.7999999821186,
+      "cue": "ui.error",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "sellAsset": [
+    {
+      "t": 615.3000000119209,
+      "cue": "music.island",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 621.2000000178814,
+      "cue": "coins.get",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 665.6000000238419,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 668.6000000238419,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 703.2000000178814,
+      "cue": "build.remove",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "upgradeAsset": [
+    {
+      "t": 628.5999999940395,
+      "cue": "music.island",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 630.2999999821186,
+      "cue": "coins.pay",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 675.5,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 680.7999999821186,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 838.1999999880791,
+      "cue": "upgrade",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "repairAsset": [
+    {
+      "t": 626.5999999940395,
+      "cue": "coins.pay",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 667.4000000059605,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 672.8000000119209,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 715.9000000059605,
+      "cue": "repair",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "takeLoan": [
+    {
+      "t": 674.4000000059605,
+      "cue": "music.island",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 679.6999999880791,
+      "cue": "coins.get",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 718.9000000059605,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 720.8000000119209,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 751.5999999940395,
+      "cue": "loan.take",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "repayLoan": [
+    {
+      "t": 672.8000000119209,
+      "cue": "loan.repay",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 712.2000000178814,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 713.7000000178814,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    }
+  ],
+  "study": [
+    {
+      "t": 615.1999999880791,
+      "cue": "music.island",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 621.0999999940395,
+      "cue": "coins.pay",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 662.5999999940395,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 665.5999999940395,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 697.5,
+      "cue": "study",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "rest": [
+    {
+      "t": 623.4000000059605,
+      "cue": "music.island",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 629.5,
+      "cue": "coins.pay",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 667.0999999940395,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 672.4000000059605,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 708.9000000059605,
+      "cue": "rest",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "setExtraShift": [
+    {
+      "t": 657.9000000059605,
+      "cue": "music.island",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 665,
+      "cue": "shift.on",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 713.5,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 717.5,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    }
+  ],
+  "quitJob": [
+    {
+      "t": 635.8000000119209,
+      "cue": "job.quit",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 676.5,
+      "cue": "music.free",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 698.9000000059605,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 700.6000000238419,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    }
+  ],
+  "returnToWork": [
+    {
+      "t": 649,
+      "cue": "job.return",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "buildDream": [
+    {
+      "t": 701.2999999821186,
+      "cue": "music.free",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 705.0999999940395,
+      "cue": "coins.pay",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 768.1999999880791,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 771.9000000059605,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 776.6999999880791,
+      "cue": "dream.start",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "coinWeek": [
+    {
+      "t": 662,
+      "cue": "music.island",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 696.5,
+      "cue": "ui.click",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 698.6999999880791,
+      "cue": "week.next",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 731,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 731.4000000059605,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 0
+    },
+    {
+      "t": 752.4000000059605,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 884.4000000059605,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 1
+    },
+    {
+      "t": 1040.4000000059605,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 2
+    },
+    {
+      "t": 1213.300000011921,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 3
+    },
+    {
+      "t": 1389.5999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 4
+    },
+    {
+      "t": 1560.300000011921,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 5
+    },
+    {
+      "t": 1726.9000000059605,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 6
+    },
+    {
+      "t": 1891.699999988079,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    },
+    {
+      "t": 2059.9000000059605,
+      "cue": "coin.minus",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "storm": [
+    {
+      "t": 642.6999999880791,
+      "cue": "music.island",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 684.3000000119209,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 688.8000000119209,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 691.8000000119209,
+      "cue": "ui.click",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 692.5,
+      "cue": "week.next",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 693,
+      "cue": "amb.rain",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 722.6999999880791,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 0
+    },
+    {
+      "t": 870.0999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 1
+    },
+    {
+      "t": 1802.199999988079,
+      "cue": "ui.open",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 1802.5999999940395,
+      "cue": "storm",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 1802.800000011921,
+      "cue": "event.bad",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 5104.9000000059605,
+      "cue": "amb.thunder",
+      "bus": "ambience",
+      "source": "file"
+    }
+  ],
+  "freedom": [
+    {
+      "t": 650.5999999940395,
+      "cue": "music.island",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 703.2000000178814,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 705.5999999940395,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 711,
+      "cue": "ui.click",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 711.9000000059605,
+      "cue": "week.next",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 747.7000000178814,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 0
+    },
+    {
+      "t": 888.0999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 1
+    },
+    {
+      "t": 1053.800000011921,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 2
+    },
+    {
+      "t": 1232.5,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 3
+    },
+    {
+      "t": 1397.9000000059605,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 4
+    },
+    {
+      "t": 1570.9000000059605,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 5
+    },
+    {
+      "t": 1741.300000011921,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 6
+    },
+    {
+      "t": 1819.4000000059605,
+      "cue": "ui.open",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 1820.2000000178814,
+      "cue": "freedom",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 1820.7000000178814,
+      "cue": "event.good",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 1853.5,
+      "cue": "music.free",
+      "bus": "music",
+      "source": "file",
+      "variant": 1
+    },
+    {
+      "t": 1912.4000000059605,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    },
+    {
+      "t": 2077.7000000178814,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    },
+    {
+      "t": 2248.4000000059605,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    },
+    {
+      "t": 2412.7000000178814,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    }
+  ],
+  "freedomLevel": [
+    {
+      "t": 727.6999999880791,
+      "cue": "music.free",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 768.5,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 773.7999999821186,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 776.7999999821186,
+      "cue": "ui.click",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 777.5999999940395,
+      "cue": "week.next",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 819.2999999821186,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 0
+    },
+    {
+      "t": 950.4000000059605,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 1
+    },
+    {
+      "t": 1121.5999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 2
+    },
+    {
+      "t": 1293,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 3
+    },
+    {
+      "t": 1459.0999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 4
+    },
+    {
+      "t": 1637,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 5
+    },
+    {
+      "t": 1803.4000000059605,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 6
+    },
+    {
+      "t": 1887.7999999821186,
+      "cue": "ui.open",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 1888.2999999821186,
+      "cue": "freedom.level",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 1888.699999988079,
+      "cue": "event.bad",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 1975.7999999821186,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    },
+    {
+      "t": 2140.0999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    },
+    {
+      "t": 2309,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    },
+    {
+      "t": 2490.199999988079,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    },
+    {
+      "t": 2654.2999999821186,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    }
+  ],
+  "dreamStage": [
+    {
+      "t": 656,
+      "cue": "music.free",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 699.4000000059605,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 700.9000000059605,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 703.4000000059605,
+      "cue": "ui.click",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 704.4000000059605,
+      "cue": "week.next",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 770.5999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 0
+    },
+    {
+      "t": 884.5,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 1
+    },
+    {
+      "t": 1048.800000011921,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 2
+    },
+    {
+      "t": 1216,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 3
+    },
+    {
+      "t": 1386.300000011921,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 4
+    },
+    {
+      "t": 1559.5,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 5
+    },
+    {
+      "t": 1733.4000000059605,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 6
+    },
+    {
+      "t": 1810.0999999940395,
+      "cue": "ui.open",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 1810.699999988079,
+      "cue": "dream.stage",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 1811.4000000059605,
+      "cue": "threat",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 1900.5999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    },
+    {
+      "t": 2066.9000000059605,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    },
+    {
+      "t": 2240,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    }
+  ],
+  "dreamDone": [
+    {
+      "t": 748.2999999821186,
+      "cue": "music.free",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 787.5999999940395,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 789.0999999940395,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 800.5,
+      "cue": "ui.click",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 801.6999999880791,
+      "cue": "week.next",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 802.3999999761581,
+      "cue": "amb.rain",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 857.6999999880791,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 0
+    },
+    {
+      "t": 858,
+      "cue": "dream.launch",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 977.2999999821186,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 1
+    },
+    {
+      "t": 1143.2999999821186,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 2
+    },
+    {
+      "t": 1316.199999988079,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 3
+    },
+    {
+      "t": 1483.7999999821186,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 4
+    },
+    {
+      "t": 1668,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 5
+    },
+    {
+      "t": 1832.5999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 6
+    },
+    {
+      "t": 1917.2999999821186,
+      "cue": "ui.open",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 1940.8999999761581,
+      "cue": "music.epilogue",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 1941,
+      "cue": "epilogue",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 2000.3999999761581,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    },
+    {
+      "t": 2168.5,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    },
+    {
+      "t": 2332.7999999821186,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    },
+    {
+      "t": 2503.699999988079,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    },
+    {
+      "t": 2672.899999976158,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    },
+    {
+      "t": 5539.5999999940395,
+      "cue": "amb.thunder",
+      "bus": "ambience",
+      "source": "file"
+    }
+  ],
+  "neighborFree": [
+    {
+      "t": 681.3999999761581,
+      "cue": "music.island",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 722.2999999821186,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 723.8999999761581,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 729.1999999880791,
+      "cue": "ui.click",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 730.0999999940395,
+      "cue": "week.next",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 764.5999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 0
+    },
+    {
+      "t": 909,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 1
+    },
+    {
+      "t": 1078.3999999761581,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 2
+    },
+    {
+      "t": 1244.3999999761581,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 3
+    },
+    {
+      "t": 1426.0999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 4
+    },
+    {
+      "t": 1592.0999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 5
+    },
+    {
+      "t": 1751.699999988079,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 6
+    },
+    {
+      "t": 1842.5,
+      "cue": "neighbor.free",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 1923.5999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    },
+    {
+      "t": 2092,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    },
+    {
+      "t": 2261.899999976158,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    }
+  ],
+  "scamCollapse": [
+    {
+      "t": 649.3999999761581,
+      "cue": "music.island",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 692.6999999880791,
+      "cue": "ui.click",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 693.6999999880791,
+      "cue": "week.next",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 735.2999999821186,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 735.5999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 0
+    },
+    {
+      "t": 755.0999999940395,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    },
+    {
+      "t": 866.5,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 1
+    },
+    {
+      "t": 1042.2999999821186,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 2
+    },
+    {
+      "t": 1206.5,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 3
+    },
+    {
+      "t": 1380.8999999761581,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 4
+    },
+    {
+      "t": 1550,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 5
+    },
+    {
+      "t": 1721.5,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 6
+    },
+    {
+      "t": 1801,
+      "cue": "ui.open",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 1801.199999988079,
+      "cue": "scam.collapse",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 1801.2999999821186,
+      "cue": "event.bad",
+      "bus": "sfx",
+      "source": "file"
+    },
+    {
+      "t": 1888.0999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    },
+    {
+      "t": 2054.7999999821186,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    },
+    {
+      "t": 2238.699999988079,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    }
+  ],
+  "catalog:ui.click": [
+    {
+      "t": 497.89999997615814,
+      "cue": "ui.click",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:ui.toggle": [
+    {
+      "t": 628,
+      "cue": "ui.toggle",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:ui.error": [
+    {
+      "t": 783.5,
+      "cue": "ui.error",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:ui.open": [
+    {
+      "t": 900.0999999940395,
+      "cue": "ui.open",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:coins.pay": [
+    {
+      "t": 1021,
+      "cue": "coins.pay",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:coins.get": [
+    {
+      "t": 1126.3999999761581,
+      "cue": "coins.get",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:build.pop": [
+    {
+      "t": 1245.199999988079,
+      "cue": "build.pop",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:status.joy": [
+    {
+      "t": 1363.7999999821186,
+      "cue": "status.joy",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:build.remove": [
+    {
+      "t": 1498.5999999940395,
+      "cue": "build.remove",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:upgrade": [
+    {
+      "t": 1616,
+      "cue": "upgrade",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:repair": [
+    {
+      "t": 1715.0999999940395,
+      "cue": "repair",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:loan.take": [
+    {
+      "t": 1831.0999999940395,
+      "cue": "loan.take",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:loan.repay": [
+    {
+      "t": 1934.5,
+      "cue": "loan.repay",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:study": [
+    {
+      "t": 2037.0999999940395,
+      "cue": "study",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:rest": [
+    {
+      "t": 2134,
+      "cue": "rest",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:shift.on": [
+    {
+      "t": 2243.199999988079,
+      "cue": "shift.on",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:job.quit": [
+    {
+      "t": 2359.5999999940395,
+      "cue": "job.quit",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:job.return": [
+    {
+      "t": 2447.7999999821186,
+      "cue": "job.return",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:dream.start": [
+    {
+      "t": 2548.399999976158,
+      "cue": "dream.start",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:week.next": [
+    {
+      "t": 2630.5999999940395,
+      "cue": "week.next",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:coin.tick": [
+    {
+      "t": 2730.699999988079,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:coin.minus": [
+    {
+      "t": 2807.0999999940395,
+      "cue": "coin.minus",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:event.good": [
+    {
+      "t": 2916.2999999821186,
+      "cue": "event.good",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:event.bad": [
+    {
+      "t": 3017.899999976158,
+      "cue": "event.bad",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:storm": [
+    {
+      "t": 3135.2999999821186,
+      "cue": "storm",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:scam.collapse": [
+    {
+      "t": 3232.699999988079,
+      "cue": "scam.collapse",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:loan.emergency": [
+    {
+      "t": 3349.2999999821186,
+      "cue": "loan.emergency",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:threat": [
+    {
+      "t": 3453,
+      "cue": "threat",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:neighbor.free": [
+    {
+      "t": 3549.5999999940395,
+      "cue": "neighbor.free",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:freedom": [
+    {
+      "t": 3654.899999976158,
+      "cue": "freedom",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:freedom.level": [
+    {
+      "t": 3760.7999999821186,
+      "cue": "freedom.level",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:dream.stage": [
+    {
+      "t": 3839.7999999821186,
+      "cue": "dream.stage",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:dream.launch": [
+    {
+      "t": 3924.199999988079,
+      "cue": "dream.launch",
+      "bus": "sfx",
+      "source": "file"
+    }
+  ],
+  "catalog:epilogue": [
+    {
+      "t": 4027.899999976158,
+      "cue": "music.epilogue",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    },
+    {
+      "t": 4028,
+      "cue": "epilogue",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    }
+  ],
+  "catalog:amb.sea": [
+    {
+      "t": 4137.899999976158,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "file"
+    }
+  ],
+  "catalog:amb.wind": [
+    {
+      "t": 4244.199999988079,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "file"
+    }
+  ],
+  "catalog:amb.gulls": [
+    {
+      "t": 4370.699999988079,
+      "cue": "amb.gulls",
+      "bus": "ambience",
+      "source": "file"
+    }
+  ],
+  "catalog:amb.rain": [
+    {
+      "t": 4469.0999999940395,
+      "cue": "amb.rain",
+      "bus": "ambience",
+      "source": "file"
+    }
+  ],
+  "catalog:amb.thunder": [
+    {
+      "t": 4589.199999988079,
+      "cue": "amb.thunder",
+      "bus": "ambience",
+      "source": "file"
+    }
+  ],
+  "catalog:music.island": [
+    {
+      "t": 4694.0999999940395,
+      "cue": "music.island",
+      "bus": "music",
+      "source": "file",
+      "variant": 1
+    }
+  ],
+  "catalog:music.free": [
+    {
+      "t": 4825.5,
+      "cue": "music.free",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    }
+  ],
+  "catalog:music.epilogue": [
+    {
+      "t": 4943.0999999940395,
+      "cue": "music.epilogue",
+      "bus": "music",
+      "source": "file",
+      "variant": 0
+    }
+  ],
+  "showcase-all-42-cues-and-cascade": [
+    {
+      "t": 5046.5,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "delayMs": 0,
+      "pitchStep": 0
+    },
+    {
+      "t": 5217.799999982119,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 1
+    },
+    {
+      "t": 5390.0999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 2
+    },
+    {
+      "t": 5557.699999988079,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 3
+    },
+    {
+      "t": 5730,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 4
+    },
+    {
+      "t": 5900.5999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 5
+    },
+    {
+      "t": 6067.899999976158,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 6
+    },
+    {
+      "t": 6237.5,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "file",
+      "pitchStep": 7
+    }
+  ],
+  "real-files-all-cues-streamed-music-and-second-variant": [
+    {
+      "t": 6342.5,
+      "cue": "music.island",
+      "bus": "music",
+      "source": "file",
+      "variant": 1
+    }
+  ],
+  "corrupt-file-fallback": [
+    {
+      "t": 570.4000000059605,
+      "cue": "ui.toggle",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 657,
+      "cue": "music.island",
+      "bus": "music",
+      "source": "synth",
+      "variant": 0
+    }
+  ]
+}

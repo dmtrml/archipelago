@@ -1,0 +1,76 @@
+{
+  "runner": "Actual engine modules through tsx, controlled AudioContext, decoded files, HTMLAudioElement and timers",
+  "checks": [
+    {
+      "name": "Before first gesture: no context, media element or file request",
+      "passed": true
+    },
+    {
+      "name": "First catalogue effect waits for decode and uses file; fetch shared with preload",
+      "passed": true,
+      "fetchCount": 1
+    },
+    {
+      "name": "Explicit second catalogue effect variant uses the selected decoded URL",
+      "passed": true
+    },
+    {
+      "name": "Stop invalidates a pending catalogue decode",
+      "passed": true
+    },
+    {
+      "name": "Decode failure auditions synth fallback",
+      "passed": true
+    },
+    {
+      "name": "Runtime decoded-source failure falls back without a false file log",
+      "passed": true
+    },
+    {
+      "name": "45-second ambience loop catalogue sample is six seconds",
+      "passed": true,
+      "fileDurationSeconds": 45,
+      "sampleSeconds": 6
+    },
+    {
+      "name": "Selected music catalogue variant streams in full and cleans on natural end",
+      "passed": true,
+      "variant": 1,
+      "prematureStopAtSixSeconds": false,
+      "musicDecodeCalls": 0
+    },
+    {
+      "name": "Virtual epilogue reports actual streamed theme and returns to free",
+      "passed": true
+    },
+    {
+      "name": "Rejected epilogue reports exactly one synth fallback, including virtual event",
+      "passed": true
+    },
+    {
+      "name": "Failure in outgoing crossfade track cannot replace current scene",
+      "passed": true
+    },
+    {
+      "name": "Visibility pauses and resumes stream without duplicate source logs",
+      "passed": true
+    },
+    {
+      "name": "Late rejection from a pre-hide play attempt cannot replace the resumed file stream",
+      "passed": true
+    },
+    {
+      "name": "A visibility hide/show during pending context resume recovers both context and stream",
+      "passed": true
+    },
+    {
+      "name": "Media source construction failure releases URL and synthesizes",
+      "passed": true
+    },
+    {
+      "name": "Nature crossfades from initial fallback to decoded file loop",
+      "passed": true
+    }
+  ],
+  "passed": true
+}
