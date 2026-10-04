@@ -19,6 +19,7 @@ export function makeRng(seed: number): Rng {
 
 export const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 export const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x);
+export const easeInOut = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 export const easeOutBack = (x: number) => {
   const c1 = 1.70158, c3 = c1 + 1;
   return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);

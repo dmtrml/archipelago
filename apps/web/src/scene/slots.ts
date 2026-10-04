@@ -1,6 +1,7 @@
 // Места на острове для каждого слота. Вместимость обязана совпадать с SLOT_CAPACITY
 // из packages/engine/src/slots.ts: pier 4, plot 6, beach 3, plaza 2, sea 2 (finance — один банк).
 import type { SlotType } from '@arch/engine';
+import type { DreamProgress } from './contract';
 import {
   BEACH_Y, FACE_CAMERA, GRASS_Y, PIER_A, PIER_START, PLAZA_ANNEX_POS, PLAZA_POS,
   fromScreen, onBeach, type Reserve,
@@ -58,9 +59,55 @@ export function slotPlace(slot: SlotType, index: number): SlotPlace | null {
   return SLOTS[slot]?.[index] ?? null;
 }
 
+// ───── Мечта игрока: стапель на пляже справа от камеры по умолчанию ─────
+// Между бунгало (пляж 0.1) и маяком: там песок свободен, а в море нет ни яхты (море 0.42), ни лодок пирса.
+// Ось идёт по нормали к берегу в этой точке, т.е. почти поперёк взгляда камеры: стапель и шхуна видны сбоку.
+const DREAM_START = onBeach(-0.36, 0);
+/** Азимут оси стапеля (от берега к морю), рад. */
+const DREAM_DIR = -0.35;
+export const DREAM_PLACE = {
+  x: DREAM_START.x,
+  z: DREAM_START.z,
+  /** высота песка в начале стапеля */
+  y: BEACH_Y,
+  /** rotation.y группы: локальная +x смотрит в море, +z — к камере вдоль берега */
+  rotY: -DREAM_DIR,
+  dir: DREAM_DIR,
+};
+/** Точка в системе стапеля (lx — вдоль оси в сторону моря, lz — поперёк) в мировых x/z. */
+export const dreamPoint = (lx: number, lz: number): { x: number; z: number } => {
+  const c = Math.cos(DREAM_DIR), s = Math.sin(DREAM_DIR);
+  return { x: DREAM_PLACE.x + lx * c - lz * s, z: DREAM_PLACE.z + lx * s + lz * c };
+};
+/**
+ * Где стоит достроенная шхуна (система стапеля): на воде у морского конца спуска, чуть сбоку к камере —
+ * чтобы не лезть на сваи стапеля и вписаться в кадр. yaw — доворот носа относительно оси спуска.
+ */
+export const DREAM_SHIP_AT = { lx: 8.2, lz: 3.1, yaw: 0.12 };
+/** Центр стапеля и стройплощадки (система стапеля): здесь их рисует Shipyard, сюда же поворачивается камера. */
+export const DREAM_SLIP_AT = { lx: 4.2, lz: 0 };
+export const DREAM_PROPS_AT = { lx: 1.5, lz: 2.9 };
+
+/**
+ * На что смотреть камере, когда мечта меняется: шхуна на воде, стапель с судном или (до первого этапа) стройплощадка.
+ * null — рисовать пока нечего, поворачиваться не к чему.
+ */
+export function dreamFocusPoint({ built, stages, building }: DreamProgress): { x: number; z: number } | null {
+  if (built >= Math.max(1, stages)) return dreamPoint(DREAM_SHIP_AT.lx, DREAM_SHIP_AT.lz);
+  if (built >= 1) return dreamPoint(DREAM_SLIP_AT.lx, DREAM_SLIP_AT.lz);
+  return building ? dreamPoint(DREAM_PROPS_AT.lx, DREAM_PROPS_AT.lz) : null;
+}
+
+/** Стапель (по оси до воды) и стройплощадка рядом — декор сюда не лезет. */
+export const DREAM_RESERVES: Reserve[] = [
+  ...[0.4, 2.3, 4.2].map((lx) => ({ ...dreamPoint(lx, 0), r: 2.2 })),
+  { ...dreamPoint(1.5, 2.9), r: 1.9 },
+];
+
 /** Круги, свободные от декора (деревья, пальмы, камни, трава). */
 export const SLOT_RESERVES: Reserve[] = [
   ...SLOTS.plot.map((p) => ({ x: p.x, z: p.z, r: 2.1, core: 1.8 })),
   ...SLOTS.beach.map((p) => ({ x: p.x, z: p.z, r: 2.5 })),
   { x: BANK_PLACE.x, z: BANK_PLACE.z, r: 2.3 },
+  ...DREAM_RESERVES,
 ];

@@ -1,14 +1,23 @@
 // Денежные расчёты, общие для редуктора, селекторов и ботов. Только чистые функции.
-import { ASSET_DEFS } from './content';
+import { ASSET_DEFS, DREAMS } from './content';
 import * as R from './rules';
 import { SLOT_CAPACITY } from './slots';
 import type {
-  AssetDef, Loan, MarketState, Offer, OwnedAsset, PlayerState, Sector, SlotType,
+  AssetDef, DreamDef, Loan, MarketState, Offer, OwnedAsset, PlayerState, Sector, SlotType,
 } from './types';
+
+/** id строки содержания готовой мечты в отчёте недели (и якорь мечты в UI/3D). */
+export const DREAM_UPKEEP_UID = 'dream';
 
 export function getDef(defId: string): AssetDef {
   const def = ASSET_DEFS[defId];
   if (!def) throw new Error(`Unknown deal id: ${defId}`);
+  return def;
+}
+
+export function getDream(dreamId: string): DreamDef {
+  const def = DREAMS[dreamId];
+  if (!def) throw new Error(`Unknown dream id: ${dreamId}`);
   return def;
 }
 
@@ -55,8 +64,14 @@ export function saleValue(asset: OwnedAsset, market: MarketState): number {
   return Math.max(0, Math.round(value));
 }
 
+/** Содержание мечты: платится только когда она готова целиком. */
+export function dreamUpkeep(player: PlayerState): number {
+  const dream = player.dream;
+  return dream && dream.doneWeek !== null ? getDream(dream.id).upkeep : 0;
+}
+
 export function totalUpkeep(player: PlayerState): number {
-  return player.owned.reduce((sum, a) => sum + a.upkeep, 0);
+  return player.owned.reduce((sum, a) => sum + a.upkeep, 0) + dreamUpkeep(player);
 }
 
 export function loanInterest(loan: Loan): number {
@@ -111,6 +126,23 @@ export function isFree(player: PlayerState, market: MarketState): boolean {
   return realPassiveIncome(player, market) >= weeklyExpenses(player).total;
 }
 
+/** Доля настоящей свободы: настоящий пассивный доход / расходы (0, если расходов нет). */
+export function realFreedomRatio(player: PlayerState, market: MarketState): number {
+  const total = weeklyExpenses(player).total;
+  return total > 0 ? realPassiveIncome(player, market) / total : 0;
+}
+
+/** Уровень свободы: сколько порогов FREEDOM_LEVEL_RATIOS достигнуто (0..3). */
+export function freedomLevel(ratio: number): number {
+  return R.FREEDOM_LEVEL_RATIOS.filter((threshold) => ratio >= threshold).length;
+}
+
+/** Дней работы над мечтой в неделю: пока работаешь — мало, без работы — втрое больше. */
+export function dreamWorkPerWeek(player: PlayerState): number {
+  return player.employed ? R.DREAM_WORK_EMPLOYED : R.DREAM_WORK_FREE;
+}
+
+/** Готовая мечта — не имущество на продажу: в assetsValue (и в капитал) она не входит. */
 export function assetsValue(player: PlayerState, market: MarketState): number {
   return player.owned.reduce((sum, a) => sum + saleValue(a, market), 0);
 }
@@ -141,7 +173,9 @@ export function freeSlotIndex(player: PlayerState, slot: SlotType): number | nul
 }
 
 export function happinessJoy(player: PlayerState): number {
-  return player.owned.reduce((sum, a) => sum + getDef(a.defId).joy, 0);
+  const dream = player.dream;
+  const dreamJoy = dream && dream.doneWeek !== null ? getDream(dream.id).joy : 0;
+  return player.owned.reduce((sum, a) => sum + getDef(a.defId).joy, 0) + dreamJoy;
 }
 
 export function clamp(value: number, min: number, max: number): number {

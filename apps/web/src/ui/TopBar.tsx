@@ -27,7 +27,7 @@ export function TopBar() {
         <Emblem />
         <div className="badge-text">
           <div className="title">{me.islandName}</div>
-          <div className="sub">Неделя {world.week}{me.freedomWeek ? ` · свобода с ${me.freedomWeek}-й недели` : ''}</div>
+          <div className="sub">Неделя {world.week}{me.freedomWeek ? ` · свобода с ${me.freedomWeek}-й недели` : ''}{me.employed ? '' : ' · без работы'}</div>
         </div>
         <ConfirmButton className="icon-btn" confirmText="Начать заново?" onConfirm={resetGame}>
           <span aria-label="Новая игра">↺</span>

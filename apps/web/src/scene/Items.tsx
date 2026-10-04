@@ -83,7 +83,7 @@ function useLifecycle(visual: VisualItem[]) {
 }
 
 // ───── Круг на воде/земле ─────
-function Ripple({ y, size, delay = 0, dur = 1.3 }: { y: number; size: number; delay?: number; dur?: number }) {
+export function Ripple({ y, size, delay = 0, dur = 1.3 }: { y: number; size: number; delay?: number; dur?: number }) {
   const ref = useRef<Mesh>(null!);
   const material = useMemo(() => new MeshBasicMaterial({ color: PAL.white, transparent: true, opacity: 0, depthWrite: false }), []);
   useEffect(() => () => material.dispose(), [material]);

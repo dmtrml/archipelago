@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { IslandScene } from './scene/IslandScene';
-import { placedItems, useGame } from './store';
+import { dreamProgress, placedItems, useGame } from './store';
 import { TopBar } from './ui/TopBar';
 import { DesktopLayout, MobileLayout, useMediaQuery } from './ui/Panels';
 import { ToastView, WeekModal, WelcomeModal } from './ui/Modals';
@@ -32,12 +32,20 @@ export default function App() {
   const focusItem = useGame((s) => s.focusItem);
   const isMobile = useMediaQuery('(max-width: 1023px)');
   const items = useMemo(() => (world ? placedItems(world) : []), [world]);
+  // Мечта — по примитивам, чтобы сцена не получала новый объект после каждого действия
+  const dp = world ? dreamProgress(world) : null;
+  const dreamBuilt = dp?.built, dreamStages = dp?.stages, dreamBuilding = dp?.building;
+  const dream = useMemo(
+    () => (dreamBuilt === undefined || dreamStages === undefined ? null : { built: dreamBuilt, stages: dreamStages, building: !!dreamBuilding }),
+    [dreamBuilt, dreamStages, dreamBuilding],
+  );
   const sideInsets = useSideInsets(!isMobile && !!world);
 
   return (
     <>
       <IslandScene
         items={items}
+        dream={dream}
         floats={floats}
         weather={weather}
         bottomInset={isMobile ? (sheetOpen ? 0.58 : 0.26) : 0}

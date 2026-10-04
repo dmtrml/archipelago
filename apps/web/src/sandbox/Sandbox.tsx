@@ -2,7 +2,7 @@
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import type { ModelId, SlotType } from '@arch/engine';
 import { IslandScene } from '../scene/IslandScene';
-import type { FloatLabel, PlacedItem, Weather } from '../scene/contract';
+import type { DreamProgress, FloatLabel, PlacedItem, Weather } from '../scene/contract';
 
 // Вместимость — как SLOT_CAPACITY в packages/engine/src/slots.ts
 const CAP: Record<SlotType, number> = { pier: 4, plot: 6, beach: 3, plaza: 2, sea: 2, finance: 99 };
@@ -54,6 +54,9 @@ export default function Sandbox() {
   const [clicked, setClicked] = useState<string | null>(null);
   const [open, setOpen] = useState(true);
   const [sceneKey, setSceneKey] = useState(0);
+  // «мечта»: null — на острове её нет; built 0…3 — этапы шхуны на стапеле
+  const [dream, setDream] = useState<DreamProgress | null>(null);
+  const setBuilt = (built: number) => setDream((d) => ({ stages: 3, building: false, ...d, built }));
 
   const add = (model: ModelId) => setItems((list) => {
     const slot = MODEL_SLOT[model];
@@ -105,6 +108,7 @@ export default function Sandbox() {
         items={items}
         floats={floats}
         weather={weather}
+        dream={dream}
         bottomInset={inset}
         onItemClick={(uid) => { setClicked(uid); float(uid, 'pos'); }}
       />
@@ -127,6 +131,19 @@ export default function Sandbox() {
               <button style={btn} onClick={() => damageAll(true)}>Сломать всё</button>
               <button style={btn} onClick={() => damageAll(false)}>Починить всё</button>
               <button style={btn} onClick={() => setSceneKey((k) => k + 1)}>Перезапуск сцены</button>
+            </Row>
+            <Row title="Мечта (шхуна на стапеле)">
+              <button style={dream === null ? gold : btn} onClick={() => setDream(null)}>нет</button>
+              {[0, 1, 2, 3].map((n) => (
+                <button key={n} style={dream?.built === n ? gold : btn} onClick={() => setBuilt(n)}>built {n}</button>
+              ))}
+              <button
+                style={dream?.building ? gold : btn}
+                onClick={() => setDream((d) => ({ stages: 3, built: 0, ...d, building: !d?.building }))}
+              >
+                стройка
+              </button>
+              <button style={btn} onClick={() => float('dream', 'neg')}>Сумма: мечта</button>
             </Row>
             <Row title="Погода и подписи">
               <button style={weather === 'storm' ? gold : btn} onClick={() => setWeather(weather === 'storm' ? 'clear' : 'storm')}>

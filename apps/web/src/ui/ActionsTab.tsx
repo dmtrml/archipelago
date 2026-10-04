@@ -1,10 +1,11 @@
 import {
   financeView, getPlayer, insurancePremium, loanLimit, studyCost,
-  EMERGENCY_RATE, LOAN_RATE, REST_COST, REST_JOY,
+  EMERGENCY_RATE, LOAN_RATE, REST_COST, REST_JOY, THREAT_WEEKS,
 } from '@arch/engine';
 import { HUMAN, useGame } from '../store';
-import { fmt } from '../format';
-import { Pips, Section } from './common';
+import { fmt, weeks } from '../format';
+import { ConfirmButton, Pips, Section } from './common';
+import { returnSalary, speedUpText } from './text';
 
 const KNOWLEDGE_UNLOCKS = [
   'Будете замечать аферы и сможете открыть пляжное кафе',
@@ -23,30 +24,83 @@ export function ActionsTab() {
   const premium = insurancePremium(me);
   const cost = studyCost(me);
   const shiftBonus = Math.round(me.salary * 0.5);
+  const free = me.freedomWeek !== null;
+  const newSalary = returnSalary(me.salary);
 
   return (
     <div className="tab-body">
       <Section title="Работа и отдых">
-        {me.happiness < 30 && (
+        {me.employed && me.happiness < 30 && (
           <div className="warning">
             Счастье на исходе. Ниже 20 начинается выгорание — зарплата падает вдвое. Пора отдохнуть.
           </div>
         )}
-        <label className={`toggle-row ${me.restedThisWeek ? 'off' : ''}`}>
-          <div>
-            <b>Подработка на этой неделе</b>
-            <span>
-              {me.restedThisWeek ? 'На этой неделе вы отдыхаете' : `+${fmt(shiftBonus)} монет, но −12 счастья`}
-            </span>
+        {me.employed ? (
+          <label className={`toggle-row ${me.restedThisWeek ? 'off' : ''}`}>
+            <div>
+              <b>Подработка на этой неделе</b>
+              <span>
+                {me.restedThisWeek ? 'На этой неделе вы отдыхаете' : `+${fmt(shiftBonus)} монет, но −12 счастья`}
+              </span>
+            </div>
+            <input
+              type="checkbox"
+              className="switch"
+              checked={me.extraShift}
+              disabled={me.restedThisWeek}
+              onChange={(e) => act({ type: 'setExtraShift', playerId: HUMAN, on: e.target.checked })}
+            />
+          </label>
+        ) : (
+          <div className="action-row col job">
+            <div>
+              <b>Вы не работаете</b>
+              <span>
+                Зарплаты и подработки нет, зато будни не отнимают счастье, а мечта строится {speedUpText()}.
+                Если {weeks(THREAT_WEEKS)} подряд пассивный доход будет ниже расходов, придётся вернуться на работу.
+              </span>
+              {me.threatWeeks > 0 && (
+                <span className="neg">
+                  Свобода под угрозой: через {Math.max(0, THREAT_WEEKS - me.threatWeeks)} нед. придётся вернуться на работу.
+                </span>
+              )}
+            </div>
+            <div className="job-foot">
+              <span>Новая зарплата — <b>{fmt(newSalary)}</b> в неделю, ниже прежней ({fmt(me.salary)})</span>
+              <ConfirmButton
+                className="btn ghost sm"
+                confirmText="Точно вернуться?"
+                onConfirm={() => act({ type: 'returnToWork', playerId: HUMAN }, 'Вы снова на работе')}
+              >
+                Вернуться на работу
+              </ConfirmButton>
+            </div>
           </div>
-          <input
-            type="checkbox"
-            className="switch"
-            checked={me.extraShift}
-            disabled={me.restedThisWeek}
-            onChange={(e) => act({ type: 'setExtraShift', playerId: HUMAN, on: e.target.checked })}
-          />
-        </label>
+        )}
+        {me.employed && free && (
+          <div className="action-row col job">
+            <div>
+              <b>Уйти с работы</b>
+              <span>
+                Зарплаты не будет, зато будни больше не отнимают счастье, а мечта строится {speedUpText()}.
+                Если {weeks(THREAT_WEEKS)} подряд пассивный доход будет ниже расходов, придётся вернуться на работу.
+              </span>
+              {fin.freedomRatio < 1 && (
+                <span className="neg">Сейчас пассивный доход ниже расходов — отсчёт начнётся сразу.</span>
+              )}
+            </div>
+            <ConfirmButton
+              className="btn ghost sm"
+              confirmText="Точно уйти?"
+              onConfirm={() => act({ type: 'quitJob', playerId: HUMAN }, 'Вы больше не работаете')}
+            >
+              Уйти с работы
+            </ConfirmButton>
+          </div>
+        )}
+        {me.employed && !free && (
+          <div className="muted-text">Уйти с работы можно будет после финансовой свободы.</div>
+        )}
         <div className="action-row">
           <div>
             <b>Отдохнуть с семьёй</b>

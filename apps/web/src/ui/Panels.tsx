@@ -6,6 +6,7 @@ import { DealsTab } from './DealsTab';
 import { IslandTab } from './IslandTab';
 import { ActionsTab } from './ActionsTab';
 import { NeighborsTab } from './NeighborsTab';
+import { DreamBlock } from './DreamBlock';
 import { FreedomBlock, Statement } from './ReportPanel';
 
 export function useMediaQuery(query: string) {
@@ -33,7 +34,7 @@ function TabContent({ tab }: { tab: Tab }) {
     case 'island': return <IslandTab />;
     case 'actions': return <ActionsTab />;
     case 'neighbors': return <NeighborsTab />;
-    case 'report': return <div className="tab-body"><FreedomBlock /><Statement /></div>;
+    case 'report': return <div className="tab-body"><FreedomBlock /><DreamBlock /><Statement /></div>;
   }
 }
 
@@ -42,7 +43,7 @@ function Tabs({ tabs, extra }: { tabs: Tab[]; extra?: ReactNode }) {
   const tab = useGame((s) => s.tab);
   const setTab = useGame((s) => s.setTab);
   const affordable = offerViews(world, HUMAN).filter((v) => v.canAfford && !v.locked && !v.slotFull).length;
-  const tired = world.players[0].happiness < 30;
+  const tired = world.players[0].employed && world.players[0].happiness < 30;
   return (
     <nav className="tabs" role="tablist">
       {tabs.map((t) => (
@@ -78,6 +79,7 @@ export function DesktopLayout() {
     <>
       <aside className="col-left">
         <div className="panel pad"><FreedomBlock /></div>
+        <DreamBlock panel />
         <div className="panel pad scroll"><Statement /></div>
       </aside>
       <aside className="col-right panel">

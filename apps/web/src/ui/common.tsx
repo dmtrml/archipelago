@@ -51,3 +51,29 @@ export function Section({ title, aside, children }: { title: string; aside?: Rea
     </section>
   );
 }
+
+/** Праздничное конфетти: свобода и эпилог. */
+export function Confetti() {
+  const [pieces] = useState(() => Array.from({ length: 70 }, (_, i) => ({
+    left: Math.random() * 100,
+    color: ['#F5B83D', '#E8735A', '#3E9A9A', '#23935E', '#FFF4E2'][i % 5],
+    dx: Math.random() * 200 - 100,
+    rot: Math.random() * 900 - 450,
+    dur: 2.2 + Math.random() * 1.8,
+    delay: Math.random() * 0.6,
+  })));
+  return (
+    <>
+      {pieces.map((p, i) => (
+        <div
+          key={i}
+          className="confetti"
+          style={{
+            left: `${p.left}vw`, background: p.color, animationDuration: `${p.dur}s`, animationDelay: `${p.delay}s`,
+            ['--dx' as string]: `${p.dx}px`, ['--rot' as string]: `${p.rot}deg`,
+          }}
+        />
+      ))}
+    </>
+  );
+}

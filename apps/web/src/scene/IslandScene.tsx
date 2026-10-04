@@ -13,13 +13,15 @@ import { Decor } from './world/Decor';
 import { Home, Lighthouse } from './world/Landmarks';
 import { Clouds, Gulls, Neighbors, Rain } from './world/Ambient';
 import { Items } from './Items';
+import { Shipyard } from './world/Shipyard';
 import { FloatLabels } from './FloatLabels';
-import { CameraRig } from './CameraRig';
+import { CameraRig, type CameraFocus } from './CameraRig';
+import { dreamFocusPoint } from './slots';
 import './scene.css';
 
 const GL = { antialias: true, toneMapping: NeutralToneMapping, toneMappingExposure: 1.05 };
 
-export function IslandScene({ items, floats, weather, bottomInset = 0, sideInsets, onItemClick }: IslandSceneProps) {
+export function IslandScene({ items, floats, weather, dream, bottomInset = 0, sideInsets, onItemClick }: IslandSceneProps) {
   const storm = weather === 'storm';
   // шина создаётся один раз; погода стартует сразу в нужном состоянии
   const bus = useMemo(() => createBus(weather === 'storm'), []);
@@ -29,6 +31,14 @@ export function IslandScene({ items, floats, weather, bottomInset = 0, sideInset
   useEffect(() => { clickRef.current = onItemClick; }, [onItemClick]);
 
   const setFloatLayer = useCallback((el: HTMLDivElement | null) => { bus.floatLayer = el; }, [bus]);
+
+  // куда камере поворачиваться при изменении мечты (по примитивам — объект dream может быть новым после каждого действия)
+  const dBuilt = dream?.built, dStages = dream?.stages, dBuilding = dream?.building;
+  const focus = useMemo<CameraFocus | null>(() => {
+    if (dBuilt === undefined || dStages === undefined) return null;
+    const p = dreamFocusPoint({ built: dBuilt, stages: dStages, building: !!dBuilding });
+    return p && { key: `${dBuilt}:${dBuilding ? 1 : 0}`, ...p };
+  }, [dBuilt, dStages, dBuilding]);
 
   const { camera, small } = useMemo(() => {
     const w = window.innerWidth, h = Math.max(1, window.innerHeight);
@@ -57,8 +67,9 @@ export function IslandScene({ items, floats, weather, bottomInset = 0, sideInset
           <Gulls />
           <Rain count={small ? 600 : 900} />
           <Items items={items} clickRef={clickRef} />
+          {dream && <Shipyard dream={dream} clickRef={clickRef} />}
           <FloatLabels floats={floats} items={items} />
-          <CameraRig bottomInset={bottomInset} sideInsets={sideInsets} />
+          <CameraRig bottomInset={bottomInset} sideInsets={sideInsets} focus={focus} />
         </BusContext.Provider>
       </Canvas>
       <div className="isl-tilt isl-tilt-top" />

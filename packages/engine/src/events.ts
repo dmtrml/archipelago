@@ -1,15 +1,17 @@
 // Случайные события: личные (для каждого игрока) и общие (для всего архипелага).
+import { FREEDOM_LEVEL_TITLES } from './content';
 import { getDef, happinessJoy } from './economy';
 import type { Rng } from './rng';
 import * as R from './rules';
-import { coins } from './text';
-import type { GameEvent, PlayerState, PlayerWeekReport, WorldState } from './types';
+import { coins, weeksText } from './text';
+import type { DreamDef, GameEvent, PlayerState, PlayerWeekReport, WorldState } from './types';
 
 /** Все id событий — чтобы UI мог подобрать иконки. */
 export type EventId =
   | 'illness' | 'breakdown' | 'gift' | 'raise' | 'burnout'
   | 'storm' | 'stormDamage' | 'stormInsured' | 'fishShoal' | 'touristBoom' | 'crisis'
-  | 'scamCollapse' | 'emergencyLoan' | 'freedom';
+  | 'scamCollapse' | 'emergencyLoan' | 'freedom'
+  | 'dreamStage' | 'dreamDone' | 'freedomLevel' | 'freedomThreat' | 'threatOver' | 'backToWork';
 
 function event(id: EventId, title: string, text: string, tone: GameEvent['tone'], extra: Partial<GameEvent> = {}): GameEvent {
   return { id, title, text, tone, ...extra };
@@ -72,6 +74,7 @@ export function rollPersonalEvent(player: PlayerState, rng: Rng): GameEvent | nu
       return event('gift', 'Подарок', why, 'good', { cashDelta: amount });
     }
     case 'raise': {
+      if (!player.employed) return null; // повышение бывает только на работе
       player.salary += R.RAISE_SALARY;
       player.living += R.RAISE_LIVING;
       return event('raise', 'Повышение!',
@@ -81,9 +84,13 @@ export function rollPersonalEvent(player: PlayerState, rng: Rng): GameEvent | nu
   }
 }
 
-/** Изменение счастья за неделю: будни + радость от статусных вещей + штраф за подработку. */
+/**
+ * Изменение счастья за неделю: будни (только пока работаешь) + радость от статусных вещей и мечты
+ * + штраф за подработку.
+ */
 export function weeklyHappinessDelta(player: PlayerState): number {
-  return R.HAPPINESS_DRIFT + happinessJoy(player) + (player.extraShift ? R.EXTRA_SHIFT_JOY : 0);
+  const drift = player.employed ? R.HAPPINESS_DRIFT : 0;
+  return drift + happinessJoy(player) + (player.extraShift ? R.EXTRA_SHIFT_JOY : 0);
 }
 
 // ───────────── Общие события ─────────────
@@ -157,4 +164,47 @@ export function freedomEvent(): GameEvent {
   return event('freedom', 'Финансовая свобода!',
     'Пассивный доход покрывает все расходы. Теперь можно работать, потому что хочется, а не потому что надо.',
     'good');
+}
+
+// ───────────── Второй акт ─────────────
+
+export function dreamStageEvent(dream: DreamDef, finishedStage: number): GameEvent {
+  const done = dream.stages[finishedStage];
+  const next = dream.stages[finishedStage + 1];
+  const tail = next ? `Впереди — «${next.title}».` : '';
+  return event('dreamStage', `Готово: ${done.title}`,
+    `Ещё один этап мечты позади — «${dream.title}» стала ближе. ${tail}`.trim(), 'good');
+}
+
+export function dreamDoneEvent(dream: DreamDef): GameEvent {
+  return event('dreamDone', 'Шхуна готова!',
+    `Шхуна сошла на воду и уходит в кругосветку! Теперь на её содержание уходит ${coins(dream.upkeep)} в неделю, зато она радует каждый день.`,
+    'good');
+}
+
+/** Уровень 1 («Свобода») празднует freedomEvent; здесь — запас прочности: 2 и выше. */
+export function freedomLevelEvent(level: number): GameEvent {
+  const title = FREEDOM_LEVEL_TITLES[level - 1];
+  const text = level >= 3
+    ? 'Пассивный доход вдвое больше расходов. Это уже богатство: даже плохой сезон не отнимет свободу.'
+    : 'Пассивный доход в полтора раза больше расходов — теперь у свободы есть запас прочности.';
+  return event('freedomLevel', title, text, 'good');
+}
+
+export function freedomThreatEvent(weeksLeft: number): GameEvent {
+  return event('freedomThreat', 'Свобода под угрозой',
+    `Без работы пассивного дохода не хватает на расходы. До возвращения на работу: ${weeksText(weeksLeft)}. Добавь доходных активов или убери лишние траты.`,
+    'bad');
+}
+
+export function threatOverEvent(): GameEvent {
+  return event('threatOver', 'Угроза миновала',
+    'Пассивный доход снова покрывает расходы — свобода на месте. Запас прочности делает её надёжнее.',
+    'good');
+}
+
+export function backToWorkEvent(salary: number): GameEvent {
+  return event('backToWork', 'Пришлось вернуться на работу',
+    `Свобода не удержалась: без работы доходов не хватало слишком долго. Новая зарплата — ${coins(salary)} в неделю, чуть меньше прежней. Копи запас, и свобода вернётся.`,
+    'bad');
 }

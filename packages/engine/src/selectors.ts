@@ -1,12 +1,14 @@
 // Производные данные для UI. Только чтение мира.
 import {
-  assetsValue, currentIncome, getDef, offerIncome, passiveIncome, repairCost, saleValue,
-  slotUsage, totalDebt, weeklyExpenses, loanLimit as playerLoanLimit,
+  assetsValue, currentIncome, dreamWorkPerWeek, freedomLevel, getDef, getDream, offerIncome,
+  passiveIncome, repairCost, saleValue, slotUsage, totalDebt, weeklyExpenses,
+  loanLimit as playerLoanLimit,
 } from './economy';
 import * as R from './rules';
 import { SLOT_CAPACITY } from './slots';
+import { notEnoughCash } from './text';
 import type {
-  AssetView, FinanceView, LeaderboardRow, OfferView, PlayerState, WorldState,
+  AssetView, DreamView, FinanceView, LeaderboardRow, MarketState, Offer, OfferView, PlayerState, WorldState,
 } from './types';
 
 export { insurancePremium, studyCost } from './economy';
@@ -20,21 +22,54 @@ export function getPlayer(world: WorldState, playerId: string): PlayerState {
   return player;
 }
 
+/** Доля свободы, как её показывает шкала: пассивный доход (как его видит игрок) / расходы. */
+function shownFreedomRatio(player: PlayerState, market: MarketState): number {
+  const total = weeklyExpenses(player).total;
+  return total > 0 ? passiveIncome(player, market) / total : 0;
+}
+
 export function financeView(world: WorldState, playerId: string): FinanceView {
   const player = getPlayer(world, playerId);
-  const salary = Math.round(player.salary * (player.extraShift ? 1 + R.EXTRA_SHIFT_BONUS : 1));
+  const salary = player.employed
+    ? Math.round(player.salary * (player.extraShift ? 1 + R.EXTRA_SHIFT_BONUS : 1))
+    : 0;
   const passive = passiveIncome(player, world.market);
   const expenses = weeklyExpenses(player);
   const debt = totalDebt(player);
+  const freedomRatio = expenses.total > 0 ? passive / expenses.total : 0;
   return {
     salary,
     passiveIncome: passive,
     expenses,
     net: salary + passive - expenses.total,
-    freedomRatio: expenses.total > 0 ? passive / expenses.total : 0,
+    freedomRatio,
     netWorth: player.cash + assetsValue(player, world.market) - debt,
     debt,
+    employed: player.employed,
+    level: freedomLevel(freedomRatio),
   };
+}
+
+/**
+ * Доля свободы сразу после покупки предложения: тот же расчёт, что у шкалы, на копии игрока
+ * с условным новым активом. Копия поверхностная — расчёты только читают игрока, а глубокое
+ * копирование на каждое предложение заметно замедляло ботов.
+ */
+function freedomAfterBuying(world: WorldState, player: PlayerState, offer: Offer): number {
+  const preview: PlayerState = {
+    ...player,
+    owned: [...player.owned, {
+      uid: 'preview',
+      defId: offer.defId,
+      boughtWeek: world.week,
+      price: offer.price,
+      income: offer.income,
+      upkeep: offer.upkeep,
+      damaged: false,
+      slotIndex: 0,
+    }],
+  };
+  return shownFreedomRatio(preview, world.market);
 }
 
 export function offerViews(world: WorldState, playerId: string): OfferView[] {
@@ -54,6 +89,7 @@ export function offerViews(world: WorldState, playerId: string): OfferView[] {
       locked: player.knowledge < def.minKnowledge,
       canAfford: player.cash >= offer.price,
       slotFull: slotUsage(player, def.slot) >= SLOT_CAPACITY[def.slot],
+      freedomAfter: freedomAfterBuying(world, player, offer),
     };
     if (def.kind === 'scam' && player.knowledge >= R.SCAM_SIGHT_KNOWLEDGE) view.warning = SCAM_WARNING;
     return view;
@@ -70,6 +106,46 @@ export function assetViews(world: WorldState, playerId: string): AssetView[] {
     saleValue: saleValue(asset, world.market),
     repairCost: asset.damaged ? repairCost(asset) : 0,
   }));
+}
+
+/** Мечта игрока: состояние стройки и можно ли начать следующий этап. null — у игрока мечты нет (соседи-боты). */
+export function dreamView(world: WorldState, playerId: string): DreamView | null {
+  const player = getPlayer(world, playerId);
+  const state = player.dream;
+  if (!state) return null;
+  const def = getDream(state.id);
+  const done = state.doneWeek !== null;
+  const stageIndex = Math.min(Math.max(state.built, 0), def.stages.length);
+  const stage = done ? null : (def.stages[stageIndex] ?? null);
+  const workPerWeek = dreamWorkPerWeek(player);
+
+  let weeksLeft = 0;
+  if (stage) {
+    const daysLeft = state.building ? stage.work - state.progress : stage.work;
+    weeksLeft = Math.max(0, Math.ceil(daysLeft / workPerWeek));
+  }
+
+  let reason: string | undefined;
+  if (player.freedomWeek === null) reason = 'Откроется после финансовой свободы';
+  else if (done || !stage) reason = 'Мечта готова';
+  else if (state.building) reason = 'Этап строится';
+  else if (player.cash < stage.cost) reason = notEnoughCash(stage.cost - player.cash);
+
+  const finished = structuredClone(player);
+  if (finished.dream && finished.dream.doneWeek === null) finished.dream.doneWeek = world.week;
+
+  const view: DreamView = {
+    def,
+    state,
+    stage,
+    stageIndex,
+    workPerWeek,
+    weeksLeft,
+    canStart: reason === undefined,
+    freedomAfterDone: shownFreedomRatio(finished, world.market),
+  };
+  if (reason !== undefined) view.reason = reason;
+  return view;
 }
 
 export function leaderboard(world: WorldState): LeaderboardRow[] {

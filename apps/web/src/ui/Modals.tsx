@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
-import { HUMAN, useGame } from '../store';
-import { fmt, signed } from '../format';
+import { DREAMS, DREAM_WORK_EMPLOYED, getPlayer } from '@arch/engine';
+import { HUMAN, useGame, type WeekModal as WeekModalData } from '../store';
+import { fmt, signed, weeks } from '../format';
+import { Confetti } from './common';
+import { EpilogueModal } from './Epilogue';
+import { daysText, lowerFirst, speedUpText } from './text';
 import { Emblem } from './TopBar';
 
 export function WelcomeModal() {
@@ -20,6 +24,7 @@ export function WelcomeModal() {
           <li><b className="pos">Активы</b> приносят деньги каждую неделю — даже когда вы не работаете.</li>
           <li><b className="neg">Пассивы</b> красивые, но только забирают деньги на содержание.</li>
           <li><b>Цель</b> — чтобы доход от активов покрыл все расходы. Это и есть финансовая свобода.</li>
+          <li><b>Мечта</b> — шхуна для кругосветки. Строить её можно после свободы.</li>
         </ul>
         <label className="field">
           <span>Название острова</span>
@@ -35,45 +40,65 @@ export function WelcomeModal() {
   );
 }
 
-function Confetti() {
-  const [pieces] = useState(() => Array.from({ length: 70 }, (_, i) => ({
-    left: Math.random() * 100,
-    color: ['#F5B83D', '#E8735A', '#3E9A9A', '#23935E', '#FFF4E2'][i % 5],
-    dx: Math.random() * 200 - 100,
-    rot: Math.random() * 900 - 450,
-    dur: 2.2 + Math.random() * 1.8,
-    delay: Math.random() * 0.6,
-  })));
+/** Развилка в момент свободы: остаться на работе или уйти. Решение можно поменять во вкладке «Действия». */
+function FreedomChoice({ onStay, onQuit }: { onStay: () => void; onQuit: () => void }) {
   return (
-    <>
-      {pieces.map((p, i) => (
-        <div
-          key={i}
-          className="confetti"
-          style={{
-            left: `${p.left}vw`, background: p.color, animationDuration: `${p.dur}s`, animationDelay: `${p.delay}s`,
-            ['--dx' as string]: `${p.dx}px`, ['--rot' as string]: `${p.rot}deg`,
-          }}
-        />
-      ))}
-    </>
+    <div className="choice">
+      <div className="choice-title">Что дальше?</div>
+      <div className="choice-cards">
+        <div className="choice-card">
+          <h3>Остаться на работе</h3>
+          <p>Зарплата и дальше ускоряет рост, а мечта строится по выходным: {daysText(DREAM_WORK_EMPLOYED)} в неделю.</p>
+          <button className="btn primary" onClick={onStay} autoFocus>Остаться</button>
+        </div>
+        <div className="choice-card">
+          <h3>Уйти с работы</h3>
+          <p>Будни не отнимают счастье, мечта строится {speedUpText()}, но без запаса свобода хрупкая.</p>
+          <button className="btn ghost" onClick={onQuit}>Уйти с работы</button>
+        </div>
+      </div>
+      <p className="hint-text">Выбор можно поменять в любой момент во вкладке «Действия».</p>
+    </div>
+  );
+}
+
+function WeekSummary({ modal }: { modal: WeekModalData }) {
+  const mine = modal.report.players[HUMAN];
+  const income = mine.salary + mine.assetIncome.reduce((s, a) => s + a.amount, 0);
+  const expenses = mine.living + mine.upkeep.reduce((s, a) => s + a.amount, 0) + mine.interest + mine.insurance;
+  return (
+    <div className="week-sum">
+      <div><span>Доходы</span><b className="pos">+{fmt(income)}</b></div>
+      <div><span>Расходы</span><b className="neg">−{fmt(expenses)}</b></div>
+      <div><span>Итого</span><b className={mine.net >= 0 ? 'pos' : 'neg'}>{signed(mine.net)}</b></div>
+      <div><span>Наличные</span><b>{fmt(mine.cashAfter)}</b></div>
+    </div>
   );
 }
 
 export function WeekModal() {
   const modal = useGame((s) => s.modal);
   const close = useGame((s) => s.closeModal);
+  const act = useGame((s) => s.act);
   useEffect(() => {
     if (!modal) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Enter' || e.key === 'Escape') close(); };
+    const onKey = (e: KeyboardEvent) => {
+      // Enter на сфокусированной кнопке нажимает именно её; окно закрываем только по Enter «в пустоту»
+      if (e.key === 'Enter' && (e.target as HTMLElement | null)?.closest('button')) return;
+      if (e.key === 'Enter' || e.key === 'Escape') close();
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [modal, close]);
-  if (!modal) return null;
+  const world = useGame((s) => s.world);
+  if (!modal || !world) return null;
+  if (modal.epilogue) return <EpilogueModal modal={modal} />;
 
-  const mine = modal.report.players[HUMAN];
-  const income = mine.salary + mine.assetIncome.reduce((s, a) => s + a.amount, 0);
-  const expenses = mine.living + mine.upkeep.reduce((s, a) => s + a.amount, 0) + mine.interest + mine.insurance;
+  const dream = getPlayer(world, HUMAN).dream;
+  const dreamTitle = dream ? lowerFirst(DREAMS[dream.id].title) : null;
+  const quit = () => {
+    if (act({ type: 'quitJob', playerId: HUMAN }, 'Вы больше не работаете')) close();
+  };
 
   return (
     <div className="modal-backdrop" onClick={close}>
@@ -85,8 +110,9 @@ export function WeekModal() {
             <h2>Финансовая свобода!</h2>
             <p className="lead">
               Ваши активы теперь приносят больше, чем стоит вся ваша жизнь на острове.
-              Вы добились этого за {modal.report.week} недель. Можно продолжать расти — или посмотреть, как дела у соседей.
+              Вы добились этого за {weeks(modal.report.week)}.
             </p>
+            {dreamTitle && <div className="dream-unlocked">Мечта открыта: {dreamTitle}. Теперь её можно строить.</div>}
           </>
         ) : (
           <h2>{modal.events.some((e) => e.tone === 'bad') ? 'Неспокойная неделя' : 'Интересная неделя'}</h2>
@@ -104,13 +130,10 @@ export function WeekModal() {
           ))}
         </div>
 
-        <div className="week-sum">
-          <div><span>Доходы</span><b className="pos">+{fmt(income)}</b></div>
-          <div><span>Расходы</span><b className="neg">−{fmt(expenses)}</b></div>
-          <div><span>Итого</span><b className={mine.net >= 0 ? 'pos' : 'neg'}>{signed(mine.net)}</b></div>
-          <div><span>Наличные</span><b>{fmt(mine.cashAfter)}</b></div>
-        </div>
-        <button className="btn primary big" onClick={close} autoFocus>Дальше</button>
+        <WeekSummary modal={modal} />
+        {modal.freedom
+          ? <FreedomChoice onStay={close} onQuit={quit} />
+          : <button className="btn primary big" onClick={close} autoFocus>Дальше</button>}
       </div>
     </div>
   );
