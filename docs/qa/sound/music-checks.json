@@ -1,0 +1,107 @@
+{
+  "runner": "Actual TypeScript engine via tsx; controlled timers, AudioContext and HTMLAudioElement",
+  "checks": [
+    {
+      "name": "Synth playlist alternates and stays silent between tracks",
+      "passed": true,
+      "variants": [
+        0,
+        1,
+        0
+      ],
+      "startTimesMs": [
+        0,
+        64030,
+        128060
+      ],
+      "declaredTrackMs": 24000,
+      "cleanupLatencyMs": 30,
+      "silenceMs": 40000
+    },
+    {
+      "name": "Playlist randomized silence boundaries",
+      "passed": true,
+      "randomInputs": [
+        0,
+        0.999999
+      ],
+      "silenceMs": [
+        20000,
+        59999.95999999999
+      ]
+    },
+    {
+      "name": "Synth scene crossfade",
+      "passed": true,
+      "fadeSeconds": 2.5,
+      "midpointGains": [
+        0.275,
+        0.275
+      ],
+      "outgoingStoppedAfterMs": 2530
+    },
+    {
+      "name": "Freedom automatically ducks music",
+      "passed": true,
+      "attenuationDb": -9,
+      "gain": 0.35481338923357547,
+      "attackSeconds": 0.05,
+      "holdUntilSeconds": 3,
+      "restoredAtSeconds": 3.4
+    },
+    {
+      "name": "Epilogue starts immediately and returns to free once",
+      "passed": true,
+      "durationSeconds": 7.5,
+      "returnLatencyMs": 30,
+      "finalScene": "free"
+    },
+    {
+      "name": "Stream scene crossfade and cleanup",
+      "passed": true,
+      "fadeSeconds": 2.5,
+      "sourceDisconnected": true,
+      "gainDisconnected": true,
+      "paused": true,
+      "srcRemoved": true,
+      "handlersRemoved": true,
+      "loadCalled": true,
+      "decodedMusicTracks": 0
+    },
+    {
+      "name": "Stream capacity steals oldest disposable effect",
+      "passed": true,
+      "voiceLimit": 16,
+      "voicesAfterStart": 16,
+      "displacedEffectStopped": true
+    },
+    {
+      "name": "Stream capacity rejects new layer when all 16 are protected, then recovers",
+      "passed": true,
+      "protectedVoices": 16,
+      "rejectedWithoutCreatingMedia": true,
+      "afterFadeVoices": 1
+    },
+    {
+      "name": "Natural stream completion cleans resources and enters playlist silence",
+      "passed": true,
+      "silenceMs": 40000,
+      "srcRemoved": true,
+      "sourceDisconnected": true
+    },
+    {
+      "name": "Rejected stream starts exactly one synth fallback and releases media",
+      "passed": true,
+      "voices": 1,
+      "fallbackSource": "synth",
+      "failedMediaReleased": true
+    },
+    {
+      "name": "Reset invalidates late media failure and clears timers",
+      "passed": true,
+      "voices": 0,
+      "timers": 0
+    }
+  ],
+  "passed": true
+}

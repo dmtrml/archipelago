@@ -1,0 +1,1428 @@
+{
+  "newGame": [
+    {
+      "t": 1084.7999999821186,
+      "cue": "ui.click",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 1090.9000000059605,
+      "cue": "music.island",
+      "bus": "music",
+      "source": "synth",
+      "variant": 0
+    },
+    {
+      "t": 1095.4000000059605,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "synth"
+    },
+    {
+      "t": 1095.7999999821186,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "synth"
+    }
+  ],
+  "buyAsset": [
+    {
+      "t": 711.3999999761581,
+      "cue": "coins.pay",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 791.0999999940395,
+      "cue": "build.pop",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "buyStatus": [
+    {
+      "t": 609.7999999821186,
+      "cue": "coins.pay",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 687.4000000059605,
+      "cue": "build.pop",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 773.4000000059605,
+      "cue": "status.joy",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "buyScam": [
+    {
+      "t": 639.2999999821186,
+      "cue": "coins.pay",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 716.5,
+      "cue": "build.pop",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "buyNoCash": [
+    {
+      "t": 616.5999999940395,
+      "cue": "ui.error",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "sellAsset": [
+    {
+      "t": 590.8000000119209,
+      "cue": "coins.get",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 670.0999999940395,
+      "cue": "build.remove",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "upgradeAsset": [
+    {
+      "t": 628.4000000059605,
+      "cue": "coins.pay",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 830.9000000059605,
+      "cue": "upgrade",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "repairAsset": [
+    {
+      "t": 632.1999999880791,
+      "cue": "coins.pay",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 711.6999999880791,
+      "cue": "repair",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "takeLoan": [
+    {
+      "t": 608.4000000059605,
+      "cue": "coins.get",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 688.3000000119209,
+      "cue": "loan.take",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "repayLoan": [
+    {
+      "t": 629.5999999940395,
+      "cue": "loan.repay",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "study": [
+    {
+      "t": 602.4000000059605,
+      "cue": "coins.pay",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 674.9000000059605,
+      "cue": "study",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "rest": [
+    {
+      "t": 645.8000000119209,
+      "cue": "coins.pay",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 724.3000000119209,
+      "cue": "rest",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "setExtraShift": [
+    {
+      "t": 659.3999999761581,
+      "cue": "shift.on",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "quitJob": [
+    {
+      "t": 636,
+      "cue": "job.quit",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "returnToWork": [
+    {
+      "t": 637.2999999821186,
+      "cue": "job.return",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "buildDream": [
+    {
+      "t": 659.0999999940395,
+      "cue": "coins.pay",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 742.5,
+      "cue": "dream.start",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "coinWeek": [
+    {
+      "t": 700.3000000119209,
+      "cue": "ui.click",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 702,
+      "cue": "week.next",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 733.5999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 0
+    },
+    {
+      "t": 878.8000000119209,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 1
+    },
+    {
+      "t": 1043.800000011921,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 2
+    },
+    {
+      "t": 1213.800000011921,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 3
+    },
+    {
+      "t": 1395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 4
+    },
+    {
+      "t": 1559.9000000059605,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 5
+    },
+    {
+      "t": 1727,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 6
+    },
+    {
+      "t": 1895.199999988079,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    },
+    {
+      "t": 2065.199999988079,
+      "cue": "coin.minus",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "storm": [
+    {
+      "t": 667.3000000119209,
+      "cue": "ui.click",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 668.1999999880791,
+      "cue": "week.next",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 669.1999999880791,
+      "cue": "amb.rain",
+      "bus": "ambience",
+      "source": "synth"
+    },
+    {
+      "t": 699.0999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 0
+    },
+    {
+      "t": 846,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 1
+    },
+    {
+      "t": 1773.5999999940395,
+      "cue": "ui.open",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 1775.300000011921,
+      "cue": "storm",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 1776.300000011921,
+      "cue": "event.bad",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 3711.0999999940395,
+      "cue": "amb.thunder",
+      "bus": "ambience",
+      "source": "synth"
+    },
+    {
+      "t": 7494.300000011921,
+      "cue": "amb.thunder",
+      "bus": "ambience",
+      "source": "synth"
+    }
+  ],
+  "freedom": [
+    {
+      "t": 716.3000000119209,
+      "cue": "ui.click",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 717.5999999940395,
+      "cue": "week.next",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 752.8000000119209,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 0
+    },
+    {
+      "t": 899.0999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 1
+    },
+    {
+      "t": 1065.4000000059605,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 2
+    },
+    {
+      "t": 1231.5,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 3
+    },
+    {
+      "t": 1399.5999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 4
+    },
+    {
+      "t": 1571.800000011921,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 5
+    },
+    {
+      "t": 1745.5,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 6
+    },
+    {
+      "t": 1822.9000000059605,
+      "cue": "ui.open",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 1827.4000000059605,
+      "cue": "music.free",
+      "bus": "music",
+      "source": "synth",
+      "variant": 0
+    },
+    {
+      "t": 1828.5,
+      "cue": "freedom",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 1828.800000011921,
+      "cue": "event.good",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 1909.800000011921,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    },
+    {
+      "t": 2081.199999988079,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    },
+    {
+      "t": 2250,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    },
+    {
+      "t": 2424.199999988079,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    }
+  ],
+  "freedomLevel": [
+    {
+      "t": 712.5999999940395,
+      "cue": "ui.click",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 713.8000000119209,
+      "cue": "week.next",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 752.5,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 0
+    },
+    {
+      "t": 896.2000000178814,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 1
+    },
+    {
+      "t": 1060.300000011921,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 2
+    },
+    {
+      "t": 1229.9000000059605,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 3
+    },
+    {
+      "t": 1406,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 4
+    },
+    {
+      "t": 1565.5,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 5
+    },
+    {
+      "t": 1736.7000000178814,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 6
+    },
+    {
+      "t": 1815.5,
+      "cue": "ui.open",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 1815.9000000059605,
+      "cue": "freedom.level",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 1816.2000000178814,
+      "cue": "event.bad",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 1907,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    },
+    {
+      "t": 2081,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    },
+    {
+      "t": 2250.5999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    },
+    {
+      "t": 2420.5999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    },
+    {
+      "t": 2591.2000000178814,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    }
+  ],
+  "dreamStage": [
+    {
+      "t": 682.7000000178814,
+      "cue": "ui.click",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 684.1000000238419,
+      "cue": "week.next",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 744.5,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 0
+    },
+    {
+      "t": 862.7000000178814,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 1
+    },
+    {
+      "t": 1039.1000000238419,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 2
+    },
+    {
+      "t": 1202.6000000238419,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 3
+    },
+    {
+      "t": 1372.2000000178814,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 4
+    },
+    {
+      "t": 1541.300000011921,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 5
+    },
+    {
+      "t": 1710.4000000059605,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 6
+    },
+    {
+      "t": 1788.1000000238419,
+      "cue": "ui.open",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 1789.9000000059605,
+      "cue": "dream.stage",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 1791.6000000238419,
+      "cue": "threat",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 1875.9000000059605,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    },
+    {
+      "t": 2053.100000023842,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    },
+    {
+      "t": 2227.600000023842,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    }
+  ],
+  "dreamDone": [
+    {
+      "t": 748.0999999940395,
+      "cue": "ui.click",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 749.4000000059605,
+      "cue": "week.next",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 750.3000000119209,
+      "cue": "amb.rain",
+      "bus": "ambience",
+      "source": "synth"
+    },
+    {
+      "t": 802.3000000119209,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 0
+    },
+    {
+      "t": 802.9000000059605,
+      "cue": "dream.launch",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 921.0999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 1
+    },
+    {
+      "t": 1100.300000011921,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 2
+    },
+    {
+      "t": 1263.300000011921,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 3
+    },
+    {
+      "t": 1432.5,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 4
+    },
+    {
+      "t": 1605.4000000059605,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 5
+    },
+    {
+      "t": 1774.9000000059605,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 6
+    },
+    {
+      "t": 1859.0999999940395,
+      "cue": "ui.open",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 1859.699999988079,
+      "cue": "epilogue",
+      "bus": "music",
+      "source": "synth"
+    },
+    {
+      "t": 1862.5999999940395,
+      "cue": "music.epilogue",
+      "bus": "music",
+      "source": "synth",
+      "variant": 0
+    },
+    {
+      "t": 1951.4000000059605,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    },
+    {
+      "t": 2117.0999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    },
+    {
+      "t": 2281,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    },
+    {
+      "t": 2450.800000011921,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    },
+    {
+      "t": 2632.300000011921,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    },
+    {
+      "t": 5982,
+      "cue": "amb.thunder",
+      "bus": "ambience",
+      "source": "synth"
+    },
+    {
+      "t": 9408.09999999404,
+      "cue": "music.free",
+      "bus": "music",
+      "source": "synth",
+      "variant": 0
+    }
+  ],
+  "neighborFree": [
+    {
+      "t": 687.4000000059605,
+      "cue": "ui.click",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 688.7000000178814,
+      "cue": "week.next",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 724.3000000119209,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 0
+    },
+    {
+      "t": 866.7000000178814,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 1
+    },
+    {
+      "t": 1030.5,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 2
+    },
+    {
+      "t": 1205.2000000178814,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 3
+    },
+    {
+      "t": 1375.300000011921,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 4
+    },
+    {
+      "t": 1546.1000000238419,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 5
+    },
+    {
+      "t": 1712.1000000238419,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 6
+    },
+    {
+      "t": 1797.6000000238419,
+      "cue": "neighbor.free",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 1881.1000000238419,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    },
+    {
+      "t": 2064.300000011921,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    },
+    {
+      "t": 2228.9000000059605,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    }
+  ],
+  "scamCollapse": [
+    {
+      "t": 663.6999999880791,
+      "cue": "ui.click",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 664.7999999821186,
+      "cue": "week.next",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 701.8999999761581,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 0
+    },
+    {
+      "t": 848.7999999821186,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 1
+    },
+    {
+      "t": 1013.1999999880791,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 2
+    },
+    {
+      "t": 1180.699999988079,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 3
+    },
+    {
+      "t": 1348.199999988079,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 4
+    },
+    {
+      "t": 1519.2999999821186,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 5
+    },
+    {
+      "t": 1688.7999999821186,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 6
+    },
+    {
+      "t": 1777.2999999821186,
+      "cue": "ui.open",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 1778.8999999761581,
+      "cue": "scam.collapse",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 1780,
+      "cue": "event.bad",
+      "bus": "sfx",
+      "source": "synth"
+    },
+    {
+      "t": 1861.199999988079,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    },
+    {
+      "t": 2027.2999999821186,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    },
+    {
+      "t": 2196.699999988079,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    }
+  ],
+  "catalog:ui.click": [
+    {
+      "t": 453.59999999403954,
+      "cue": "ui.click",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:ui.toggle": [
+    {
+      "t": 535,
+      "cue": "ui.toggle",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:ui.error": [
+    {
+      "t": 640.5,
+      "cue": "ui.error",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:ui.open": [
+    {
+      "t": 734.5,
+      "cue": "ui.open",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:coins.pay": [
+    {
+      "t": 835.5999999940395,
+      "cue": "coins.pay",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:coins.get": [
+    {
+      "t": 940.9000000059605,
+      "cue": "coins.get",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:build.pop": [
+    {
+      "t": 1039.2000000178814,
+      "cue": "build.pop",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:status.joy": [
+    {
+      "t": 1138.800000011921,
+      "cue": "status.joy",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:build.remove": [
+    {
+      "t": 1241.4000000059605,
+      "cue": "build.remove",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:upgrade": [
+    {
+      "t": 1341,
+      "cue": "upgrade",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:repair": [
+    {
+      "t": 1440.300000011921,
+      "cue": "repair",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:loan.take": [
+    {
+      "t": 1519.300000011921,
+      "cue": "loan.take",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:loan.repay": [
+    {
+      "t": 1620.2000000178814,
+      "cue": "loan.repay",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:study": [
+    {
+      "t": 1724.7000000178814,
+      "cue": "study",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:rest": [
+    {
+      "t": 1823,
+      "cue": "rest",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:shift.on": [
+    {
+      "t": 1918.300000011921,
+      "cue": "shift.on",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:job.quit": [
+    {
+      "t": 1985.2000000178814,
+      "cue": "job.quit",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:job.return": [
+    {
+      "t": 2055.2000000178814,
+      "cue": "job.return",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:dream.start": [
+    {
+      "t": 2157.2000000178814,
+      "cue": "dream.start",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:week.next": [
+    {
+      "t": 2235.300000011921,
+      "cue": "week.next",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:coin.tick": [
+    {
+      "t": 2338.4000000059605,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:coin.minus": [
+    {
+      "t": 2438,
+      "cue": "coin.minus",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:event.good": [
+    {
+      "t": 2520,
+      "cue": "event.good",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:event.bad": [
+    {
+      "t": 2626.0999999940395,
+      "cue": "event.bad",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:storm": [
+    {
+      "t": 2725.5999999940395,
+      "cue": "storm",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:scam.collapse": [
+    {
+      "t": 2825.2000000178814,
+      "cue": "scam.collapse",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:loan.emergency": [
+    {
+      "t": 2924.2000000178814,
+      "cue": "loan.emergency",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:threat": [
+    {
+      "t": 3022.2000000178814,
+      "cue": "threat",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:neighbor.free": [
+    {
+      "t": 3124.5999999940395,
+      "cue": "neighbor.free",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:freedom": [
+    {
+      "t": 3223.9000000059605,
+      "cue": "freedom",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:freedom.level": [
+    {
+      "t": 3322.5999999940395,
+      "cue": "freedom.level",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:dream.stage": [
+    {
+      "t": 3423.5,
+      "cue": "dream.stage",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:dream.launch": [
+    {
+      "t": 3523.800000011921,
+      "cue": "dream.launch",
+      "bus": "sfx",
+      "source": "synth"
+    }
+  ],
+  "catalog:epilogue": [
+    {
+      "t": 3622.7000000178814,
+      "cue": "epilogue",
+      "bus": "music",
+      "source": "synth"
+    },
+    {
+      "t": 3624.2000000178814,
+      "cue": "music.epilogue",
+      "bus": "music",
+      "source": "synth",
+      "variant": 0
+    }
+  ],
+  "catalog:amb.sea": [
+    {
+      "t": 3723.2000000178814,
+      "cue": "amb.sea",
+      "bus": "ambience",
+      "source": "synth"
+    }
+  ],
+  "catalog:amb.wind": [
+    {
+      "t": 3838.800000011921,
+      "cue": "amb.wind",
+      "bus": "ambience",
+      "source": "synth"
+    }
+  ],
+  "catalog:amb.gulls": [
+    {
+      "t": 3941.300000011921,
+      "cue": "amb.gulls",
+      "bus": "ambience",
+      "source": "synth"
+    }
+  ],
+  "catalog:amb.rain": [
+    {
+      "t": 4035.5,
+      "cue": "amb.rain",
+      "bus": "ambience",
+      "source": "synth"
+    }
+  ],
+  "catalog:amb.thunder": [
+    {
+      "t": 4103.700000017881,
+      "cue": "amb.thunder",
+      "bus": "ambience",
+      "source": "synth"
+    }
+  ],
+  "catalog:music.island": [
+    {
+      "t": 4214.0999999940395,
+      "cue": "music.island",
+      "bus": "music",
+      "source": "synth",
+      "variant": 0
+    }
+  ],
+  "catalog:music.free": [
+    {
+      "t": 4326,
+      "cue": "music.free",
+      "bus": "music",
+      "source": "synth",
+      "variant": 0
+    }
+  ],
+  "catalog:music.epilogue": [
+    {
+      "t": 4426.200000017881,
+      "cue": "music.epilogue",
+      "bus": "music",
+      "source": "synth",
+      "variant": 0
+    }
+  ],
+  "showcase-all-42-cues-and-cascade": [
+    {
+      "t": 4527,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "delayMs": 0,
+      "pitchStep": 0
+    },
+    {
+      "t": 4700.0999999940395,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 1
+    },
+    {
+      "t": 4873,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 2
+    },
+    {
+      "t": 5040.300000011921,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 3
+    },
+    {
+      "t": 5210,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 4
+    },
+    {
+      "t": 5380.200000017881,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 5
+    },
+    {
+      "t": 5549.200000017881,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 6
+    },
+    {
+      "t": 5724.300000011921,
+      "cue": "coin.tick",
+      "bus": "sfx",
+      "source": "synth",
+      "pitchStep": 7
+    }
+  ]
+}

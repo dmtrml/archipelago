@@ -5,6 +5,7 @@ import {
 } from '@arch/engine';
 import type { DreamProgress, FloatLabel, PlacedItem, Weather } from './scene/contract';
 import { fmt, signed } from './format';
+import { onAction, onWeek, onWeather, startGameSounds, stopGameSounds } from './audio/gameSounds';
 
 export const HUMAN = 'p1';
 const SAVE_KEY = 'archipelago.save.v1';
@@ -91,12 +92,19 @@ let toastSeq = 0;
 let floatSeq = 0;
 
 export const useGame = create<GameStore>((set, get) => {
-  const pushFloats = (labels: Omit<FloatLabel, 'id'>[], stagger = 170) => {
+  const timers = new Set<ReturnType<typeof setTimeout>>();
+  const schedule = (callback: () => void, delay: number) => {
+    const timer = setTimeout(() => { timers.delete(timer); callback(); }, delay);
+    timers.add(timer);
+  };
+  const clearTimers = () => { timers.forEach(clearTimeout); timers.clear(); };
+  const pushFloats = (labels: Omit<FloatLabel, 'id'>[], stagger = 170, onFloat?: (label: FloatLabel) => void) => {
     labels.forEach((label, i) => {
-      setTimeout(() => {
+      schedule(() => {
         const f: FloatLabel = { ...label, id: `f${++floatSeq}` };
         set((s) => ({ floats: [...s.floats, f] }));
-        setTimeout(() => set((s) => ({ floats: s.floats.filter((x) => x.id !== f.id) })), 2600);
+        onFloat?.(f);
+        schedule(() => set((s) => ({ floats: s.floats.filter((x) => x.id !== f.id) })), 2600);
       }, i * stagger);
     });
   };
@@ -116,15 +124,20 @@ export const useGame = create<GameStore>((set, get) => {
     busy: false,
 
     newGame(islandName, playerName) {
+      clearTimers();
+      if (get().world) stopGameSounds();
       const world = createWorld({ seed: Math.floor(Math.random() * 2 ** 31), playerName, islandName });
       const history = recordHistory({}, world);
-      set({ world, news: [], history, neighborId: null, modal: null, tab: 'deals', floats: [], weather: 'clear' });
+      set({ world, news: [], history, neighborId: null, modal: null, tab: 'deals', floats: [], weather: 'clear', busy: false, toast: null });
       save({ world, news: [], history });
+      startGameSounds(world);
     },
 
     resetGame() {
+      clearTimers();
+      stopGameSounds();
       save(null);
-      set({ world: null, news: [], history: {}, neighborId: null, modal: null, floats: [], weather: 'clear' });
+      set({ world: null, news: [], history: {}, neighborId: null, modal: null, floats: [], weather: 'clear', busy: false, toast: null });
     },
 
     act(action, success) {
@@ -132,11 +145,13 @@ export const useGame = create<GameStore>((set, get) => {
       if (!world) return false;
       const res = applyAction(world, action);
       if (res.error) {
+        onAction(action, world, res.world, res.error);
         get().showToast(res.error, 'bad');
         return false;
       }
       set({ world: res.world });
       save({ world: res.world, news: get().news, history: get().history });
+      onAction(action, world, res.world);
 
       // Улучшение — над объектом всплывает прибавка к доходу
       if (action.type === 'upgradeAsset') {
@@ -144,7 +159,7 @@ export const useGame = create<GameStore>((set, get) => {
         const after = assetViews(res.world, HUMAN).find((v) => v.asset.uid === action.assetUid);
         if (before && after) {
           const gain = after.asset.income - before.income;
-          if (gain > 0) setTimeout(() => pushFloats([{ anchor: action.assetUid, text: `+${fmt(gain)} в неделю`, tone: 'pos' }]), 500);
+          if (gain > 0) schedule(() => pushFloats([{ anchor: action.assetUid, text: `+${fmt(gain)} в неделю`, tone: 'pos' }]), 500);
         }
       }
 
@@ -156,7 +171,7 @@ export const useGame = create<GameStore>((set, get) => {
           const def = ASSET_DEFS[bought.defId];
           const tone = def.kind === 'status' ? 'neg' : 'pos';
           const text = def.kind === 'status' ? `−${fmt(bought.upkeep)} в неделю` : `+${fmt(bought.income)} в неделю`;
-          setTimeout(() => pushFloats([{ anchor: bought.uid, text, tone }]), 450);
+          schedule(() => pushFloats([{ anchor: bought.uid, text, tone }]), 450);
         }
       }
       if (success) get().showToast(success, 'good');
@@ -172,6 +187,7 @@ export const useGame = create<GameStore>((set, get) => {
         return;
       }
       const report = res.world.lastReport;
+      const sounds = onWeek(report, world, res.world);
       const mine = report.players[HUMAN];
       const news = [
         ...report.news.map((n) => ({ week: report.week, text: n.text, playerId: n.playerId })),
@@ -194,25 +210,28 @@ export const useGame = create<GameStore>((set, get) => {
         const asset = owned.get(u.assetUid);
         if (asset && u.amount > 0 && ASSET_DEFS[asset.defId].kind === 'status') labels.push({ anchor: u.assetUid, text: `−${fmt(u.amount)}`, tone: 'neg' });
       }
-      pushFloats(labels);
+      pushFloats(labels, 170, sounds.onFloat);
 
       if (report.worldEvents.some((e) => e.id === 'storm')) {
         set({ weather: 'storm' });
-        setTimeout(() => set({ weather: 'clear' }), 7000);
+        onWeather('storm');
+        schedule(() => { set({ weather: 'clear' }); onWeather('clear'); }, 7000);
       }
 
       // Событие 'freedom' показываем отдельным праздничным заголовком, а не карточкой;
       // 'dreamDone' открывает эпилог вместо обычного окна недели
       const events = [...report.worldEvents, ...mine.events.filter((e) => e.id !== 'freedom')];
       const epilogue = mine.events.some((e) => e.id === 'dreamDone');
-      setTimeout(() => {
+      schedule(() => {
         if (events.length > 0 || mine.freedomReached || epilogue) {
           set({ modal: { report, events, freedom: mine.freedomReached, epilogue }, busy: false });
+          sounds.onModal();
         } else {
           set({ busy: false });
+          sounds.onModal(false);
           get().showToast(`Неделя ${report.week}: ${signed(mine.net)} · наличные ${fmt(mine.cashAfter)}`, mine.net >= 0 ? 'good' : 'bad');
         }
-      }, events.length > 0 || mine.freedomReached || epilogue ? 1100 : 500);
+      }, events.length > 0 || mine.freedomReached || epilogue || sounds.hasNotice ? 1100 : 500);
     },
 
     closeModal() { set({ modal: null }); },
@@ -227,7 +246,7 @@ export const useGame = create<GameStore>((set, get) => {
       } else {
         set({ tab: 'island', sheetOpen: true, highlightUid: uid });
       }
-      setTimeout(() => { if (get().highlightUid === uid) set({ highlightUid: null }); }, 2200);
+      schedule(() => { if (get().highlightUid === uid) set({ highlightUid: null }); }, 2200);
     },
 
     showNeighbor(playerId) {
@@ -237,10 +256,12 @@ export const useGame = create<GameStore>((set, get) => {
     showToast(text, tone = 'neutral') {
       const id = ++toastSeq;
       set({ toast: { id, text, tone } });
-      setTimeout(() => { if (get().toast?.id === id) set({ toast: null }); }, 3200);
+      schedule(() => { if (get().toast?.id === id) set({ toast: null }); }, 3200);
     },
   };
 });
+
+if (saved) startGameSounds(saved.world);
 
 /** Что стоит на острове у игрока — в формате сцены. */
 export function placedItems(world: WorldState): PlacedItem[] {
