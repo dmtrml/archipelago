@@ -1,0 +1,294 @@
+{
+  ".hud": [
+    {
+      "rect": [
+        0,
+        0,
+        390,
+        844
+      ],
+      "display": "flex",
+      "padding": "10px",
+      "gap": "normal",
+      "font": "16px Manrope, system-ui, sans-serif",
+      "borderRadius": "0px",
+      "overflow": "visible"
+    }
+  ],
+  ".top": [
+    {
+      "rect": [
+        10,
+        10,
+        370,
+        129.6
+      ],
+      "display": "flex",
+      "padding": "0px",
+      "gap": "8px",
+      "font": "16px Manrope, system-ui, sans-serif",
+      "borderRadius": "0px",
+      "overflow": "visible"
+    }
+  ],
+  ".badge": [
+    {
+      "rect": [
+        10,
+        10,
+        370,
+        56.6
+      ],
+      "display": "flex",
+      "padding": "8px",
+      "gap": "12px",
+      "font": "16px Manrope, system-ui, sans-serif",
+      "borderRadius": "18px",
+      "overflow": "visible"
+    }
+  ],
+  ".badge-text": [
+    {
+      "rect": [
+        67,
+        19,
+        96,
+        38.6
+      ],
+      "display": "block",
+      "padding": "0px 4px 0px 0px",
+      "gap": "normal",
+      "font": "16px Manrope, system-ui, sans-serif",
+      "borderRadius": "0px",
+      "overflow": "visible"
+    }
+  ],
+  ".title": [
+    {
+      "rect": [
+        67,
+        19,
+        92,
+        17.6
+      ],
+      "display": "block",
+      "padding": "0px",
+      "gap": "normal",
+      "font": "700 16px / 17.6px Unbounded, system-ui, sans-serif",
+      "borderRadius": "0px",
+      "overflow": "hidden"
+    }
+  ],
+  ".sub": [
+    {
+      "rect": [
+        67,
+        40.6,
+        92,
+        17
+      ],
+      "display": "block",
+      "padding": "0px",
+      "gap": "normal",
+      "font": "600 12.5px Manrope, system-ui, sans-serif",
+      "borderRadius": "0px",
+      "overflow": "hidden"
+    }
+  ],
+  ".emblem": [
+    {
+      "rect": [
+        19,
+        20.3,
+        36,
+        36
+      ],
+      "display": "grid",
+      "padding": "0px",
+      "gap": "normal",
+      "font": "16px Manrope, system-ui, sans-serif",
+      "borderRadius": "13px",
+      "overflow": "visible"
+    }
+  ],
+  ".nb-mini": [
+    {
+      "rect": [
+        175,
+        20.3,
+        150,
+        36
+      ],
+      "display": "flex",
+      "padding": "0px",
+      "gap": "2px",
+      "font": "16px Manrope, system-ui, sans-serif",
+      "borderRadius": "0px",
+      "overflow": "visible"
+    }
+  ],
+  ".nb-mini .ring-avatar": [
+    {
+      "rect": [
+        177,
+        22.3,
+        32,
+        32
+      ],
+      "display": "block",
+      "padding": "0px",
+      "gap": "normal",
+      "font": "16px Manrope, system-ui, sans-serif",
+      "borderRadius": "0px",
+      "overflow": "visible"
+    },
+    {
+      "rect": [
+        215,
+        22.3,
+        32,
+        32
+      ],
+      "display": "block",
+      "padding": "0px",
+      "gap": "normal",
+      "font": "16px Manrope, system-ui, sans-serif",
+      "borderRadius": "0px",
+      "overflow": "visible"
+    },
+    {
+      "rect": [
+        253,
+        22.3,
+        32,
+        32
+      ],
+      "display": "block",
+      "padding": "0px",
+      "gap": "normal",
+      "font": "16px Manrope, system-ui, sans-serif",
+      "borderRadius": "0px",
+      "overflow": "visible"
+    },
+    {
+      "rect": [
+        291,
+        22.3,
+        32,
+        32
+      ],
+      "display": "block",
+      "padding": "0px",
+      "gap": "normal",
+      "font": "16px Manrope, system-ui, sans-serif",
+      "borderRadius": "0px",
+      "overflow": "visible"
+    }
+  ],
+  ".stats": [
+    {
+      "rect": [
+        10,
+        74.6,
+        370,
+        65
+      ],
+      "display": "flex",
+      "padding": "0px",
+      "gap": "6px",
+      "font": "16px Manrope, system-ui, sans-serif",
+      "borderRadius": "0px",
+      "overflow": "visible"
+    }
+  ],
+  ".stat": [
+    {
+      "rect": [
+        10,
+        74.6,
+        88,
+        65
+      ],
+      "display": "flex",
+      "padding": "8px 10px",
+      "gap": "10px",
+      "font": "16px Manrope, system-ui, sans-serif",
+      "borderRadius": "18px",
+      "overflow": "visible"
+    },
+    {
+      "rect": [
+        104,
+        74.6,
+        88,
+        65
+      ],
+      "display": "flex",
+      "padding": "8px 10px",
+      "gap": "10px",
+      "font": "16px Manrope, system-ui, sans-serif",
+      "borderRadius": "18px",
+      "overflow": "visible"
+    },
+    {
+      "rect": [
+        198,
+        74.6,
+        88,
+        65
+      ],
+      "display": "flex",
+      "padding": "8px 10px",
+      "gap": "10px",
+      "font": "16px Manrope, system-ui, sans-serif",
+      "borderRadius": "18px",
+      "overflow": "visible"
+    },
+    {
+      "rect": [
+        292,
+        74.6,
+        88,
+        65
+      ],
+      "display": "flex",
+      "padding": "8px 10px",
+      "gap": "10px",
+      "font": "16px Manrope, system-ui, sans-serif",
+      "borderRadius": "18px",
+      "overflow": "visible"
+    }
+  ],
+  ".sheet": [
+    {
+      "rect": [
+        8,
+        642.5,
+        374,
+        193.5
+      ],
+      "display": "flex",
+      "padding": "0px",
+      "gap": "normal",
+      "font": "16px Manrope, system-ui, sans-serif",
+      "borderRadius": "18px",
+      "overflow": "visible"
+    }
+  ],
+  ".sheet-cta": [
+    {
+      "rect": [
+        9,
+        771,
+        372,
+        64
+      ],
+      "display": "block",
+      "padding": "8px 10px 10px",
+      "gap": "normal",
+      "font": "16px Manrope, system-ui, sans-serif",
+      "borderRadius": "0px",
+      "overflow": "visible"
+    }
+  ]
+}

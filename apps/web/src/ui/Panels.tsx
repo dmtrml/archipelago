@@ -5,7 +5,6 @@ import { signed } from '../format';
 import { DealsTab } from './DealsTab';
 import { IslandTab } from './IslandTab';
 import { ActionsTab } from './ActionsTab';
-import { NeighborsBar } from './Neighbors';
 import { DreamBlock } from './DreamBlock';
 import { FreedomBlock, Statement } from './ReportPanel';
 
@@ -84,7 +83,6 @@ export function DesktopLayout() {
         <Tabs tabs={['deals', 'island', 'actions']} />
         <div className="tab-scroll"><TabContent tab={current} /></div>
       </aside>
-      <div className="col-top"><NeighborsBar /></div>
       <div className="col-center"><NextWeekButton /></div>
     </>
   );

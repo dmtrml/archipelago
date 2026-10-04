@@ -242,45 +242,63 @@ function NewsTicker() {
 
 // ───────── Полоска соседей ─────────
 
-/** Компьютер: полоска по центру сверху; телефон (`compact`) — маленькие аватары в шапке. */
-export function NeighborsBar({ compact }: { compact?: boolean }) {
+export type NeighborsSize = 'full' | 'medium' | 'compact' | 'badge';
+
+/** Компьютер: три размера в верхней строке; телефон (`compact`) — аватары в плашке. */
+export function NeighborsBar({ compact, size = 'full' }: { compact?: boolean; size?: NeighborsSize }) {
   const world = useGame((s) => s.world)!;
   const selected = useGame((s) => s.neighborId);
   const show = useGame((s) => s.showNeighbor);
   const rows = leaderboard(world);
 
-  const chips = rows.map((r, place) => {
+  const chips = (mode: NeighborsSize, interactive = true) => rows.map((r, place) => {
     const me = !r.isBot;
     const color = colorOf(world, r.playerId);
     const free = r.freedomWeek !== null;
+    const label = `${r.name}${me ? ' (вы)' : ''}: ${percent(r.freedomRatio)}% до свободы`;
+    const contents = <>
+      <RingAvatar letter={me ? 'В' : r.name.slice(0, 1)} color={color} ratio={r.freedomRatio} size={mode === 'full' ? 38 : 32} free={free} />
+      {(mode === 'full' || mode === 'medium') && (
+        <span className="nb-text">
+          <b>{me ? 'Вы' : r.name}</b>
+          <small>{mode === 'medium' ? `${percent(r.freedomRatio)}%` : `${free ? 'свобода' : `${percent(r.freedomRatio)}%`} · ${place + 1}-е`}</small>
+        </span>
+      )}
+    </>;
+    if (!interactive) return <span key={r.playerId} className="nb-chip">{contents}</span>;
     return (
       <button
         key={r.playerId}
         className={`nb-chip ${me ? 'me' : ''} ${selected === r.playerId ? 'active' : ''}`}
-        onClick={() => (me ? show(null) : show(r.playerId))}
+        onClick={() => { if (!me) show(r.playerId); }}
         disabled={me && compact}
-        title={me ? 'Это вы' : `${r.name}: ${percent(r.freedomRatio)}% до свободы`}
+        title={label}
+        aria-label={label}
       >
-        <RingAvatar letter={me ? 'В' : r.name.slice(0, 1)} color={color} ratio={r.freedomRatio} size={compact ? 32 : 38} free={free} />
-        {!compact && (
-          <span className="nb-text">
-            <b>{me ? 'Вы' : r.name}</b>
-            <small>{free ? 'свобода' : `${percent(r.freedomRatio)}%`} · {place + 1}-е</small>
-          </span>
-        )}
+        {contents}
       </button>
     );
   });
 
-  if (compact) return <div className="nb-mini">{chips}</div>;
+  if (compact) return <div className="nb-mini">{chips('compact')}</div>;
+  const label = <span className="nb-label">Гонка<br />к свободе</span>;
   return (
-    <div className="neighbors">
-      <div className="nb-bar panel">
-        <span className="nb-label">Гонка<br />к свободе</span>
-        {chips}
+    <div className="neighbors" data-size={size}>
+      <div className={`nb-bar panel nb-${size}`}>
+        {size === 'full' && label}
+        {chips(size)}
       </div>
-      <NewsTicker />
-      {selected && <NeighborCard playerId={selected} onClose={() => show(null)} />}
+      <div className="nb-measure" aria-hidden="true">
+        {(['full', 'medium', 'compact'] as const).map((mode) => (
+          <div key={mode} className={`nb-probe panel nb-${mode}`} data-neighbors-probe={mode}>
+            {mode === 'full' && label}{chips(mode, false)}
+          </div>
+        ))}
+      </div>
+      <div className="neighbor-dropdown">
+        <NewsTicker />
+        {selected && <NeighborCard playerId={selected} onClose={() => show(null)} />}
+      </div>
     </div>
   );
 }
