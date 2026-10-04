@@ -1,4 +1,4 @@
-// Stage-one sound acceptance. Uses external Playwright; no application dependency is added.
+// Sound acceptance (synthesis and real files). Uses external Playwright, no app dependency.
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { mkdir, readFile, writeFile, stat } from 'node:fs/promises';
@@ -28,6 +28,15 @@ const observe = (target) => {
 observe(page);
 await page.addInitScript(() => {
   window.__contextCreations = 0;
+  window.__audioRequests = [];
+  window.__qaMedia = new Set();
+  const fetchOriginal = window.fetch;
+  window.fetch = (...args) => {
+    if (String(args[0]).includes('/audio/')) window.__audioRequests.push(String(args[0]));
+    return fetchOriginal(...args);
+  };
+  const playOriginal = HTMLMediaElement.prototype.play;
+  HTMLMediaElement.prototype.play = function (...args) { window.__qaMedia.add(this); return playOriginal.apply(this, args); };
   const Original = window.AudioContext;
   if (Original) window.AudioContext = class extends Original {
     constructor(...args) { super(...args); window.__contextCreations++; }
@@ -59,6 +68,7 @@ async function load(name, { debug = true, long = false } = {}) {
   await page.evaluate(() => document.fonts.ready);
   assert.equal(await page.evaluate(() => window.__contextCreations), 0, `${name}: context created before gesture`);
   assert.equal((await snapshot()).contextState, 'locked');
+  assert.equal(await page.evaluate(() => window.__audioRequests.length + window.__qaMedia.size), 0, 'Audio requested before gesture');
 }
 async function unlock() {
   await page.locator('.badge .title').click();
@@ -72,6 +82,8 @@ function inOrder(entries, cues) {
   }
 }
 async function record(name) { audioLogs[name] = await logs(); checks.push(name); }
+const cueRow = (cue) => page.locator('.sound-cue').filter({ has: page.locator('code', { hasText: new RegExp(`^${cue.replace(/[.]/g, '\\.')}$`) }) });
+async function choose(cue, source) { await cueRow(cue).locator('select').selectOption(source); }
 async function jpeg(name) {
   const path = join(output, `${name}.jpg`);
   await page.screenshot({ path, type: 'jpeg', quality: 62 });
@@ -87,9 +99,20 @@ try {
   assert.equal(await page.evaluate(() => '__audioLog' in window), false);
   await page.getByRole('button', { name: 'Начать игру', exact: true }).click();
   await page.locator('.hud').waitFor();
+  await page.waitForFunction(() => ['music.island', 'amb.sea', 'amb.wind'].every((cue) => (window.__audioLog ?? []).some((entry) => entry.cue === cue)));
   const initial = await logs();
-  assert(initial.some((entry) => entry.cue === 'ui.click'));
+  assert(initial.some((entry) => entry.cue === 'ui.click' && entry.source === 'synth'));
+  await waitSnapshot((state) => ['music.island', 'amb.sea', 'amb.wind'].every((cue) => state.voices.some((voice) => voice.cue === cue && voice.source === (cue === 'music.island' ? 'file' : 'synth') && voice.choice === voice.source)));
   for (const cue of ['music.island', 'amb.sea', 'amb.wind']) assert(initial.some((entry) => entry.cue === cue), `Missing starting layer ${cue}`);
+  const defaults = await page.evaluate(async () => {
+    const { CUE_IDS, CUES } = await import('/src/audio/cues.ts'); const { getCueSource } = await import('/src/audio/settings.ts');
+    return CUE_IDS.map((cue) => ({ cue, bus: CUES[cue].bus, source: getCueSource(cue) }));
+  });
+  const ownerRecordings = new Set(['ui.error', 'amb.rain', 'amb.thunder', 'music.island', 'music.free']);
+  for (const item of defaults) assert.equal(item.source, ownerRecordings.has(item.cue) ? 'file' : 'synth', `${item.cue}: unexpected default`);
+  assert(!(await page.evaluate(() => window.__audioRequests)).some((path) => path.includes('/sfx/') && !path.endsWith('/ui-error.mp3')), 'Synth defaults still preload recorded effects');
+  assert(!(await page.evaluate(() => window.__audioRequests)).some((path) => /amb-(sea|wind|gulls)/.test(path)), 'Synth nature defaults loaded their recordings');
+  checks.push('owner-selected-default-five-recordings-and-37-synthesized-sounds');
   await record('newGame');
 
   const actionCues = {
@@ -170,6 +193,52 @@ try {
     await record(name);
   }
 
+  await load('buyAsset');
+  await page.goto(`${url}/?sound`); await page.getByRole('heading', { name: 'Звуки острова' }).waitFor();
+  await choose('amb.sea', 'file');
+  await page.locator('.sound-scene').filter({ hasText: /▶ Остров/ }).click();
+  await page.locator('.sound-nature button').click();
+  await page.getByRole('switch', { name: /Шторм/ }).check();
+  await waitSnapshot((state) => state.scene === 'island' && state.weather === 'storm'
+    && ['music.island', 'amb.sea'].every((cue) => state.voices.some((voice) => voice.cue === cue && voice.source === 'file')));
+  for (const source of ['synth', 'file']) {
+    await choose('music.island', source); await choose('amb.sea', source);
+    await waitSnapshot((state) => state.scene === 'island' && state.weather === 'storm' && state.ambience
+      && ['music.island', 'amb.sea'].every((cue) => state.voices.some((voice) => voice.cue === cue && voice.source === source && voice.choice === source)));
+    await page.waitForTimeout(2700);
+    const switched = await snapshot();
+    for (const cue of ['music.island', 'amb.sea']) assert.equal(switched.voices.filter((voice) => voice.cue === cue).length, 1, `${cue}: outgoing layer leaked`);
+  }
+  checks.push('live-source-switches-preserve-music-scene-and-storm');
+  await choose('epilogue', 'synth');
+  assert.equal(await cueRow('music.epilogue').locator('select').inputValue(), 'synth');
+  await choose('music.epilogue', 'file');
+  assert.equal(await cueRow('epilogue').locator('select').inputValue(), 'file');
+  await choose('coins.pay', 'file'); await choose('music.island', 'synth'); await choose('amb.sea', 'synth');
+  const choiceBeforeComparison = await page.evaluate(async () => (await import('/src/audio/settings.ts')).getAudioSettings().sources);
+  await page.getByRole('button', { name: '■ Остановить всё', exact: true }).click(); await clearLog();
+  const paymentLabel = await cueRow('coins.pay').locator('b').innerText();
+  await page.getByRole('button', { name: `Послушать синтез: ${paymentLabel}`, exact: true }).click();
+  await page.waitForFunction(() => (window.__audioLog ?? []).some((entry) => entry.cue === 'coins.pay' && entry.source === 'synth'));
+  assert.deepEqual(await page.evaluate(async () => (await import('/src/audio/settings.ts')).getAudioSettings().sources), choiceBeforeComparison, 'Comparison changed the saved game profile');
+  await page.reload(); await page.getByRole('heading', { name: 'Звуки острова' }).waitFor();
+  for (const [cue, source] of [['coins.pay', 'file'], ['build.pop', 'synth'], ['music.island', 'synth'], ['amb.sea', 'synth']]) {
+    assert.equal(await cueRow(cue).locator('select').inputValue(), source, `${cue}: source did not survive reload`);
+  }
+  assert.equal(await page.evaluate(() => window.__contextCreations), 0);
+  await page.goto(url); await page.locator('.hud').waitFor(); await unlock();
+  await page.waitForFunction(async () => (await import('/src/audio/engine.ts')).audio.decoded.has('/audio/sfx/coins-pay.mp3'));
+  await clearLog();
+  assert.equal(await page.evaluate(async (action) => (await import('/src/store.ts')).useGame.getState().act(action), fixtures.buyAsset.action), true);
+  await page.waitForFunction(() => (window.__audioLog ?? []).some((entry) => entry.cue === 'build.pop'));
+  const mixedGame = await logs();
+  assert(mixedGame.some((entry) => entry.cue === 'coins.pay' && entry.source === 'file'));
+  assert(mixedGame.some((entry) => entry.cue === 'build.pop' && entry.source === 'synth'));
+  assert((await snapshot()).voices.some((voice) => voice.cue === 'music.island' && voice.source === 'synth'));
+  assert((await snapshot()).voices.some((voice) => voice.cue === 'amb.sea' && voice.source === 'synth'));
+  assert(!(await page.evaluate(() => window.__audioRequests)).some((path) => /build-pop|amb-sea|\/music\//.test(path)), 'Synth choices loaded their recorded files');
+  await record('mixed-source-profile-persists-and-controls-game');
+
   await load('developed'); await unlock();
   await page.locator('.audio-button').click();
   await page.getByRole('dialog', { name: 'Звук', exact: true }).waitFor();
@@ -180,15 +249,21 @@ try {
   assert.equal((await logs()).length, previous, 'Muted effects should not be played');
   for (const label of ['Музыка', 'Эффекты', 'Природа']) {
     const slider = page.getByRole('slider', { name: label, exact: true });
-    await slider.focus(); await page.keyboard.press('Home');
-    for (let step = 0; step < 23; step++) await page.keyboard.press('ArrowRight');
+    const id = await slider.getAttribute('id');
+    const committed = (value) => page.waitForFunction(({ id, value }) => document.getElementById(id)?.getAttribute('aria-valuetext') === `${value}%`, { id, value });
+    await slider.press('Home'); await committed(0);
+    for (let step = 1; step <= 23; step++) { await slider.press('ArrowRight'); await committed(step); }
   }
-  for (const volume of Object.values((await snapshot()).buses)) assert(Math.abs(volume - 0.23) < 0.000001);
+  const mutedSettings = await page.evaluate(async () => (await import('/src/audio/settings.ts')).getAudioSettings());
+  for (const bus of ['music', 'sfx', 'ambience']) assert.equal(mutedSettings[bus], 0.23);
   await page.reload(); await page.locator('.hud').waitFor();
   await page.locator('.audio-button').click();
   assert.equal(await page.getByRole('switch', { name: 'Звук включён', exact: true }).isChecked(), false);
   for (const label of ['Музыка', 'Эффекты', 'Природа']) assert.equal(await page.getByRole('slider', { name: label, exact: true }).inputValue(), '0.23');
   await page.getByRole('switch', { name: 'Звук включён', exact: true }).check();
+  // Idle AudioParam.value can retain the last computed quantum; assert gain while SFX really renders.
+  await page.evaluate(async () => (await import('/src/audio/engine.ts')).audio.play('week.next'));
+  await waitSnapshot((state) => Object.values(state.buses).every((volume) => Math.abs(volume - 0.23) < 0.000001));
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('.audio-panel').count(), 0);
   assert.equal(await page.locator('.audio-button').evaluate((element) => element === document.activeElement), true);
@@ -196,6 +271,11 @@ try {
 
   await page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, value: true }); document.dispatchEvent(new Event('visibilitychange')); });
   await waitSnapshot((state) => state.contextState === 'suspended');
+  const mediaPositions = await page.evaluate(() => [...window.__qaMedia].filter((media) => media.src && !media.ended).map((media) => ({ time: media.currentTime, paused: media.paused })));
+  assert(mediaPositions.every((media) => media.paused), 'Hidden music stream still playing');
+  await page.waitForTimeout(250);
+  const hiddenPositions = await page.evaluate(() => [...window.__qaMedia].filter((media) => media.src && !media.ended).map((media) => media.currentTime));
+  mediaPositions.forEach((media, i) => assert(Math.abs(media.time - hiddenPositions[i]) < .05, 'Hidden stream advances'));
   await page.evaluate(() => { delete document.hidden; document.dispatchEvent(new Event('visibilitychange')); });
   await waitSnapshot((state) => state.contextState === 'running');
   await page.evaluate(() => {
@@ -231,19 +311,58 @@ try {
   await page.goto(`${url}/?sound`);
   await page.getByRole('heading', { name: 'Звуки острова' }).waitFor();
   await page.evaluate(() => localStorage.setItem('archipelago.audio.debug', '1'));
-  const catalog = await page.evaluate(async () => (await import('/src/audio/cues.ts')).CUE_IDS);
+  const catalogInfo = await page.evaluate(async () => {
+    const { CUE_IDS, CUES } = await import('/src/audio/cues.ts'); const { getCueSource } = await import('/src/audio/settings.ts');
+    return CUE_IDS.map((cue) => ({ cue, label: CUES[cue].label, source: getCueSource(cue), files: !!CUES[cue].files?.length }));
+  });
+  const catalog = catalogInfo.map((item) => item.cue);
   assert.equal(await page.locator('.sound-cue').count(), catalog.length);
   for (const cue of catalog) {
     await page.getByRole('button', { name: '■ Остановить всё', exact: true }).click(); await clearLog();
-    await page.locator('.sound-cue').filter({ has: page.locator('code', { hasText: new RegExp(`^${cue.replace(/[.]/g, '\\.')}$`) }) }).getByRole('button').click();
+    await cueRow(cue).locator('.sound-play').click();
     await page.waitForFunction((cue) => (window.__audioLog ?? []).some((entry) => entry.cue === cue), cue);
     audioLogs[`catalog:${cue}`] = await logs();
+    assert.equal(audioLogs[`catalog:${cue}`].find((entry) => entry.cue === cue).source, catalogInfo.find((item) => item.cue === cue).source, `${cue}: catalogue ignored the saved choice`);
   }
   await page.getByRole('button', { name: '■ Остановить всё', exact: true }).click(); await clearLog();
   await page.getByRole('button', { name: /Каскад монет ×8/ }).click();
   await page.waitForFunction(() => (window.__audioLog ?? []).filter((entry) => entry.cue === 'coin.tick').length === 8);
   assert.deepEqual((await logs()).map((entry) => entry.pitchStep), [0, 1, 2, 3, 4, 5, 6, 7]);
   await record('showcase-all-42-cues-and-cascade');
+
+  const fileMode = await page.evaluate(async () => { const { CUE_IDS, CUES } = await import('/src/audio/cues.ts'); return CUE_IDS.every((cue) => CUES[cue].files?.length); });
+  if (fileMode) {
+    for (const { cue, label } of catalogInfo) {
+      await page.getByRole('button', { name: '■ Остановить всё', exact: true }).click(); await clearLog();
+      await page.getByRole('button', { name: `Послушать запись: ${label}`, exact: true }).click();
+      await page.waitForFunction((cue) => (window.__audioLog ?? []).some((entry) => entry.cue === cue), cue);
+      const entries = await logs(); assert.equal(entries.find((entry) => entry.cue === cue).source, 'file', `${cue}: explicit recording comparison must decode or stream the real file`);
+      audioLogs[`recording:${cue}`] = entries;
+      assert.equal(await cueRow(cue).locator('select').inputValue(), catalogInfo.find((item) => item.cue === cue).source, `${cue}: comparison changed the game choice`);
+    }
+    const fetched = await page.evaluate(() => window.__audioRequests);
+    assert(!fetched.some((path) => path.includes('/music/')), 'Music decoded through fetch instead of streamed');
+    const decodedLoops = await page.evaluate(async () => {
+      const { audio } = await import('/src/audio/engine.ts');
+      return ['sea', 'wind', 'rain'].map((name) => ({ file: name, duration: audio.decoded.get(`/audio/ambience/amb-${name}.mp3`)?.duration }));
+    });
+    decodedLoops.forEach((loop) => assert(Math.abs(loop.duration - 30) < .001, `Browser decoder added loop padding: ${JSON.stringify(loop)}`));
+    assert.equal(await page.locator('.sound-cue select').count(), 42);
+    await page.getByRole('button', { name: '■ Остановить всё', exact: true }).click(); await clearLog();
+    await page.getByRole('button', { name: `Послушать: ${catalogInfo.find((item) => item.cue === 'music.island').label}, вариант 2`, exact: true }).click();
+    await page.waitForFunction(() => (window.__audioLog ?? []).some((entry) => entry.cue === 'music.island' && entry.source === 'file' && entry.variant === 1));
+    assert(await page.evaluate(() => [...window.__qaMedia].some((media) => media.src.endsWith('/island-sicilian.mp3') && !media.paused)));
+    await record('real-files-all-cues-streamed-music-and-second-variant');
+    const corrupt = await context.newPage(); observe(corrupt);
+    await corrupt.route('**/audio/**/*.mp3', (route) => route.fulfill({ status: 200, contentType: 'audio/mpeg', body: 'deliberately corrupt audio fixture' }));
+    await corrupt.goto(`${url}/?sound`);
+    await corrupt.getByRole('button', { name: `Послушать запись: ${catalogInfo.find((item) => item.cue === 'ui.toggle').label}`, exact: true }).click();
+    await corrupt.waitForFunction(() => (window.__audioLog ?? []).some((entry) => entry.cue === 'ui.toggle' && entry.source === 'synth'));
+    await corrupt.getByRole('button', { name: `Послушать запись: ${catalogInfo.find((item) => item.cue === 'music.island').label}`, exact: true }).click();
+    await corrupt.waitForFunction(() => (window.__audioLog ?? []).some((entry) => entry.cue === 'music.island' && entry.source === 'synth'));
+    audioLogs['corrupt-file-fallback'] = await corrupt.evaluate(() => window.__audioLog);
+    await corrupt.close(); checks.push('real-corrupt-effect-and-stream-synth-fallback');
+  }
 
   for (const [width, height] of [[1366, 768], [390, 844]]) {
     await page.setViewportSize({ width, height });
@@ -266,6 +385,8 @@ try {
     const sorted = geometry.sort((a, b) => a.left - b.left);
     for (let i = 1; i < sorted.length; i++) assert(sorted[i].left >= sorted[i - 1].right - 1, 'Header controls overlap');
     await page.goto(`${url}/?sound`); await page.getByRole('heading', { name: 'Звуки острова' }).waitFor();
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, 'Source controls overflow showcase viewport');
+    await page.locator('.sound-catalog-heading').evaluate((element) => element.scrollIntoView({ block: 'start' }));
     await jpeg(`showcase-${width}`);
   }
   checks.push('responsive-header-panel-showcase-short-long');
@@ -283,6 +404,14 @@ try {
     await fallback.locator('.hud').waitFor();
     await fallback.getByRole('button', { name: /Следующая неделя/ }).click();
     assert.equal(await fallback.evaluate(async () => (await import('/src/store.ts')).useGame.getState().world.week), 2);
+    await fallback.goto(`${url}/?sound`);
+    await fallback.getByRole('heading', { name: 'Звуки острова' }).waitFor();
+    await fallback.getByRole('combobox', { name: `В игре: ${catalogInfo.find((item) => item.cue === 'ui.click').label}`, exact: true }).selectOption('file');
+    assert.equal(await fallback.evaluate(async () => (await import('/src/audio/settings.ts')).getCueSource('ui.click')), 'file', `${mode}: source choice should remain usable`);
+    if (mode === 'storage-denied') {
+      await fallback.reload(); await fallback.getByRole('heading', { name: 'Звуки острова' }).waitFor();
+      assert.equal(await fallback.evaluate(async () => (await import('/src/audio/settings.ts')).getCueSource('ui.click')), 'synth', 'Denied storage should recover the default profile after reload');
+    }
     await fallback.close(); checks.push(mode);
   }
 

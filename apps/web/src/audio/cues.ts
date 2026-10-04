@@ -32,7 +32,7 @@ const music = (name: string, label: string, group = 'Музыка', duration = 2
   volume: 0.55, maxVoices: 2, cooldownMs: 300,
 });
 
-/** Stage 1 deliberately has no file URLs: each cue is a playable synthesis placeholder. */
+/** Every file has a licensed source in CREDITS.md; recipes remain the offline fallback. */
 const catalog = {
   'ui.click': effect('ui.click', 'Кнопка — деревянный тук', 'Интерфейс', 0.13, 0.65, 60),
   'ui.toggle': effect('ui.toggle', 'Переключатель — щелчок', 'Интерфейс', 0.14, 0.6),
@@ -49,7 +49,7 @@ const catalog = {
   'loan.take': effect('loan.take', 'Кредит — бумага и штамп', 'Действия', 0.55, 0.6),
   'loan.repay': effect('loan.repay', 'Погашение — штамп и облегчение', 'Действия', 0.9, 0.6),
   study: effect('study', 'Учёба — страница и звон', 'Действия', 0.8, 0.55),
-  rest: effect('rest', 'Отдых — мягкая арфа', 'Действия', 1.15, 0.5),
+  rest: effect('rest', 'Отдых', 'Действия', 1.15, 0.5),
   'shift.on': effect('shift.on', 'Подработка — два тика часов', 'Действия', 0.4, 0.6),
   'job.quit': effect('job.quit', 'Уход с работы — светлый аккорд', 'Действия', 1, 0.6),
   'job.return': effect('job.return', 'На работу — две ноты вниз', 'Действия', 0.85, 0.6),
@@ -79,11 +79,22 @@ const catalog = {
   'amb.rain': ambience('amb.rain', 'Шторм — дождь', true, 4, 0.45),
   'amb.thunder': ambience('amb.thunder', 'Шторм — мягкий гром', false, 2.8, 0.65),
 
-  'music.island': music('music.island', 'Остров — две темы маримбы'),
-  'music.free': music('music.free', 'Свобода — две светлые темы'),
+  'music.island': music('music.island', 'Остров — уютная тема'),
+  'music.free': music('music.free', 'Свобода — светлая тема'),
   'music.epilogue': music('music.epilogue', 'Эпилог — завершение', 'Музыка', 7.5),
 } satisfies Record<string, CueDefinition>;
 
 export type CueId = keyof typeof catalog;
 export const CUES: Record<CueId, CueDefinition> = catalog;
 export const CUE_IDS = Object.keys(CUES) as CueId[];
+
+for (const cue of CUE_IDS) {
+  if (CUES[cue].bus !== 'music') {
+    const directory = CUES[cue].bus === 'sfx' ? 'sfx' : 'ambience';
+    CUES[cue].files = [`/audio/${directory}/${cue.replaceAll('.', '-')}.mp3`];
+  }
+}
+CUES['ui.click'].files!.push('/audio/sfx/ui-click-2.mp3');
+CUES['music.island'].files = ['/audio/music/island-ukulele.mp3', '/audio/music/island-sicilian.mp3'];
+CUES['music.free'].files = ['/audio/music/free-apple-cider.mp3'];
+CUES['music.epilogue'].files = CUES.epilogue.files = ['/audio/music/epilogue-forest.mp3'];

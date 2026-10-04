@@ -98,8 +98,10 @@ const close = (actual, expected, message) => assert.ok(Math.abs(actual - expecte
 const evidence = { runner: 'Actual TypeScript engine via tsx; controlled timers, AudioContext and HTMLAudioElement', checks: [] };
 const record = (name, values) => evidence.checks.push({ name, passed: true, ...values });
 let audio, CUES, CUE_IDS;
+const originalFiles = new Map();
 try {
   ({ CUES, CUE_IDS } = await import('../apps/web/src/audio/cues.ts'));
+  for (const cue of CUE_IDS) { originalFiles.set(cue, CUES[cue].files); delete CUES[cue].files; }
   ({ audio } = await import('../apps/web/src/audio/engine.ts'));
   audio.unlock(); assert.equal(audio.snapshot().contextState, 'running');
   const reset = () => { audio.stop(); audio.variant = 0; random = 0.5; window.__audioLog = []; };
@@ -202,7 +204,9 @@ try {
   evidence.passed = false; evidence.error = error.stack; process.exitCode = 1;
 } finally {
   audio?.stop();
-  if (CUES) { delete CUES['music.island'].files; delete CUES['music.free'].files; }
+  if (CUES) for (const [cue, files] of originalFiles) {
+    if (files) CUES[cue].files = files; else delete CUES[cue].files;
+  }
   Object.assign(globalThis, { setTimeout: saved.setTimeout, clearTimeout: saved.clearTimeout, performance: saved.performance });
   Math.random = saved.random; console.debug = saved.debug;
   await mkdir(dirname(reportPath), { recursive: true });

@@ -1,0 +1,880 @@
+{
+  "retrievedAt": "2026-10-04",
+  "sources": {
+    "interface": {
+      "title": "Interface Sounds",
+      "author": "Kenney",
+      "page": "https://kenney.nl/assets/interface-sounds",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "raw": "sfx/interface.zip",
+      "extract": "sfx/interface",
+      "download": "https://kenney.nl/media/pages/assets/interface-sounds/fa43c1dd4d-1677589452/kenney_interface-sounds.zip",
+      "sha256": "f2193d072726d6758a5f7871b2dcc54dcce0d5c35c6f0a62f92549b327c81232"
+    },
+    "impact": {
+      "title": "Impact Sounds",
+      "author": "Kenney",
+      "page": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "raw": "sfx/impact.zip",
+      "extract": "sfx/impact",
+      "download": "https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip",
+      "sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8"
+    },
+    "rpg": {
+      "title": "RPG Audio",
+      "author": "Kenney",
+      "page": "https://kenney.nl/assets/rpg-audio",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "raw": "sfx/rpg.zip",
+      "extract": "sfx/rpg",
+      "download": "https://kenney.nl/media/pages/assets/rpg-audio/8e99002d76-1677590336/kenney_rpg-audio.zip",
+      "sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b"
+    },
+    "ukulele": {
+      "title": "Happy Ukelele Island Surfing Theme",
+      "author": "Tarush Singhal",
+      "page": "https://opengameart.org/content/happy-ukelele-island-surfing-theme",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "raw": "music/ukele.mp3",
+      "download": "https://opengameart.org/sites/default/files/ukele.mp3",
+      "bpm": 99,
+      "bpmEvidence": "Original MP3 embedded TBPM tag: 99; spectral-flux autocorrelation strongest period approximately 99.38 BPM.",
+      "sha256": "371bfc606045dbaadc234696049d474f1b3473dc336fda8d0e183c17d9f1533f"
+    },
+    "apple": {
+      "title": "Apple Cider",
+      "author": "Zane Little",
+      "page": "https://opengameart.org/content/apple-cider",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "raw": "music/apple_cider.ogg",
+      "download": "https://opengameart.org/sites/default/files/apple_cider.ogg",
+      "bpm": null,
+      "bpmEvidence": "No published BPM found; original tags name artist/title but not BPM. Spectral-flux autocorrelation strongest period approximately 99.38 BPM (estimate only).",
+      "sha256": "29dfe7f2491fa2cabd159db70db868445be253e395db5f75b30b3113f798f4ca"
+    },
+    "sicilian": {
+      "title": "Sicilian sun",
+      "author": "Konrad \"FeniX\" Gadzina",
+      "page": "https://opengameart.org/content/sicilian-sun",
+      "license": "CC-BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "raw": "music/Sicilian sun_0.flac",
+      "download": "https://opengameart.org/sites/default/files/Sicilian%20sun_0.flac",
+      "bpm": null,
+      "bpmEvidence": "No published BPM found; strongest spectral-flux autocorrelation period approximately 83.35 BPM (estimate only).",
+      "sha256": "59dc0189ccea28bae796f06d9c8a4a7a72cde07cc90f31a557c403d2e8cf0229",
+      "authorUrl": "http://enklawa-tworcza.blogspot.com/"
+    },
+    "forest-begin": {
+      "title": "Ukulele Forest (Beginning, Loop and End)",
+      "author": "StarNinjas",
+      "authorUrl": "https://opengameart.org/users/starninjas",
+      "page": "https://opengameart.org/content/ukulele-forest-beginning-loop-and-end",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "raw": "music/forest_beginning.ogg",
+      "download": "https://opengameart.org/sites/default/files/forest_beginning.ogg",
+      "sha256": "814d8d4d20033282744cfa03c2bb8416ac54d09166a360691df9715f93e23a87"
+    },
+    "forest-end": {
+      "title": "Ukulele Forest (Beginning, Loop and End)",
+      "author": "StarNinjas",
+      "authorUrl": "https://opengameart.org/users/starninjas",
+      "page": "https://opengameart.org/content/ukulele-forest-beginning-loop-and-end",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "raw": "music/forest_end.ogg",
+      "download": "https://opengameart.org/sites/default/files/forest_end.ogg",
+      "sha256": "d5995729e5092832a06828daa4c8a47e3cbd16d0c944f8651e56e137867d7744"
+    },
+    "sea": {
+      "title": "Malta North Coast Sea on Rocks",
+      "author": "tonyg74",
+      "page": "https://freesound.org/people/tonyg74/sounds/583597/",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://cdn.freesound.org/previews/583/583597_6461847-hq.mp3",
+      "raw": "ambient/sea-tonyg74-583597.mp3",
+      "sha256": "6bb3d058d6dd26b791261ca8a7f239103d14e1d5501f58951d8b346f438397b4"
+    },
+    "wind": {
+      "title": "Wind through the palm trees and some crickets chirping in the day (Gran Sabana, Venezuela)",
+      "author": "Felix Blume (felix.blume)",
+      "page": "https://freesound.org/people/felix.blume/sounds/384550/",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://cdn.freesound.org/previews/384/384550_1661766-hq.mp3",
+      "raw": "ambient/palm-wind-felix-blume-384550.mp3",
+      "sha256": "c9910a16a0d4e891c190d4df5e5cf8eaadd9096c0c694a41fabb2bc2fde8a060"
+    },
+    "rain": {
+      "title": "Rain (loopable), sample 3",
+      "author": "Ylmir",
+      "page": "https://opengameart.org/content/rain-loopable",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://opengameart.org/sites/default/files/Rain%20MP3.zip",
+      "raw": "ambient/rain.zip",
+      "extract": "ambient/rain",
+      "sha256": "89c275fda7759584b471985af370386eff25a87ee7babfccd4e9d0ac2210c6df"
+    },
+    "gulls": {
+      "title": "Seagulls in Kiel.wav",
+      "author": "svenne2000",
+      "page": "https://freesound.org/people/svenne2000/sounds/507380/",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://cdn.freesound.org/previews/507/507380_1742074-hq.mp3",
+      "raw": "ambient/gulls-svenne2000-507380.mp3",
+      "sha256": "bbfd201aecd540ab94f702ba1b813bc67ee8547bd326f82201eafa327693b904"
+    },
+    "thunder": {
+      "title": "180806 Thunder, distant rolling boomy, rain drops TORONTO.flac",
+      "author": "TRP",
+      "page": "https://freesound.org/people/TRP/sounds/572443/",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "download": "https://cdn.freesound.org/previews/572/572443_97550-hq.mp3",
+      "raw": "ambient/distant-thunder-trp-572443.mp3",
+      "sha256": "547dc370d35f6fc69b93d3c587a7fae395688d4823e41dc4ee305d1915f686bd"
+    }
+  },
+  "assets": [
+    {
+      "path": "sfx/ui-click.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "impact",
+          "file": "Audio/impactWood_light_000.ogg",
+          "seconds": 0.12,
+          "semitones": -3
+        }
+      ]
+    },
+    {
+      "path": "sfx/ui-click-2.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "impact",
+          "file": "Audio/impactWood_light_001.ogg",
+          "seconds": 0.12,
+          "semitones": -3
+        }
+      ]
+    },
+    {
+      "path": "sfx/ui-toggle.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "interface",
+          "file": "Audio/toggle_001.ogg",
+          "seconds": 0.16
+        }
+      ]
+    },
+    {
+      "path": "sfx/ui-error.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "impact",
+          "file": "Audio/impactWood_light_000.ogg",
+          "seconds": 0.1,
+          "semitones": -8
+        },
+        {
+          "source": "impact",
+          "file": "Audio/impactWood_light_000.ogg",
+          "seconds": 0.1,
+          "at": 0.14,
+          "semitones": -10
+        }
+      ]
+    },
+    {
+      "path": "sfx/ui-open.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "rpg",
+          "file": "Audio/bookOpen.ogg",
+          "seconds": 0.32
+        }
+      ]
+    },
+    {
+      "path": "sfx/coins-pay.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "rpg",
+          "file": "Audio/handleCoins.ogg",
+          "seconds": 0.42
+        },
+        {
+          "source": "interface",
+          "file": "Audio/glass_001.ogg",
+          "seconds": 0.17,
+          "at": 0.07,
+          "semitones": -2,
+          "gain": 0.25
+        },
+        {
+          "source": "interface",
+          "file": "Audio/glass_001.ogg",
+          "seconds": 0.17,
+          "at": 0.22,
+          "semitones": -5,
+          "gain": 0.2
+        }
+      ]
+    },
+    {
+      "path": "sfx/coins-get.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "rpg",
+          "file": "Audio/handleCoins2.ogg",
+          "seconds": 0.45
+        },
+        {
+          "source": "interface",
+          "file": "Audio/glass_002.ogg",
+          "seconds": 0.17,
+          "at": 0.1,
+          "gain": 0.25
+        },
+        {
+          "source": "interface",
+          "file": "Audio/glass_002.ogg",
+          "seconds": 0.17,
+          "at": 0.26,
+          "semitones": 3,
+          "gain": 0.2
+        }
+      ]
+    },
+    {
+      "path": "sfx/build-pop.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "interface",
+          "file": "Audio/drop_001.ogg",
+          "seconds": 0.26
+        },
+        {
+          "source": "impact",
+          "file": "Audio/impactWood_light_000.ogg",
+          "seconds": 0.16,
+          "at": 0.16,
+          "gain": 0.7
+        }
+      ]
+    },
+    {
+      "path": "sfx/status-joy.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "forest-end",
+          "start": 0.1,
+          "seconds": 1.2
+        }
+      ]
+    },
+    {
+      "path": "sfx/build-remove.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "interface",
+          "file": "Audio/minimize_001.ogg",
+          "seconds": 0.35
+        },
+        {
+          "source": "rpg",
+          "file": "Audio/cloth1.ogg",
+          "seconds": 0.2,
+          "gain": 0.3
+        }
+      ]
+    },
+    {
+      "path": "sfx/upgrade.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "impact",
+          "file": "Audio/impactWood_light_000.ogg",
+          "seconds": 0.12
+        },
+        {
+          "source": "impact",
+          "file": "Audio/impactWood_light_001.ogg",
+          "seconds": 0.12,
+          "at": 0.18
+        },
+        {
+          "source": "impact",
+          "file": "Audio/impactWood_light_002.ogg",
+          "seconds": 0.12,
+          "at": 0.36
+        },
+        {
+          "source": "impact",
+          "file": "Audio/impactBell_heavy_000.ogg",
+          "seconds": 0.75,
+          "at": 0.5,
+          "semitones": 3,
+          "gain": 0.35
+        }
+      ]
+    },
+    {
+      "path": "sfx/repair.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "impact",
+          "file": "Audio/impactWood_light_000.ogg",
+          "seconds": 0.12
+        },
+        {
+          "source": "impact",
+          "file": "Audio/impactWood_light_001.ogg",
+          "seconds": 0.12,
+          "at": 0.23
+        }
+      ]
+    },
+    {
+      "path": "sfx/loan-take.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "rpg",
+          "file": "Audio/bookFlip1.ogg",
+          "seconds": 0.3
+        },
+        {
+          "source": "impact",
+          "file": "Audio/impactSoft_medium_000.ogg",
+          "seconds": 0.12,
+          "at": 0.22
+        }
+      ]
+    },
+    {
+      "path": "sfx/loan-repay.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "impact",
+          "file": "Audio/impactSoft_medium_000.ogg",
+          "seconds": 0.12
+        },
+        {
+          "source": "interface",
+          "file": "Audio/glass_002.ogg",
+          "seconds": 0.45,
+          "at": 0.12,
+          "gain": 0.35
+        }
+      ]
+    },
+    {
+      "path": "sfx/study.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "rpg",
+          "file": "Audio/bookFlip2.ogg",
+          "seconds": 0.33
+        },
+        {
+          "source": "interface",
+          "file": "Audio/glass_003.ogg",
+          "seconds": 0.42,
+          "at": 0.26,
+          "gain": 0.35
+        }
+      ]
+    },
+    {
+      "path": "sfx/rest.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "forest-begin",
+          "start": 1.5,
+          "seconds": 1.3
+        }
+      ]
+    },
+    {
+      "path": "sfx/shift-on.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "interface",
+          "file": "Audio/tick_001.ogg",
+          "seconds": 0.1
+        },
+        {
+          "source": "interface",
+          "file": "Audio/tick_001.ogg",
+          "seconds": 0.1,
+          "at": 0.2
+        }
+      ]
+    },
+    {
+      "path": "sfx/job-quit.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "forest-end",
+          "start": 0.15,
+          "seconds": 1.2
+        }
+      ]
+    },
+    {
+      "path": "sfx/job-return.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "interface",
+          "file": "Audio/pluck_001.ogg",
+          "seconds": 0.22,
+          "semitones": -1
+        },
+        {
+          "source": "interface",
+          "file": "Audio/pluck_001.ogg",
+          "seconds": 0.22,
+          "at": 0.26,
+          "semitones": -4
+        }
+      ]
+    },
+    {
+      "path": "sfx/dream-start.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "rpg",
+          "file": "Audio/chop.ogg",
+          "seconds": 0.35,
+          "gain": 0.5
+        },
+        {
+          "source": "impact",
+          "file": "Audio/impactWood_light_000.ogg",
+          "seconds": 0.13,
+          "at": 0.35
+        },
+        {
+          "source": "impact",
+          "file": "Audio/impactWood_light_000.ogg",
+          "seconds": 0.13,
+          "at": 0.57
+        }
+      ]
+    },
+    {
+      "path": "sfx/week-next.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "impact",
+          "file": "Audio/impactBell_heavy_000.ogg",
+          "seconds": 0.75,
+          "semitones": -3
+        }
+      ]
+    },
+    {
+      "path": "sfx/coin-tick.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "interface",
+          "file": "Audio/glass_001.ogg",
+          "seconds": 0.2,
+          "semitones": -4
+        }
+      ]
+    },
+    {
+      "path": "sfx/coin-minus.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "interface",
+          "file": "Audio/glass_001.ogg",
+          "seconds": 0.21,
+          "semitones": -9
+        }
+      ],
+      "rmsDb": -25
+    },
+    {
+      "path": "sfx/event-good.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "interface",
+          "file": "Audio/glass_003.ogg",
+          "seconds": 0.3
+        },
+        {
+          "source": "interface",
+          "file": "Audio/glass_004.ogg",
+          "seconds": 0.3,
+          "at": 0.18,
+          "semitones": 3,
+          "gain": 0.7
+        }
+      ]
+    },
+    {
+      "path": "sfx/event-bad.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "impact",
+          "file": "Audio/impactSoft_heavy_000.ogg",
+          "seconds": 0.4,
+          "semitones": -3
+        }
+      ]
+    },
+    {
+      "path": "sfx/scam-collapse.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "interface",
+          "file": "Audio/drop_001.ogg",
+          "seconds": 0.16,
+          "semitones": -2
+        },
+        {
+          "source": "interface",
+          "file": "Audio/drop_001.ogg",
+          "seconds": 0.16,
+          "at": 0.17,
+          "semitones": -5
+        },
+        {
+          "source": "interface",
+          "file": "Audio/drop_001.ogg",
+          "seconds": 0.16,
+          "at": 0.35,
+          "semitones": -9
+        },
+        {
+          "source": "interface",
+          "file": "Audio/pluck_002.ogg",
+          "seconds": 0.35,
+          "at": 0.3,
+          "semitones": -8,
+          "gain": 0.4
+        }
+      ]
+    },
+    {
+      "path": "sfx/loan-emergency.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "impact",
+          "file": "Audio/impactBell_heavy_000.ogg",
+          "seconds": 0.75,
+          "semitones": -10
+        }
+      ]
+    },
+    {
+      "path": "sfx/threat.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "interface",
+          "file": "Audio/tick_001.ogg",
+          "seconds": 0.1,
+          "at": 0.0,
+          "semitones": -6
+        },
+        {
+          "source": "interface",
+          "file": "Audio/tick_001.ogg",
+          "seconds": 0.1,
+          "at": 0.25,
+          "semitones": -6
+        },
+        {
+          "source": "interface",
+          "file": "Audio/tick_001.ogg",
+          "seconds": 0.1,
+          "at": 0.5,
+          "semitones": -6
+        },
+        {
+          "source": "interface",
+          "file": "Audio/tick_001.ogg",
+          "seconds": 0.1,
+          "at": 0.75,
+          "semitones": -6
+        }
+      ]
+    },
+    {
+      "path": "sfx/neighbor-free.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "impact",
+          "file": "Audio/impactBell_heavy_000.ogg",
+          "seconds": 0.75,
+          "semitones": 5
+        }
+      ],
+      "rmsDb": -26
+    },
+    {
+      "path": "sfx/freedom.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "forest-begin",
+          "seconds": 2.6
+        },
+        {
+          "source": "impact",
+          "file": "Audio/impactBell_heavy_000.ogg",
+          "seconds": 0.75,
+          "at": 0.2,
+          "semitones": 4,
+          "gain": 0.22
+        }
+      ],
+      "rmsDb": -23
+    },
+    {
+      "path": "sfx/freedom-level.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "interface",
+          "file": "Audio/glass_003.ogg",
+          "seconds": 0.4
+        },
+        {
+          "source": "interface",
+          "file": "Audio/glass_003.ogg",
+          "seconds": 0.4,
+          "at": 0.2,
+          "semitones": 4
+        },
+        {
+          "source": "interface",
+          "file": "Audio/glass_003.ogg",
+          "seconds": 0.4,
+          "at": 0.4,
+          "semitones": 7
+        }
+      ]
+    },
+    {
+      "path": "sfx/dream-stage.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "impact",
+          "file": "Audio/impactWood_light_000.ogg",
+          "seconds": 0.12
+        },
+        {
+          "source": "impact",
+          "file": "Audio/impactBell_heavy_000.ogg",
+          "seconds": 0.75,
+          "at": 0.18,
+          "semitones": 5,
+          "gain": 0.5
+        }
+      ]
+    },
+    {
+      "path": "music/island-ukulele.mp3",
+      "kind": "track",
+      "channels": 2,
+      "bitrate": 128,
+      "parts": [
+        {
+          "source": "ukulele"
+        }
+      ]
+    },
+    {
+      "path": "music/island-sicilian.mp3",
+      "kind": "track",
+      "channels": 2,
+      "bitrate": 128,
+      "parts": [
+        {
+          "source": "sicilian",
+          "repeat": 8
+        }
+      ]
+    },
+    {
+      "path": "music/free-apple-cider.mp3",
+      "kind": "track",
+      "channels": 2,
+      "bitrate": 128,
+      "parts": [
+        {
+          "source": "apple"
+        }
+      ]
+    },
+    {
+      "path": "music/epilogue-forest.mp3",
+      "kind": "track",
+      "channels": 2,
+      "bitrate": 128,
+      "release": 0.25,
+      "parts": [
+        {
+          "source": "forest-begin"
+        },
+        {
+          "source": "forest-end"
+        }
+      ]
+    },
+    {
+      "path": "ambience/amb-sea.mp3",
+      "kind": "loop",
+      "seconds": 30,
+      "crossfade": 5,
+      "rmsDb": -27,
+      "parts": [
+        {
+          "source": "sea"
+        }
+      ]
+    },
+    {
+      "path": "ambience/amb-wind.mp3",
+      "kind": "loop",
+      "seconds": 30,
+      "crossfade": 5,
+      "rmsDb": -27,
+      "parts": [
+        {
+          "source": "wind"
+        }
+      ]
+    },
+    {
+      "path": "ambience/amb-rain.mp3",
+      "kind": "loop",
+      "seconds": 30,
+      "crossfade": 5,
+      "rmsDb": -27,
+      "parts": [
+        {
+          "source": "rain",
+          "file": "3.mp3"
+        }
+      ]
+    },
+    {
+      "path": "ambience/amb-gulls.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "gulls",
+          "start": 0.25,
+          "seconds": 1.35
+        }
+      ],
+      "rmsDb": -27
+    },
+    {
+      "path": "ambience/amb-thunder.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "thunder",
+          "start": 2.5,
+          "seconds": 4.5,
+          "attack": 0.18,
+          "release": 0.6
+        }
+      ],
+      "rmsDb": -25
+    },
+    {
+      "path": "sfx/storm.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "thunder",
+          "start": 3,
+          "seconds": 3,
+          "attack": 0.18,
+          "release": 0.6
+        }
+      ],
+      "rmsDb": -25
+    },
+    {
+      "path": "sfx/dream-launch.mp3",
+      "kind": "effect",
+      "parts": [
+        {
+          "source": "impact",
+          "file": "Audio/impactBell_heavy_000.ogg",
+          "seconds": 0.8,
+          "semitones": -3
+        },
+        {
+          "source": "impact",
+          "file": "Audio/impactBell_heavy_000.ogg",
+          "seconds": 0.8,
+          "at": 0.65,
+          "semitones": -3
+        },
+        {
+          "source": "sea",
+          "start": 5,
+          "seconds": 1.7,
+          "at": 0.45,
+          "gain": 0.5
+        },
+        {
+          "source": "gulls",
+          "start": 0.25,
+          "seconds": 1.35,
+          "at": 1,
+          "gain": 0.5
+        }
+      ]
+    }
+  ]
+}
