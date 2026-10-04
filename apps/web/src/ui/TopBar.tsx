@@ -1,8 +1,74 @@
+import { useLayoutEffect, useRef, useState } from 'react';
 import { financeView, getPlayer } from '@arch/engine';
 import { HUMAN, useGame } from '../store';
 import { fmt } from '../format';
 import { Coin, ConfirmButton, Meter } from './common';
-import { NeighborsBar } from './Neighbors';
+import { NeighborsBar, type NeighborsSize } from './Neighbors';
+import { useMediaQuery } from './Panels';
+
+/** Выбираем размер по свободному промежутку, независимо от аватаров в плашке. */
+function useNeighborsLayout(desktop: boolean, islandName: string, week: number, selected: string | null) {
+  const topRef = useRef<HTMLElement>(null);
+  const [size, setSize] = useState<NeighborsSize>('compact');
+  useLayoutEffect(() => {
+    const top = topRef.current;
+    if (!desktop || !top) return;
+    const badge = top.querySelector<HTMLElement>('.badge')!;
+    const stats = top.querySelector<HTMLElement>('.stats')!;
+    const mini = badge.querySelector<HTMLElement>('.nb-mini')!;
+    const probes = [...top.querySelectorAll<HTMLElement>('[data-neighbors-probe]')];
+    const hud = top.parentElement!;
+    const leftColumn = hud.querySelector<HTMLElement>('.col-left');
+    const rightColumn = hud.querySelector<HTMLElement>('.col-right');
+    let frame = 0;
+    const measure = () => {
+      const topRect = top.getBoundingClientRect();
+      const badgeRect = badge.getBoundingClientRect();
+      const topGap = parseFloat(getComputedStyle(top).columnGap);
+      const badgeGap = parseFloat(getComputedStyle(badge).columnGap);
+      const miniWidth = mini.getBoundingClientRect().width;
+      // В fallback плашка сжимается: возвращаем ширину обрезанного текста и убираем mini.
+      const textOverflow = Math.max(0, ...[...badge.querySelectorAll<HTMLElement>('.title, .sub')]
+        .map((text) => text.scrollWidth - text.clientWidth));
+      const baseBadgeWidth = badgeRect.width - (miniWidth ? miniWidth + badgeGap : 0) + textOverflow;
+      const available = topRect.width - stats.getBoundingClientRect().width - baseBadgeWidth - topGap * 2;
+      const next = probes.find((probe) => probe.getBoundingClientRect().width <= available)?.dataset.neighborsProbe as NeighborsSize | undefined;
+      setSize(next ?? 'badge');
+
+      const left = Math.max(16, (leftColumn?.getBoundingClientRect().right ?? 4) + 12);
+      const right = Math.min(window.innerWidth - 16, (rightColumn?.getBoundingClientRect().left ?? window.innerWidth - 4) - 12);
+      const width = Math.max(0, Math.min(400, right - left));
+      const anchor = (size === 'badge' ? mini : top.querySelector<HTMLElement>('.nb-bar')!)
+        .getBoundingClientRect();
+      const desiredLeft = width < 400 ? anchor.right - width : (anchor.left + anchor.right - width) / 2;
+      const popupLeft = Math.max(left, Math.min(right - width, desiredLeft));
+      const popupTop = topRect.height + 8;
+      const tickerHeight = top.querySelector<HTMLElement>('.ticker')?.getBoundingClientRect().height ?? 0;
+      top.style.setProperty('--nb-dropdown-left', `${popupLeft - topRect.left}px`);
+      top.style.setProperty('--nb-dropdown-width', `${width}px`);
+      top.style.setProperty('--nb-dropdown-top', `${popupTop}px`);
+      top.style.setProperty('--nb-card-height', `${Math.max(0, window.innerHeight - topRect.top - popupTop - 16 - (tickerHeight ? tickerHeight + 6 : 0))}px`);
+    };
+    const schedule = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(measure);
+    };
+    measure();
+    const observer = new ResizeObserver(schedule);
+    [top, badge, stats, ...probes, leftColumn, rightColumn].forEach((element) => {
+      if (element) observer.observe(element);
+    });
+    window.addEventListener('resize', schedule);
+    document.fonts.addEventListener('loadingdone', schedule);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener('resize', schedule);
+      document.fonts.removeEventListener('loadingdone', schedule);
+    };
+  }, [desktop, islandName, week, selected, size]);
+  return { topRef, size };
+}
 
 export function Emblem() {
   return (
@@ -21,9 +87,12 @@ export function TopBar() {
   const resetGame = useGame((s) => s.resetGame);
   const me = getPlayer(world, HUMAN);
   const fin = financeView(world, HUMAN);
+  const desktop = useMediaQuery('(min-width: 1024px)');
+  const selected = useGame((s) => s.neighborId);
+  const { topRef, size } = useNeighborsLayout(desktop, me.islandName, world.week, selected);
 
   return (
-    <header className="top">
+    <header className="top" ref={topRef} data-neighbors-size={desktop ? size : undefined}>
       <div className="panel badge">
         <Emblem />
         <div className="badge-text">
@@ -35,6 +104,8 @@ export function TopBar() {
           <span aria-label="Новая игра">↺</span>
         </ConfirmButton>
       </div>
+
+      {desktop && <div className="neighbors-slot"><NeighborsBar size={size} /></div>}
 
       <div className="stats">
         <div className="panel stat">

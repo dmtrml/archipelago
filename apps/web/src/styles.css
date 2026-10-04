@@ -68,6 +68,14 @@ button, input { font: inherit; color: inherit; }
 .value { font: 700 19px/1 var(--font-display); margin-top: 5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .value small { font: 700 12px var(--font-body); color: var(--ink-soft); }
 
+.hud.desktop .top { position: relative; align-items: center; flex-wrap: nowrap; min-width: 0; }
+.hud.desktop .badge { min-width: 0; }
+.hud.desktop .badge-text { min-width: 0; }
+.hud.desktop .badge .title, .hud.desktop .badge .sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hud.desktop .badge > .icon-btn { flex: none; }
+.hud.desktop .stats { flex: none; flex-wrap: nowrap; }
+.neighbors-slot { flex: 1; min-width: 0; display: flex; justify-content: center; }
+
 .coin {
   display: inline-block; flex: none; width: 26px; height: 26px; border-radius: 50%;
   background: radial-gradient(circle at 34% 30%, #FFE7A3 0 18%, #F5B83D 45%, #D9931C 100%);
@@ -422,12 +430,23 @@ button, input { font: inherit; color: inherit; }
 }
 
 /* ───────── Соседи на экране ───────── */
-.col-top { grid-column: 2; grid-row: 2; justify-self: center; align-self: start; position: relative; z-index: 2; min-width: 0; }
 .neighbors { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.nb-bar { display: flex; align-items: center; gap: 4px; padding: 6px 8px 6px 14px; background: rgba(255, 251, 243, 0.62); }
+.nb-bar, .nb-probe { display: flex; align-items: center; flex: none; width: max-content; gap: 4px; padding: 6px 8px 6px 14px; background: rgba(255, 251, 243, 0.62); }
+.nb-measure { position: absolute; left: 0; top: 0; visibility: hidden; pointer-events: none; }
+.nb-medium, .nb-compact { padding: 6px 8px; gap: 2px; }
+.nb-medium .nb-chip { padding: 4px 6px 4px 4px; gap: 5px; }
+.nb-medium .nb-text b { font-size: 12px; }
+.nb-compact .nb-chip { padding: 2px; }
+.hud.desktop .top[data-neighbors-size="badge"] .nb-bar { display: none; }
+.neighbor-dropdown {
+  position: absolute; left: var(--nb-dropdown-left); top: var(--nb-dropdown-top); width: var(--nb-dropdown-width);
+  display: flex; flex-direction: column; gap: 6px; z-index: 2;
+}
+.neighbor-dropdown .ticker { width: 100%; max-width: 100%; }
+.neighbor-dropdown .neighbor-card { position: static; transform: none; width: 100%; max-height: var(--nb-card-height); }
 .nb-label { font-size: 10px; line-height: 1.15; font-weight: 800; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .07em; margin-right: 6px; }
 .nb-chip {
-  display: flex; align-items: center; gap: 8px; border: 0; background: transparent; cursor: pointer;
+  display: flex; flex: none; align-items: center; gap: 8px; border: 0; background: transparent; cursor: pointer;
   padding: 4px 10px 4px 4px; border-radius: 99px; transition: background .15s, box-shadow .15s;
 }
 .nb-chip:hover { background: rgba(255, 255, 255, 0.7); }
@@ -494,6 +513,7 @@ button, input { font: inherit; color: inherit; }
 .nb-mini { display: flex; gap: 2px; }
 .nb-mini .nb-chip { padding: 2px; }
 .hud.desktop .nb-mini { display: none; }
+.hud.desktop .top[data-neighbors-size="badge"] .nb-mini { display: flex; flex: none; }
 .hud.mobile .badge-text { min-width: 0; }
 .hud.mobile .title, .hud.mobile .sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .neighbor-modal > div { width: min(420px, 100%); }
