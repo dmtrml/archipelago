@@ -5,6 +5,7 @@ import { fmt } from '../format';
 import { Coin, ConfirmButton, Meter } from './common';
 import { NeighborsBar, type NeighborsSize } from './Neighbors';
 import { useMediaQuery } from './Panels';
+import { AudioControls } from '../audio/AudioControls';
 
 /** Выбираем размер по свободному промежутку, независимо от аватаров в плашке. */
 function useNeighborsLayout(desktop: boolean, islandName: string, week: number, selected: string | null) {
@@ -97,9 +98,10 @@ export function TopBar() {
         <Emblem />
         <div className="badge-text">
           <div className="title">{me.islandName}</div>
-          <div className="sub">Неделя {world.week}{me.freedomWeek ? ` · свобода с ${me.freedomWeek}-й недели` : ''}{me.employed ? '' : ' · без работы'}</div>
+          <div className="sub">Неделя {world.week}<span className="badge-detail">{me.freedomWeek ? ` · свобода с ${me.freedomWeek}-й недели` : ''}{me.employed ? '' : ' · без работы'}</span></div>
         </div>
         <NeighborsBar compact />
+        <AudioControls />
         <ConfirmButton className="icon-btn" confirmText="Начать заново?" onConfirm={resetGame}>
           <span aria-label="Новая игра">↺</span>
         </ConfirmButton>

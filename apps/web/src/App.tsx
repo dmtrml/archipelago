@@ -5,6 +5,7 @@ import { TopBar } from './ui/TopBar';
 import { DesktopLayout, MobileLayout, useMediaQuery } from './ui/Panels';
 import { ToastView, WeekModal, WelcomeModal } from './ui/Modals';
 import { NeighborModal } from './ui/Neighbors';
+import { useUiSound } from './audio/useUiSound';
 
 /** Какую долю ширины экрана занимают боковые колонки интерфейса (только раскладка для компьютера). */
 function useSideInsets(enabled: boolean): [number, number] {
@@ -26,6 +27,7 @@ function useSideInsets(enabled: boolean): [number, number] {
 }
 
 export default function App() {
+  useUiSound();
   const world = useGame((s) => s.world);
   const floats = useGame((s) => s.floats);
   const weather = useGame((s) => s.weather);
