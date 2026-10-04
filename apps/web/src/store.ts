@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import {
-  applyAction, createWorld, getPlayer, migrateWorld, ASSET_DEFS, DREAMS, DREAM_UPKEEP_UID,
+  applyAction, assetViews, createWorld, financeView, getPlayer, migrateWorld, ASSET_DEFS, DREAMS, DREAM_UPKEEP_UID,
   type Action, type GameEvent, type WeekReport, type WorldState,
 } from '@arch/engine';
 import type { DreamProgress, FloatLabel, PlacedItem, Weather } from './scene/contract';
@@ -9,27 +9,44 @@ import { fmt, signed } from './format';
 export const HUMAN = 'p1';
 const SAVE_KEY = 'archipelago.save.v1';
 
-export type Tab = 'deals' | 'island' | 'actions' | 'neighbors' | 'report';
+export type Tab = 'deals' | 'island' | 'actions' | 'report';
 
 export interface Toast { id: number; text: string; tone: 'good' | 'bad' | 'neutral' }
 /** `epilogue` — на этой неделе достроена мечта: вместо обычных итогов недели показываем эпилог. */
 export interface WeekModal { report: WeekReport; events: GameEvent[]; freedom: boolean; epilogue: boolean }
-export interface NewsItem { week: number; text: string }
+/** playerId нет у новостей из сохранений до экрана соседей. */
+export interface NewsItem { week: number; text: string; playerId?: string }
+/** Доля свободы каждого игрока по неделям — для графиков на карточках соседей. */
+export type FreedomHistory = Record<string, { week: number; ratio: number }[]>;
 
-interface Saved { world: WorldState; news: NewsItem[] }
+const HISTORY_LIMIT = 160;
 
-/** Сохранение любой поддерживаемой версии мира → мир версии 2. Непонятное сохранение игнорируем. */
+interface Saved { world: WorldState; news: NewsItem[]; history: FreedomHistory }
+
+/** Сохранение любой поддерживаемой версии мира → текущая версия. Непонятное сохранение игнорируем. */
 function load(): Saved | null {
   try {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return null;
-    const saved = JSON.parse(raw) as { world?: unknown; news?: NewsItem[] } | null;
+    const saved = JSON.parse(raw) as { world?: unknown; news?: NewsItem[]; history?: FreedomHistory } | null;
     const world = migrateWorld(saved?.world);
     if (!world) return null;
-    return { world, news: Array.isArray(saved?.news) ? saved.news : [] };
+    const history = saved?.history && typeof saved.history === 'object' ? saved.history : {};
+    return { world, news: Array.isArray(saved?.news) ? saved.news : [], history };
   } catch {
     return null;
   }
+}
+
+/** Добавить в историю точку текущей недели для всех игроков. */
+function recordHistory(history: FreedomHistory, world: WorldState): FreedomHistory {
+  const next: FreedomHistory = { ...history };
+  for (const p of world.players) {
+    const ratio = Math.round(financeView(world, p.id).freedomRatio * 1000) / 1000;
+    const line = (next[p.id] ?? []).filter((pt) => pt.week < world.week);
+    next[p.id] = [...line, { week: world.week, ratio }].slice(-HISTORY_LIMIT);
+  }
+  return next;
 }
 
 function save(data: Saved | null) {
@@ -44,6 +61,9 @@ function save(data: Saved | null) {
 interface GameStore {
   world: WorldState | null;
   news: NewsItem[];
+  history: FreedomHistory;
+  /** Чья карточка соседа открыта; null — ничья. */
+  neighborId: string | null;
   floats: FloatLabel[];
   weather: Weather;
   toast: Toast | null;
@@ -61,11 +81,12 @@ interface GameStore {
   setTab(tab: Tab): void;
   setSheetOpen(open: boolean): void;
   focusItem(uid: string): void;
+  showNeighbor(playerId: string | null): void;
   showToast(text: string, tone?: Toast['tone']): void;
 }
 
 const saved = load();
-if (saved) save(saved); // старое сохранение переписываем в версии 2 — ключ тот же
+if (saved) save(saved); // старое сохранение переписываем в текущей версии — ключ тот же
 let toastSeq = 0;
 let floatSeq = 0;
 
@@ -83,6 +104,8 @@ export const useGame = create<GameStore>((set, get) => {
   return {
     world: saved?.world ?? null,
     news: saved?.news ?? [],
+    history: saved ? recordHistory(saved.history, saved.world) : {},
+    neighborId: null,
     floats: [],
     weather: 'clear',
     toast: null,
@@ -94,13 +117,14 @@ export const useGame = create<GameStore>((set, get) => {
 
     newGame(islandName, playerName) {
       const world = createWorld({ seed: Math.floor(Math.random() * 2 ** 31), playerName, islandName });
-      set({ world, news: [], modal: null, tab: 'deals', floats: [], weather: 'clear' });
-      save({ world, news: [] });
+      const history = recordHistory({}, world);
+      set({ world, news: [], history, neighborId: null, modal: null, tab: 'deals', floats: [], weather: 'clear' });
+      save({ world, news: [], history });
     },
 
     resetGame() {
       save(null);
-      set({ world: null, news: [], modal: null, floats: [], weather: 'clear' });
+      set({ world: null, news: [], history: {}, neighborId: null, modal: null, floats: [], weather: 'clear' });
     },
 
     act(action, success) {
@@ -112,7 +136,17 @@ export const useGame = create<GameStore>((set, get) => {
         return false;
       }
       set({ world: res.world });
-      save({ world: res.world, news: get().news });
+      save({ world: res.world, news: get().news, history: get().history });
+
+      // Улучшение — над объектом всплывает прибавка к доходу
+      if (action.type === 'upgradeAsset') {
+        const before = world.players[0].owned.find((a) => a.uid === action.assetUid);
+        const after = assetViews(res.world, HUMAN).find((v) => v.asset.uid === action.assetUid);
+        if (before && after) {
+          const gain = after.asset.income - before.income;
+          if (gain > 0) setTimeout(() => pushFloats([{ anchor: action.assetUid, text: `+${fmt(gain)} в неделю`, tone: 'pos' }]), 500);
+        }
+      }
 
       // Покупка/продажа — сразу видно на острове
       if (action.type === 'buyOffer') {
@@ -139,9 +173,13 @@ export const useGame = create<GameStore>((set, get) => {
       }
       const report = res.world.lastReport;
       const mine = report.players[HUMAN];
-      const news = [...report.news.map((n) => ({ week: report.week, text: n.text })), ...get().news].slice(0, 40);
-      set({ world: res.world, news, busy: true });
-      save({ world: res.world, news });
+      const news = [
+        ...report.news.map((n) => ({ week: report.week, text: n.text, playerId: n.playerId })),
+        ...get().news,
+      ].slice(0, 80);
+      const history = recordHistory(get().history, res.world);
+      set({ world: res.world, news, history, busy: true });
+      save({ world: res.world, news, history });
 
       // Деньги «текут» на острове: зарплата над домом, доход над каждым активом
       const owned = new Map(res.world.players[0].owned.map((a) => [a.uid, a]));
@@ -192,6 +230,10 @@ export const useGame = create<GameStore>((set, get) => {
       setTimeout(() => { if (get().highlightUid === uid) set({ highlightUid: null }); }, 2200);
     },
 
+    showNeighbor(playerId) {
+      set((s) => ({ neighborId: playerId !== null && s.neighborId === playerId ? null : playerId }));
+    },
+
     showToast(text, tone = 'neutral') {
       const id = ++toastSeq;
       set({ toast: { id, text, tone } });
@@ -204,7 +246,7 @@ export const useGame = create<GameStore>((set, get) => {
 export function placedItems(world: WorldState): PlacedItem[] {
   return world.players[0].owned.map((a) => {
     const def = ASSET_DEFS[a.defId];
-    return { uid: a.uid, model: def.model, slot: def.slot, slotIndex: a.slotIndex, damaged: a.damaged };
+    return { uid: a.uid, model: def.model, slot: def.slot, slotIndex: a.slotIndex, damaged: a.damaged, level: a.level ?? 1 };
   });
 }
 

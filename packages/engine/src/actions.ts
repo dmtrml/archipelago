@@ -1,6 +1,6 @@
 // Действия игрока внутри недели (всё, кроме endWeek). Каждое либо целиком применяется, либо отказ.
 import {
-  freeSlotIndex, getDef, getDream, loanLimit, repairCost, saleValue, studyCost,
+  freeSlotIndex, getDef, getDream, loanLimit, nextUpgrade, repairCost, saleValue, studyCost, upgradedAsset,
 } from './economy';
 import { nextUid } from './offers';
 import { Rng } from './rng';
@@ -32,6 +32,7 @@ const buyOffer: Handler<Extract<PlayerAction, { type: 'buyOffer' }>> = (world, p
     price: offer.price,
     income: offer.income,
     upkeep: offer.upkeep,
+    level: 1,
     damaged: false,
     slotIndex,
   };
@@ -62,6 +63,31 @@ const repairAsset: Handler<Extract<PlayerAction, { type: 'repairAsset' }>> = (_w
   if (player.cash < cost) return notEnoughCash(cost - player.cash);
   player.cash -= cost;
   asset.damaged = false;
+  return null;
+};
+
+/**
+ * Почему актив нельзя улучшить прямо сейчас; null — можно. Тот же порядок проверок показывает
+ * и карточка улучшения (UpgradeView.reason), поэтому кнопка и действие не расходятся.
+ */
+export function upgradeError(player: PlayerState, asset: OwnedAsset): string | null {
+  const up = nextUpgrade(asset);
+  if (!up) return ERRORS.noUpgrade;
+  if (asset.damaged) return ERRORS.repairFirst;
+  if (player.knowledge < up.minKnowledge) return needKnowledge(up.minKnowledge);
+  if (player.cash < up.cost) return notEnoughCash(up.cost - player.cash);
+  return null;
+}
+
+/** Улучшение на том же месте: лодка → баркас → траулер. Место на острове не нужно. */
+const upgradeAsset: Handler<Extract<PlayerAction, { type: 'upgradeAsset' }>> = (_world, player, action) => {
+  const asset = player.owned.find((a) => a.uid === action.assetUid);
+  if (!asset) return ERRORS.noSuchAsset;
+  const error = upgradeError(player, asset);
+  if (error) return error;
+  const up = nextUpgrade(asset)!;
+  player.cash -= up.cost;
+  player.owned = player.owned.map((a) => (a.uid === asset.uid ? upgradedAsset(a, up) : a));
   return null;
 };
 
@@ -178,7 +204,7 @@ const buildDream: Handler<Extract<PlayerAction, { type: 'buildDream' }>> = (_wor
 };
 
 const HANDLERS: { [T in PlayerAction['type']]: Handler<Extract<PlayerAction, { type: T }>> } = {
-  buyOffer, sellAsset, repairAsset, takeLoan, repayLoan, setInsurance, setExtraShift, study, rest,
+  buyOffer, sellAsset, repairAsset, upgradeAsset, takeLoan, repayLoan, setInsurance, setExtraShift, study, rest,
   quitJob, returnToWork, buildDream,
 };
 

@@ -1,14 +1,16 @@
 // Производные данные для UI. Только чтение мира.
+import { upgradeError } from './actions';
 import {
-  assetsValue, currentIncome, dreamWorkPerWeek, freedomLevel, getDef, getDream, offerIncome,
-  passiveIncome, repairCost, saleValue, slotUsage, totalDebt, weeklyExpenses,
+  assetsValue, assetTitle, currentIncome, dreamWorkPerWeek, freedomLevel, getDef, getDream, isSlotFull,
+  maxLevel, nextUpgrade, offerIncome, passiveIncome, repairCost, saleValue, totalDebt, upgradedAsset,
+  upgradeIncomeGain, weeklyExpenses,
   loanLimit as playerLoanLimit,
 } from './economy';
 import * as R from './rules';
-import { SLOT_CAPACITY } from './slots';
 import { notEnoughCash } from './text';
 import type {
-  AssetView, DreamView, FinanceView, LeaderboardRow, MarketState, Offer, OfferView, PlayerState, WorldState,
+  AssetView, DreamView, FinanceView, LeaderboardRow, MarketState, Offer, OfferView, OwnedAsset, PlayerState,
+  UpgradeDef, UpgradeView, WorldState,
 } from './types';
 
 export { insurancePremium, studyCost } from './economy';
@@ -65,11 +67,46 @@ function freedomAfterBuying(world: WorldState, player: PlayerState, offer: Offer
       price: offer.price,
       income: offer.income,
       upkeep: offer.upkeep,
+      level: 1,
       damaged: false,
       slotIndex: 0,
     }],
   };
   return shownFreedomRatio(preview, world.market);
+}
+
+/**
+ * Доля свободы сразу после улучшения — тот же поверхностный предпросмотр, что и у покупки.
+ * Улучшить можно только целый актив, поэтому в предпросмотре он целый, даже если сейчас повреждён.
+ */
+function freedomAfterUpgrade(world: WorldState, player: PlayerState, asset: OwnedAsset, up: UpgradeDef): number {
+  const preview: PlayerState = {
+    ...player,
+    owned: player.owned.map((a) => (a.uid === asset.uid ? { ...upgradedAsset(a, up), damaged: false } : a)),
+  };
+  return shownFreedomRatio(preview, world.market);
+}
+
+/** Следующее улучшение актива; null — улучшать нечего. */
+function upgradeView(world: WorldState, player: PlayerState, asset: OwnedAsset): UpgradeView | null {
+  const up = nextUpgrade(asset);
+  if (!up) return null;
+  const incomeGain = upgradeIncomeGain(asset, up, world.market, player.knowledge);
+  const netGain = incomeGain - up.upkeep;
+  const reason = upgradeError(player, asset);
+  const view: UpgradeView = {
+    def: up,
+    toLevel: asset.level + 1,
+    cost: up.cost,
+    incomeGain,
+    upkeepGain: up.upkeep,
+    netGain,
+    paybackWeeks: netGain > 0 ? Math.ceil(up.cost / netGain) : null,
+    freedomAfter: freedomAfterUpgrade(world, player, asset, up),
+    canUpgrade: reason === null,
+  };
+  if (reason !== null) view.reason = reason;
+  return view;
 }
 
 export function offerViews(world: WorldState, playerId: string): OfferView[] {
@@ -88,7 +125,7 @@ export function offerViews(world: WorldState, playerId: string): OfferView[] {
       weeksLeft: offer.expiresWeek - world.week,
       locked: player.knowledge < def.minKnowledge,
       canAfford: player.cash >= offer.price,
-      slotFull: slotUsage(player, def.slot) >= SLOT_CAPACITY[def.slot],
+      slotFull: isSlotFull(player, def.slot),
       freedomAfter: freedomAfterBuying(world, player, offer),
     };
     if (def.kind === 'scam' && player.knowledge >= R.SCAM_SIGHT_KNOWLEDGE) view.warning = SCAM_WARNING;
@@ -98,14 +135,21 @@ export function offerViews(world: WorldState, playerId: string): OfferView[] {
 
 export function assetViews(world: WorldState, playerId: string): AssetView[] {
   const player = getPlayer(world, playerId);
-  return player.owned.map((asset) => ({
-    asset,
-    def: getDef(asset.defId),
-    currentIncome: currentIncome(asset, world.market, player.knowledge),
-    upkeep: asset.upkeep,
-    saleValue: saleValue(asset, world.market),
-    repairCost: asset.damaged ? repairCost(asset) : 0,
-  }));
+  return player.owned.map((asset) => {
+    const def = getDef(asset.defId);
+    return {
+      asset,
+      def,
+      title: assetTitle(asset),
+      level: asset.level,
+      maxLevel: maxLevel(def),
+      currentIncome: currentIncome(asset, world.market, player.knowledge),
+      upkeep: asset.upkeep,
+      saleValue: saleValue(asset, world.market),
+      repairCost: asset.damaged ? repairCost(asset) : 0,
+      upgrade: upgradeView(world, player, asset),
+    };
+  });
 }
 
 /** Мечта игрока: состояние стройки и можно ли начать следующий этап. null — у игрока мечты нет (соседи-боты). */

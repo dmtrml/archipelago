@@ -699,12 +699,13 @@ function v1Save(): Record<string, unknown> {
     delete p.threatWeeks;
     delete p.bestLevel;
     delete p.dream;
+    for (const a of p.owned as Record<string, unknown>[]) delete a.level; // улучшений тогда не было
   }
   return raw;
 }
 
 describe('миграция сохранений', () => {
-  it('версия 1 → 2: поля второго акта заполняются, человек получает мечту', () => {
+  it('версия 1 → 2 → 3: поля второго акта заполняются, человек получает мечту', () => {
     const raw = v1Save();
     const players = raw.players as Record<string, unknown>[];
     players[0].freedomWeek = 7;
@@ -713,7 +714,7 @@ describe('миграция сохранений', () => {
 
     const world = migrateWorld(raw)!;
     expect(world).not.toBeNull();
-    expect(world.version).toBe(2);
+    expect(world.version).toBe(3);
     expect(JSON.stringify(raw)).toBe(snapshot); // вход не изменился
 
     const [human, mia, timur] = world.players;
@@ -739,7 +740,7 @@ describe('миграция сохранений', () => {
     expect(badNumbers(next)).toEqual([]);
   });
 
-  it('мир версии 2 проходит как есть (копией)', () => {
+  it('мир текущей версии проходит как есть (копией)', () => {
     const world = newWorld(5);
     const raw = JSON.parse(JSON.stringify(world)) as unknown;
     const migrated = migrateWorld(raw)!;
@@ -756,7 +757,7 @@ describe('миграция сохранений', () => {
     };
     const garbage: unknown[] = [
       null, undefined, 0, 42, 'world', true, [], {}, { version: 2 }, { version: 1, players: [] },
-      broken((w) => { w.version = 3; }),
+      broken((w) => { w.version = 4; }),
       broken((w) => { w.version = 0; }),
       broken((w) => { delete w.version; }),
       broken((w) => { w.players = 'no'; }),
@@ -765,7 +766,7 @@ describe('миграция сохранений', () => {
       broken((w) => { w.market = null; }),
       broken((w) => { w.offers = {}; }),
       broken((w) => { w.week = 'one'; }),
-      broken((w) => { delete (w.players as Record<string, unknown>[])[0].employed; }), // v2 без полей второго акта
+      broken((w) => { delete (w.players as Record<string, unknown>[])[0].employed; }), // без полей второго акта
       broken((w) => { (w.players as Record<string, unknown>[])[0].dream = { id: 'nope' }; }),
       broken((w) => { (w.players as Record<string, unknown>[])[1].cash = null; }),
     ];
@@ -797,7 +798,7 @@ describe('второй акт не трогает соседей', () => {
 describe('случайные действия: инварианты', () => {
   const ACTIONS: Action['type'][] = [
     'buyOffer', 'sellAsset', 'repairAsset', 'takeLoan', 'repayLoan', 'setInsurance', 'setExtraShift',
-    'study', 'rest', 'quitJob', 'returnToWork', 'buildDream', 'buildDream', 'quitJob',
+    'study', 'rest', 'quitJob', 'returnToWork', 'buildDream', 'buildDream', 'quitJob', 'upgradeAsset', 'upgradeAsset',
   ];
 
   function randomAction(world: WorldState, rng: Rng): Action {
@@ -807,6 +808,10 @@ describe('случайные действия: инварианты', () => {
       case 'buyOffer': return { type, playerId: 'p1', offerUid: world.offers[rng.int(0, world.offers.length - 1)].uid };
       case 'sellAsset': return { type, playerId: 'p1', assetUid: me.owned[0]?.uid ?? 'none' };
       case 'repairAsset': return { type, playerId: 'p1', assetUid: me.owned[0]?.uid ?? 'none' };
+      case 'upgradeAsset': {
+        const asset = me.owned.length ? me.owned[rng.int(0, me.owned.length - 1)] : undefined;
+        return { type, playerId: 'p1', assetUid: asset?.uid ?? 'none' };
+      }
       case 'takeLoan': return { type, playerId: 'p1', amount: 100 * rng.int(1, 5) };
       case 'repayLoan': return { type, playerId: 'p1', loanUid: me.loans[0]?.uid ?? 'none', amount: 100 };
       case 'setInsurance': return { type, playerId: 'p1', on: rng.chance(0.5) };

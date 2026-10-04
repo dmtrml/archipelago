@@ -34,6 +34,18 @@ export interface AssetDef {
   resaleRate: number;        // доля цены при продаже (до рыночной поправки)
   /** Только для афер: через сколько недель «ферма» исчезает. */
   collapseWeeks?: [number, number];
+  /** Улучшения на том же месте: upgrades[0] — переход на уровень 2, upgrades[1] — на уровень 3. */
+  upgrades?: UpgradeDef[];
+}
+
+/** Ступень улучшения актива: лодка → баркас → траулер. Занимает то же место на острове. */
+export interface UpgradeDef {
+  title: string;             // название на этом уровне: «Баркас»
+  description: string;
+  cost: number;              // сколько стоит перейти на этот уровень
+  income: number;            // + к базовому доходу экземпляра (до индекса сектора)
+  upkeep: number;            // + к содержанию в неделю
+  minKnowledge: number;
 }
 
 // ───────────── Мечта (второй акт) ─────────────
@@ -70,9 +82,10 @@ export interface OwnedAsset {
   uid: string;
   defId: string;
   boughtWeek: number;
-  price: number;             // фактически уплаченная цена
-  income: number;            // базовый доход этого экземпляра (до индекса сектора)
-  upkeep: number;
+  price: number;             // фактически уплаченная цена (вместе со всеми улучшениями)
+  income: number;            // базовый доход этого экземпляра (до индекса сектора), с улучшениями
+  upkeep: number;            // с улучшениями
+  level: number;             // 1 — как купили; 2, 3 — после улучшений (1 + индекс в def.upgrades)
   damaged: boolean;          // повреждён штормом: доход 0, пока не починят
   slotIndex: number;         // номер места в слоте своего типа (0..capacity-1)
   /** Скрытая правда об афере. UI не должен показывать это поле игроку. */
@@ -166,7 +179,7 @@ export interface WeekReport {
 }
 
 export interface WorldState {
-  version: 2;
+  version: 3;
   seed: number;
   rng: number;               // текущее состояние ГПСЧ — вся случайность только через него
   nextUid: number;
@@ -183,6 +196,7 @@ export type Action =
   | { type: 'buyOffer'; playerId: string; offerUid: string }
   | { type: 'sellAsset'; playerId: string; assetUid: string }
   | { type: 'repairAsset'; playerId: string; assetUid: string }
+  | { type: 'upgradeAsset'; playerId: string; assetUid: string }
   | { type: 'takeLoan'; playerId: string; amount: number }
   | { type: 'repayLoan'; playerId: string; loanUid: string; amount: number }
   | { type: 'setInsurance'; playerId: string; on: boolean }
@@ -242,10 +256,31 @@ export interface OfferView {
 export interface AssetView {
   asset: OwnedAsset;
   def: AssetDef;
+  /** Название с учётом уровня: «Траулер», а не «Рыбацкая лодка». */
+  title: string;
+  level: number;
+  maxLevel: number;          // 1 — у сделки нет улучшений
   currentIncome: number;     // 0, если повреждён
   upkeep: number;
   saleValue: number;
   repairCost: number;        // 0, если не повреждён
+  /** Следующее улучшение; null — улучшать нечего (максимальный уровень или у сделки нет улучшений). */
+  upgrade: UpgradeView | null;
+}
+
+export interface UpgradeView {
+  def: UpgradeDef;
+  toLevel: number;
+  cost: number;
+  incomeGain: number;        // + к доходу в неделю по текущему рынку
+  upkeepGain: number;
+  netGain: number;           // incomeGain − upkeepGain
+  paybackWeeks: number | null;
+  /** Доля свободы (как FinanceView.freedomRatio) сразу после улучшения. */
+  freedomAfter: number;
+  canUpgrade: boolean;
+  /** Почему нельзя прямо сейчас: «Не хватает 120 монет», «Нужно знание 2», «Сначала почините». */
+  reason?: string;
 }
 
 export interface DreamView {

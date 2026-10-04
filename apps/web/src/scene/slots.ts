@@ -30,8 +30,9 @@ const beachPlace = (a: number, t: number, toCam = 0.4): SlotPlace => {
 const seaPlace = (a: number, r: number, rotY: number): SlotPlace => ({ x: Math.cos(a) * r, y: 0, z: Math.sin(a) * r, rotY });
 
 export const SLOTS: Record<Exclude<SlotType, 'finance'>, SlotPlace[]> = {
-  // по очереди с двух сторон пирса, сначала дальние
-  pier: [pierPlace(7.4, 1.95, 0.05), pierPlace(7.4, -1.95, -0.06), pierPlace(4.5, 1.95, -0.05), pierPlace(4.5, -1.95, 0.07)],
+  // по очереди с двух сторон пирса, сначала дальние. Шаг вдоль пирса рассчитан на два траулера (уровень 3, корпус 3.1)
+  // подряд; ближние места — там, где под кормой уже вода (с правой стороны, −z, песчаное дно уходит дальше).
+  pier: [pierPlace(7.75, 1.95, 0.05), pierPlace(8.05, -1.95, -0.06), pierPlace(4.2, 1.95, -0.05), pierPlace(4.7, -1.95, 0.07)],
   // участки на траве; первые — ближе к камере
   plot: [
     plotPlace(2.2, 8.0, -0.15),

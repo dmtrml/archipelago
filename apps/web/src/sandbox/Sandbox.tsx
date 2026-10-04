@@ -3,6 +3,7 @@ import { useState, type CSSProperties, type ReactNode } from 'react';
 import type { ModelId, SlotType } from '@arch/engine';
 import { IslandScene } from '../scene/IslandScene';
 import type { DreamProgress, FloatLabel, PlacedItem, Weather } from '../scene/contract';
+import { MODELS as SCENE_MODELS, levelFor } from '../scene/models';
 
 // Вместимость — как SLOT_CAPACITY в packages/engine/src/slots.ts
 const CAP: Record<SlotType, number> = { pier: 4, plot: 6, beach: 3, plaza: 2, sea: 2, finance: 99 };
@@ -19,6 +20,10 @@ const SLOT_MODELS: Record<SlotType, ModelId[]> = {
 
 let uidSeq = 1;
 let floatSeq = 1;
+
+/** Уровень, допустимый для модели (у неулучшаемых — всегда 1). */
+const fitLevel = (model: ModelId, level: number) => levelFor(SCENE_MODELS[model], level);
+const maxLevel = (model: ModelId) => SCENE_MODELS[model].maxLevel;
 
 function freeIndex(items: PlacedItem[], slot: SlotType): number {
   const used = new Set(items.filter((i) => i.slot === slot).map((i) => i.slotIndex));
@@ -54,6 +59,8 @@ export default function Sandbox() {
   const [clicked, setClicked] = useState<string | null>(null);
   const [open, setOpen] = useState(true);
   const [sceneKey, setSceneKey] = useState(0);
+  // уровень, с которым ставятся новые объекты («+ модель» и «Заполнить всё»)
+  const [fillLevel, setFillLevel] = useState(1);
   // «мечта»: null — на острове её нет; built 0…3 — этапы шхуны на стапеле
   const [dream, setDream] = useState<DreamProgress | null>(null);
   const setBuilt = (built: number) => setDream((d) => ({ stages: 3, building: false, ...d, built }));
@@ -62,7 +69,7 @@ export default function Sandbox() {
     const slot = MODEL_SLOT[model];
     const idx = freeIndex(list, slot);
     if (idx < 0) return list;
-    return [...list, { uid: `u${uidSeq++}`, model, slot, slotIndex: idx, damaged: false }];
+    return [...list, { uid: `u${uidSeq++}`, model, slot, slotIndex: idx, damaged: false, level: fitLevel(model, fillLevel) }];
   });
 
   const fillAll = () => setItems((list) => {
@@ -74,7 +81,8 @@ export default function Sandbox() {
       while (n < limit) {
         const idx = freeIndex(next, slot);
         if (idx < 0) break;
-        next.push({ uid: `u${uidSeq++}`, model: pool[idx % pool.length], slot, slotIndex: idx, damaged: false });
+        const model = pool[idx % pool.length];
+        next.push({ uid: `u${uidSeq++}`, model, slot, slotIndex: idx, damaged: false, level: fitLevel(model, fillLevel) });
         n++;
       }
     }
@@ -100,6 +108,15 @@ export default function Sandbox() {
   const toggleDamage = (uid: string) => setItems((l) => l.map((i) => (i.uid === uid ? { ...i, damaged: !i.damaged } : i)));
   const damageAll = (v: boolean) => setItems((l) => l.map((i) => ({ ...i, damaged: v })));
   const remove = (uid: string) => setItems((l) => l.filter((i) => i.uid !== uid));
+  const bumpLevel = (uid: string, d: number) =>
+    setItems((l) => l.map((i) => (i.uid === uid ? { ...i, level: fitLevel(i.model, i.level + d) } : i)));
+  const levelAll = (level: number) => setItems((l) => l.map((i) => ({ ...i, level: fitLevel(i.model, level) })));
+  const upgradeRandom = () => setItems((l) => {
+    const can = l.filter((i) => i.level < maxLevel(i.model));
+    if (!can.length) return l;
+    const pick = can[Math.floor(Math.random() * can.length)].uid;
+    return l.map((i) => (i.uid === pick ? { ...i, level: i.level + 1 } : i));
+  });
 
   return (
     <>
@@ -132,6 +149,16 @@ export default function Sandbox() {
               <button style={btn} onClick={() => damageAll(false)}>Починить всё</button>
               <button style={btn} onClick={() => setSceneKey((k) => k + 1)}>Перезапуск сцены</button>
             </Row>
+            <Row title="Улучшения (уровни 1–3)">
+              <span style={{ alignSelf: 'center', margin: '0 4px', color: '#5B6680' }}>новые на ур.</span>
+              {[1, 2, 3].map((n) => (
+                <button key={n} style={fillLevel === n ? gold : btn} onClick={() => setFillLevel(n)}>{n}</button>
+              ))}
+              <button style={gold} onClick={() => levelAll(3)}>Все на уровень 3</button>
+              <button style={btn} onClick={() => levelAll(2)}>Все на 2</button>
+              <button style={btn} onClick={() => levelAll(1)}>Все на 1</button>
+              <button style={btn} onClick={upgradeRandom}>Улучшить случайный</button>
+            </Row>
             <Row title="Мечта (шхуна на стапеле)">
               <button style={dream === null ? gold : btn} onClick={() => setDream(null)}>нет</button>
               {[0, 1, 2, 3].map((n) => (
@@ -163,6 +190,13 @@ export default function Sandbox() {
                 {items.map((i) => (
                   <div key={i.uid} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '2px 0', background: i.uid === clicked ? 'rgba(245,184,61,.25)' : undefined }}>
                     <span style={{ flex: 1 }}>{i.uid} · {i.model} · {i.slot}[{i.slotIndex}]</span>
+                    {maxLevel(i.model) > 1 && (
+                      <>
+                        <button style={btn} disabled={i.level <= 1} onClick={() => bumpLevel(i.uid, -1)}>−</button>
+                        <b style={{ minWidth: 30, textAlign: 'center' }}>ур.{i.level}</b>
+                        <button style={i.level < maxLevel(i.model) ? gold : btn} disabled={i.level >= maxLevel(i.model)} onClick={() => bumpLevel(i.uid, 1)}>+</button>
+                      </>
+                    )}
                     <button style={i.damaged ? gold : btn} onClick={() => toggleDamage(i.uid)}>{i.damaged ? 'слом.' : 'цел'}</button>
                     <button style={btn} onClick={() => float(i.uid)}>±</button>
                     <button style={btn} onClick={() => remove(i.uid)}>×</button>

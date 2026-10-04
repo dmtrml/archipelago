@@ -1,10 +1,11 @@
 import { financeView, getPlayer, offerViews, type OfferView } from '@arch/engine';
 import { HUMAN, useGame } from '../store';
 import { fmt, marketLine, SECTOR_NAME, signed } from '../format';
-import { percent } from './text';
+import { FreedomLine } from './common';
 
 function OfferCard({ v, cash, freedom }: { v: OfferView; cash: number; freedom: number }) {
   const act = useGame((s) => s.act);
+  const setTab = useGame((s) => s.setTab);
   // Афера выглядит как обычный актив — правду выдаёт только предупреждение от знаний
   const isStatus = v.def.kind === 'status';
   const reason = v.locked
@@ -46,15 +47,13 @@ function OfferCard({ v, cash, freedom }: { v: OfferView; cash: number; freedom: 
       >
         {reason ?? `Купить за ${fmt(v.offer.price)}`}
       </button>
+      {v.slotFull && !isStatus && (
+        <button className="link-btn" onClick={() => setTab('island')}>
+          Места нет — улучшите то, что уже есть →
+        </button>
+      )}
     </article>
   );
-}
-
-/** «Свобода: 92% → 99%» — что покупка сделает со шкалой свободы. */
-function FreedomLine({ before, after }: { before: number; after: number }) {
-  const a = percent(before), b = percent(after);
-  const tone = b > a ? 'pos' : b < a ? 'neg' : '';
-  return <div className={`freedom-line ${tone}`}>Свобода: {a}% → {b}%</div>;
 }
 
 export function DealsTab() {

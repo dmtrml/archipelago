@@ -1,4 +1,4 @@
-// Миграция сохранений: старый мир (версия 1) превращается в текущий (версия 2).
+// Миграция сохранений: старый мир (версии 1 или 2) превращается в текущий (версия 3) по цепочке 1 → 2 → 3.
 // Вход — «сырой» JSON из localStorage, поэтому всё проверяем руками; непонятное — null.
 import { DREAMS } from './content';
 import type { WorldState } from './types';
@@ -34,11 +34,42 @@ function isDreamState(value: unknown): boolean {
 }
 
 /** Игрок версии 2: поля второго акта обязаны быть на месте. */
-function isPlayerV2(value: unknown): boolean {
+function isPlayerV2(value: unknown): value is Obj & { owned: unknown[] } {
   return isPlayerBase(value)
     && typeof value.employed === 'boolean'
     && isNum(value.threatWeeks) && isNum(value.bestLevel)
     && (value.dream === null || isDreamState(value.dream));
+}
+
+/** Уровень улучшения: целое число от 1. */
+function isLevel(value: unknown): boolean {
+  return isNum(value) && Number.isInteger(value) && value >= 1;
+}
+
+/** Игрок версии 3: у каждого объекта на острове есть уровень улучшения. */
+function isPlayerV3(value: unknown): boolean {
+  return isPlayerV2(value) && value.owned.every((a) => isObj(a) && isLevel(a.level));
+}
+
+/** 1 → 2: все остаются на работе, уже достигнутая свобода — первый уровень, мечта только у человека. */
+function v1ToV2(players: Obj[]): void {
+  players.forEach((p, i) => {
+    p.employed = true;
+    p.threatWeeks = 0;
+    p.bestLevel = p.freedomWeek !== null ? 1 : 0;
+    p.dream = i === 0 && p.isBot === false ? newDreamState() : null;
+  });
+}
+
+/** 2 → 3: всё купленное раньше — первого уровня (улучшений тогда не было). false — непонятный объект. */
+function v2ToV3(players: (Obj & { owned: unknown[] })[]): boolean {
+  for (const p of players) {
+    for (const a of p.owned) {
+      if (!isObj(a)) return false;
+      if (!isNum(a.level)) a.level = 1;
+    }
+  }
+  return players.every(isPlayerV3);
 }
 
 function isWorldBase(raw: unknown): raw is Obj & { players: unknown[] } {
@@ -53,14 +84,15 @@ function isWorldBase(raw: unknown): raw is Obj & { players: unknown[] } {
 }
 
 /**
- * Принимает сохранённый мир версии 1 или 2 и возвращает мир версии 2 (копию, вход не меняется).
- * Для версии 1: игрок-человек (первый, не бот) получает чистую мечту, все остаются на работе,
- * уже достигнутая свобода считается первым уровнем. Всё непонятное — null.
+ * Принимает сохранённый мир версии 1, 2 или 3 и возвращает мир версии 3 (копию, вход не меняется).
+ * Версия 1 сначала становится версией 2: игрок-человек (первый, не бот) получает чистую мечту,
+ * все остаются на работе, уже достигнутая свобода считается первым уровнем.
+ * Версия 2 становится версией 3: всё купленное — первого уровня. Всё непонятное — null.
  */
 export function migrateWorld(raw: unknown): WorldState | null {
   if (!isWorldBase(raw)) return null;
   const version = raw.version;
-  if (version !== 1 && version !== 2) return null;
+  if (version !== 1 && version !== 2 && version !== 3) return null;
 
   let world: Obj;
   try {
@@ -70,17 +102,15 @@ export function migrateWorld(raw: unknown): WorldState | null {
   }
   const players = world.players as unknown[];
 
-  if (version === 2) {
-    return players.every(isPlayerV2) ? (world as unknown as WorldState) : null;
+  if (version === 3) {
+    return players.every(isPlayerV3) ? (world as unknown as WorldState) : null;
   }
 
-  if (!players.every(isPlayerBase)) return null;
-  (players as Obj[]).forEach((p, i) => {
-    p.employed = true;
-    p.threatWeeks = 0;
-    p.bestLevel = p.freedomWeek !== null ? 1 : 0;
-    p.dream = i === 0 && p.isBot === false ? newDreamState() : null;
-  });
-  world.version = 2;
+  if (version === 1) {
+    if (!players.every(isPlayerBase)) return null;
+    v1ToV2(players);
+  }
+  if (!players.every(isPlayerV2) || !v2ToV3(players)) return null;
+  world.version = 3;
   return world as unknown as WorldState;
 }

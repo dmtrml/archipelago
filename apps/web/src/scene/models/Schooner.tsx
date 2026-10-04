@@ -3,11 +3,11 @@
 // (Baked), качка корпуса, ход парусов и вымпел остаются снаружи.
 import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { BufferGeometry, Euler, Float32BufferAttribute, type Group, Quaternion, Vector3 } from 'three';
+import { BufferGeometry, Float32BufferAttribute, type Group } from 'three';
 import { PAL } from '../palette';
 import { WINDOW_OPTS, box, cached, cone, cyl, shade } from '../materials';
 import { useBus } from '../bus';
-import { M, type V3 } from './parts';
+import { Beam, M, type V3 } from './parts';
 import { Baked } from './Baked';
 
 // ───── Обводы корпуса: s — вдоль судна (0 корма … 1 нос), u — по высоте борта (0 киль … 1 палуба) ─────
@@ -96,26 +96,8 @@ const bulwarkGeo = () =>
     quad(out, d, c, sh(c), sh(d));
   });
 
-// ───── Бруски ─────
-const UNIT = box(1, 1, 1);
-const X = new Vector3(1, 0, 0);
-const qa = new Quaternion(), ea = new Euler(), va = new Vector3();
-
-/** Брусок между двумя точками (сечение t×t). */
-export function Beam({ a, b, t = 0.1, c }: { a: V3; b: V3; t?: number; c: number }) {
-  va.set(b[0] - a[0], b[1] - a[1], b[2] - a[2]);
-  const len = va.length();
-  ea.setFromQuaternion(qa.setFromUnitVectors(X, va.divideScalar(len || 1)));
-  return (
-    <M
-      g={UNIT}
-      c={c}
-      p={[(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2]}
-      r={[ea.x, ea.y, ea.z]}
-      s={[len || 0.001, t, t]}
-    />
-  );
-}
+// Брусок между двумя точками живёт в parts.tsx (им пользуются и другие модели); реэкспорт — для Shipyard.
+export { Beam };
 
 // ───── Стадия 1: киль и шпангоуты ─────
 const RIBS = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];

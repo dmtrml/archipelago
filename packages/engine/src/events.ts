@@ -1,6 +1,6 @@
 // Случайные события: личные (для каждого игрока) и общие (для всего архипелага).
 import { FREEDOM_LEVEL_TITLES } from './content';
-import { getDef, happinessJoy } from './economy';
+import { assetTitle, getDef, happinessJoy } from './economy';
 import type { Rng } from './rng';
 import * as R from './rules';
 import { coins, weeksText } from './text';
@@ -103,7 +103,7 @@ function applyStorm(world: WorldState, rng: Rng, reports: Record<string, PlayerW
       return !a.damaged && risk > 0 && rng.chance(risk);
     });
     if (hit.length === 0) continue;
-    const names = hit.map((a) => getDef(a.defId).title).join(', ');
+    const names = hit.map(assetTitle).join(', ');
     const uids = hit.map((a) => a.uid);
     if (player.insured) {
       reports[player.id].events.push(event('stormInsured', 'Страховка выручила',
