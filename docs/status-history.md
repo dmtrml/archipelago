@@ -1,5 +1,17 @@
 # История проверенных изменений
 
+## 2026-10-05 — запуск, этап 4: рекламный ролик
+
+Добавлены детерминированные fixtures, ленивый `?director`, виртуальная покадровая съёмка, камера,
+монтаж под 99 BPM и офлайн-сведение игровых источников звука. Source-current RU draft сохранён в
+`docs/qa/trailer/draft/`; финальный all-target pass создал v30/h45 RU/EN с H.264 High, AAC 48 kHz stereo,
+30 fps, точными 30/45 с, -14.3…-14.4 LUFS и faststart.
+
+Двойной `asset` render дал minimum PSNR 61.97 dB. Visual review четырёх sheets и covers выявил один
+transient пустой cached capture `v30-en/hook`; shot был принудительно переснят, после чего выполнен новый
+единый final pass. Stage4 simulator output совпал со свежим прогоном checkpoint Stage 2 `40b2a41` после нормализации только времени.
+Подробности: [приёмка этапа 4](qa/launch-4-trailer.md) и [общий отчёт](qa/launch-report.md).
+
 ## 2026-10-05 — запуск, этап 3: английская версия
 
 Движок переведён на world v4 без пользовательских фраз: события, новости и ошибки теперь содержат

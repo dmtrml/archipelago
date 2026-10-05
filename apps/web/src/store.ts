@@ -8,7 +8,7 @@ import { onAction, onWeek, onWeather, startGameSounds, stopGameSounds } from './
 import { errorText, getI18n } from './i18n';
 
 export const HUMAN = 'p1';
-const SAVE_KEY = 'archipelago.save.v1';
+const SAVE_KEY = new URLSearchParams(location.search).has('director') ? 'archipelago.director.save' : 'archipelago.save.v1';
 
 export type Tab = 'deals' | 'island' | 'actions' | 'report';
 

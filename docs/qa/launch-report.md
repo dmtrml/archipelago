@@ -6,7 +6,8 @@
 
 - Windows, Node 22.22.0, npm 10.9.4, Git 2.51.2.windows.1.
 - Браузерные проверки: Playwright Chromium, канал `msedge` на Windows.
-- ffmpeg/ffprobe доступны из WinGet. Параметры GPU/SwiftShader и время финального рендера будут зафиксированы на этапе 4.
+- ffmpeg/ffprobe PATH: 8.1.1; pipeline использует `ffmpeg-static 5.3.0` (ffmpeg 6.1.1) и `ffprobe-static 3.1.0` (ffprobe 4.0.2).
+- Финальный Stage 4 renderer: ANGLE / NVIDIA GeForce RTX 3060 / D3D11. Playwright 1.63.0 использован локально и не закреплён dependency.
 - Контрольная симуляция до изменений баланса: 500 сидов × 100 недель, 134,7 с; SHA-256 сохранённого вывода `839F459749B7143A2F9E079597E418F3CF41C0C063EDA1A8F9B91B9B87C94278`.
 
 ## Этап 1 — публикация
@@ -86,3 +87,37 @@
 - `apps/web/public/og-image-en.jpg`
 - `README.en.md`
 - `launch-3-english/results.json` и 6 JPEG в `launch-3-english/screenshots/`
+
+## Этап 4 — рекламный ролик
+
+| № | Результат | Доказательство |
+|---|---|---|
+| 1 | выполнен | typecheck, 141/141 tests, build, diff-check; Stage3→Stage4 game chunks ≤ +1 KiB raw; `Director` отдельный lazy chunk |
+| 2 | выполнен | fixtures ×2: SHA-256 `10F03584691DB6DBF9470B96259BC8E7879C7ABAF7835A74AA3E601F38565108`; seed 2, F30, S23, N8 |
+| 3 | выполнен | beats: 99 BPM, первая доля 0.023 с |
+| 4 | выполнен | 4 финала: 1080×1920/30 с и 1920×1080/45 с, 30 fps, H.264 High/yuv420p, AAC 48k stereo, faststart |
+| 5 | выполнен | -14.3/-14.4 LUFS; peak -1.2 dBFS |
+| 6 | выполнен | frame cuts и `timeline.md` совпадают с монтажными таблицами |
+| 7 | выполнен | deterministic `asset`: PSNR avg 70.562647, min 61.97 dB, 109 frames |
+| 8 | выполнен | final render без console/page errors; EN без кириллицы; локальные шрифты загружены; sourceHash `e5ef9e79…a1118` |
+| 9 | выполнен | просмотрены 4 final sheets + 4 covers; v30 safe-zone checks зелёные; пустой transient v30-en hook cache переснят до final pass |
+| 10 | выполнен | [приёмка этапа 4](launch-4-trailer.md), STATUS и история обновлены |
+
+Баланс Stage 4: свежие 500×100 sim на Stage-2 checkpoint `40b2a41` и текущем Stage 4 идентичны после нормализации только времени выполнения; SHA-256 `9F77B95342F5965543C2208ABE7593268DF7595B3709DF17582C1BDC4695EA19`.
+
+### Отклонения этапа 4
+
+- One-pass отменяет отдельный draft PR и owner feedback loop: source-current RU draft сразу продолжен final.
+- Standalone `trailer-v1` заменён master/user target `trailer-chat`; финальные MP4 не коммитятся и публикуются после Stage4 push.
+- `package-lock.json` сохранён по прямому указанию пользователя вместе с Stage4 package prep, несмотря на узкий standalone allowed-file list.
+- Playwright 1.63.0 использован как локальный extraneous package, в permanent dependencies не добавлен; clean-host reproduction после `npm ci` делает `npm install --no-save --package-lock=false playwright@1.63.0` перед render-командой.
+
+### Не сделано после этапа 4
+
+- Owner-only реальные Pages/GoatCounter/feedback settings и ручной playtest остаются one-pass fallback. Техническая acceptance всех четырёх этапов завершена.
+
+### Материалы этапа 4
+
+- [Приёмка этапа 4](launch-4-trailer.md)
+- `docs/qa/trailer/draft/` — 2 RU draft MP4, 2 storyboard JPEG и timeline
+- `.trailer/out/final/` — 4 final MP4, 4 covers, 4 sheets, timeline и render-report (ignored; публикуются как prerelease assets)

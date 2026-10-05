@@ -12,8 +12,9 @@ import { Loader } from './Loader';
 // Отдельные витрины грузятся только по запросу, без игровой логики.
 const params = new URLSearchParams(location.search);
 const Root = lazy(() => (
-  params.has('sound') ? import('./audio/SoundShowcase')
-    : params.has('sandbox') ? import('./sandbox/Sandbox') : import('./App')
+  params.has('director') ? import('./director/Director')
+    : params.has('sound') ? import('./audio/SoundShowcase')
+      : params.has('sandbox') ? import('./sandbox/Sandbox') : import('./App')
 ));
 
 createRoot(document.getElementById('root')!).render(
