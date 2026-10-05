@@ -8,8 +8,18 @@
     "tab:Действия",
     "purchase",
     "sound",
-    "week"
+    "week",
+    "upgrade",
+    "loan",
+    "week:storm",
+    "week:scam",
+    "week:raise",
+    "freedom",
+    "freedom-threat",
+    "epilogue",
+    "neighbor-card"
   ],
+  "ruMismatches": [],
   "screenshots": [
     "C:\\Users\\user\\Documents\\CoDevelopment\\CashFlow\\docs\\qa\\launch-3-english\\screenshots\\en-welcome-390.jpg",
     "C:\\Users\\user\\Documents\\CoDevelopment\\CashFlow\\docs\\qa\\launch-3-english\\screenshots\\en-game-390.jpg",

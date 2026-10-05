@@ -64,7 +64,7 @@
 |---|---|---|
 | 1 | выполнен | `npm run typecheck`; `npm test` — 141/141; `npm run build`; world v4 migration tests |
 | 2 | выполнен | Проверка строковых литералов `packages/engine/src`: кириллица только в разрешённом `BOT_ROSTER` |
-| 3 | выполнен | `scripts/check-i18n.mjs`: 9 RU-состояний дословно совпали с checkpoint `40b2a41` после удаления только новых language controls |
+| 3 | выполнен | `scripts/check-i18n.mjs`: 18 RU-состояний (включая upgrade/loan/events/freedom/threat/epilogue/neighbor card) дословно совпали с checkpoint `40b2a41` после удаления только новых language controls; найденный расширенной проверкой регресс «Баркас» исправлен обратно на «баркас» |
 | 4 | выполнен | `scripts/check-i18n.mjs`: EN 390×844 + 1366×768; 6 JPEG, кириллица/overflow/runtime errors — 0 |
 | 5 | выполнен | `/en/`, navigator ru/de, сохранённый выбор и переключение посреди партии без навигации/изменения мира прошли |
 | 6 | выполнен | engine migration test v3 → v4: legacy event/news text сохранён |
