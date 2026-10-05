@@ -114,7 +114,7 @@ export const ASSET_DEFS: Record<string, AssetDef> = {
   shares: {
     id: 'shares', kind: 'asset',
     title: 'Доля в рыболовецкой артели',
-    description: 'Ты совладелец большой артели: получаешь часть улова, а цена доли гуляет вместе с рынком рыбы.',
+    description: 'Вы совладелец большой артели: получаете часть улова, а цена доли гуляет вместе с рынком рыбы.',
     price: 500, income: 28, upkeep: 0, sector: 'fish', joy: 0,
     slot: 'finance', model: 'bank', minKnowledge: 2, stormRisk: 0, resaleRate: 0.9,
   },

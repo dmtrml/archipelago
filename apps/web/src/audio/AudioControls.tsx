@@ -1,5 +1,6 @@
 import { useId, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
+import { asset } from '../asset';
 import { audio } from './engine';
 import { getAudioSettings, subscribeAudioSettings, updateAudioSettings, type AudioSettings } from './settings';
 import './audio.css';
@@ -140,8 +141,8 @@ export function AudioControls() {
             <button type="button" className="icon-btn" aria-label="Закрыть настройки звука" onClick={() => close(true)}>×</button>
           </div>
           <AudioSliders />
-          <a className="audio-catalog-link" href="/?sound" data-ui-sound="none">Выбрать запись или синтез →</a>
-          <a className="audio-credits" href="/audio/CREDITS.md" target="_blank" rel="noreferrer">Авторы и лицензии звуков ↗</a>
+          <a className="audio-catalog-link" href={asset('?sound')} data-ui-sound="none">Выбрать запись или синтез →</a>
+          <a className="audio-credits" href={asset('audio/CREDITS.md')} target="_blank" rel="noreferrer">Авторы и лицензии звуков ↗</a>
         </div>,
         document.body,
       )}

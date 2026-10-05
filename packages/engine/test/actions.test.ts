@@ -50,7 +50,7 @@ describe('покупка и продажа', () => {
     const after = ok(world, { type: 'sellAsset', playerId: 'p1', assetUid: asset.uid });
     expect(player(after).cash).toBe(600 + value);
     expect(player(after).owned).toHaveLength(0);
-    expect(applyAction(after, { type: 'sellAsset', playerId: 'p1', assetUid: asset.uid }).error).toBe('Такого объекта у тебя нет');
+    expect(applyAction(after, { type: 'sellAsset', playerId: 'p1', assetUid: asset.uid }).error).toBe('Такого объекта у вас нет');
   });
 
   it('не хватает денег — понятная ошибка с суммой', () => {
@@ -86,7 +86,7 @@ describe('знания', () => {
     expect(before - player(world).cash).toBe(400);
     player(world).knowledge = 3;
     player(world).studiedThisWeek = false;
-    expect(applyAction(world, { type: 'study', playerId: 'p1' }).error).toBe('Ты уже знаешь всё, чему здесь учат');
+    expect(applyAction(world, { type: 'study', playerId: 'p1' }).error).toBe('Вы уже знаете всё, чему здесь учат');
   });
 
   it('предупреждение об афере видно только со знанием ≥ 1', () => {
@@ -137,7 +137,7 @@ describe('кредиты', () => {
     expect(limit).toBeGreaterThan(0);
     expect(limit % 100).toBe(0);
     expect(applyAction(world, { type: 'takeLoan', playerId: 'p1', amount: limit + 100 }).error).toBe(`Банк даёт не больше ${limit} монет`);
-    expect(applyAction(world, { type: 'takeLoan', playerId: 'p1', amount: 0 }).error).toBe('Укажи сумму больше нуля');
+    expect(applyAction(world, { type: 'takeLoan', playerId: 'p1', amount: 0 }).error).toBe('Укажите сумму больше нуля');
 
     world = ok(world, { type: 'takeLoan', playerId: 'p1', amount: 400 });
     expect(player(world).cash).toBe(1000);

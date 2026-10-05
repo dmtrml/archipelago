@@ -114,7 +114,7 @@ function applyStorm(world: WorldState, rng: Rng, reports: Record<string, PlayerW
     for (const a of hit) a.damaged = true;
     damagedAll.push(...uids);
     reports[player.id].events.push(event('stormDamage', 'Шторм повредил имущество',
-      `Пострадали: ${names}. Пока не починишь (30% цены), они не приносят дохода.`, 'bad',
+        `Пострадали: ${names}. Пока не почините (30% цены), они не приносят дохода.`, 'bad',
       { affectedAssetUids: uids }));
   }
   return event('storm', 'Шторм',
@@ -193,7 +193,7 @@ export function freedomLevelEvent(level: number): GameEvent {
 
 export function freedomThreatEvent(weeksLeft: number): GameEvent {
   return event('freedomThreat', 'Свобода под угрозой',
-    `Без работы пассивного дохода не хватает на расходы. До возвращения на работу: ${weeksText(weeksLeft)}. Добавь доходных активов или убери лишние траты.`,
+    `Без работы пассивного дохода не хватает на расходы. До возвращения на работу: ${weeksText(weeksLeft)}. Добавьте доходных активов или уберите лишние траты.`,
     'bad');
 }
 
@@ -205,6 +205,6 @@ export function threatOverEvent(): GameEvent {
 
 export function backToWorkEvent(salary: number): GameEvent {
   return event('backToWork', 'Пришлось вернуться на работу',
-    `Свобода не удержалась: без работы доходов не хватало слишком долго. Новая зарплата — ${coins(salary)} в неделю, чуть меньше прежней. Копи запас, и свобода вернётся.`,
+    `Свобода не удержалась: без работы доходов не хватало слишком долго. Новая зарплата — ${coins(salary)} в неделю, чуть меньше прежней. Копите запас, и свобода вернётся.`,
     'bad');
 }

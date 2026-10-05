@@ -141,8 +141,8 @@ describe('улучшение актива', () => {
   it('чужой или несуществующий объект — отказ', () => {
     const world = newWorld();
     const miaBoat = giveAsset(world, 'bot-mia', 'boat');
-    expect(applyAction(world, upgradeOf(miaBoat.uid)).error).toBe('Такого объекта у тебя нет');
-    expect(applyAction(world, upgradeOf('nope')).error).toBe('Такого объекта у тебя нет');
+    expect(applyAction(world, upgradeOf(miaBoat.uid)).error).toBe('Такого объекта у вас нет');
+    expect(applyAction(world, upgradeOf('nope')).error).toBe('Такого объекта у вас нет');
     expect(applyAction(world, { type: 'upgradeAsset', playerId: 'ghost', assetUid: miaBoat.uid }).error).toBe('Такого игрока нет');
   });
 

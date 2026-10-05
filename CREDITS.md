@@ -5,6 +5,11 @@
 отдельных эффектов, моно/стерео, 44,1 кГц, нормализация и MP3.
 Музыка — 128 кбит/с; её темп и высота сохранены. Синтез остаётся запасным вариантом.
 
+## Шрифты
+
+- [Manrope](https://github.com/sharanda/manrope) — The Manrope Project Authors, [SIL Open Font License 1.1](https://openfontlicense.org/).
+- [Unbounded](https://github.com/googlefonts/unbounded) — The Unbounded Project Authors, [SIL Open Font License 1.1](https://openfontlicense.org/).
+
 ## Источники
 
 | Запись / набор | Автор | Лицензия |

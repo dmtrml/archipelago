@@ -1,4 +1,5 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
+import { asset } from '../asset';
 import { AudioSliders, useAudioSettings } from './AudioControls';
 import { CUES, CUE_IDS, type CueId } from './cues';
 import { audio } from './engine';
@@ -43,7 +44,7 @@ export default function SoundShowcase() {
             <h1>Звуки острова</h1>
             <p className="sound-intro">Выберите для каждого звука запись или синтез. Кнопки сравнения позволяют послушать оба варианта. В исходном наборе записи выбраны для отказа, дождя, грома, музыки острова и свободы; остальные звуки — синтез.</p>
           </div>
-          <a className="btn ghost sm" href="/" data-ui-sound="none">← К игре</a>
+          <a className="btn ghost sm" href={asset('')} data-ui-sound="none">← К игре</a>
         </header>
 
         <div className="sound-workbench">
