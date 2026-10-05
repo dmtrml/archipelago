@@ -15,7 +15,7 @@ export function FreedomBlock() {
   if (me.freedomWeek === null) {
     const covered = fin.freedomRatio >= 1;
     return (
-      <div className="freedom">
+      <div className="freedom" data-coach="freedom">
         <div className="freedom-head"><span>До финансовой свободы</span><b>{pct}%</b></div>
         <div className="bar"><div className="fill" style={{ width: `${Math.min(100, pct)}%` }} /></div>
         <div className="freedom-foot">
@@ -36,7 +36,7 @@ export function FreedomBlock() {
   const shortfall = !free && fin.freedomRatio < 1;
 
   return (
-    <div className={`freedom after ${free ? 'free' : ''}`}>
+    <div className={`freedom after ${free ? 'free' : ''}`} data-coach="freedom">
       <div className="freedom-head"><span>{levelTitle(level)}</span><b>{pct}%</b></div>
       <div className="bar scaled">
         <div className="fill" style={{ width: `${Math.min(100, (fin.freedomRatio / top) * 100)}%` }} />

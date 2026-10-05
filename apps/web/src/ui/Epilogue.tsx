@@ -3,6 +3,9 @@ import { financeView, getPlayer, leaderboard } from '@arch/engine';
 import { HUMAN, useGame, type WeekModal } from '../store';
 import { Confetti, ConfirmButton, Meter } from './common';
 import { levelTitle, percent } from './text';
+import { weeksAcc } from '../format';
+import { share } from '../share';
+import { track } from '../analytics';
 
 /** «Мия, Борис и Тимур». */
 const names = (list: string[]) => (list.length > 1 ? `${list.slice(0, -1).join(', ')} и ${list[list.length - 1]}` : list[0]);
@@ -39,6 +42,7 @@ export function EpilogueModal({ modal }: { modal: WeekModal }) {
 
   const dreamWeek = me.dream?.doneWeek ?? modal.report.week;
   const happiness = Math.round(me.happiness);
+  const feedbackUrl = import.meta.env.VITE_FEEDBACK_URL?.trim();
 
   return (
     <div className="modal-backdrop" onClick={close}>
@@ -81,7 +85,9 @@ export function EpilogueModal({ modal }: { modal: WeekModal }) {
           <ConfirmButton className="btn ghost big" confirmText="Точно? Остров начнётся заново" onConfirm={resetGame}>
             Новая игра
           </ConfirmButton>
+          <button className="btn ghost big" type="button" onClick={() => void share(`Архипелаг: свобода за ${weeksAcc(me.freedomWeek ?? modal.report.week)}, шхуна для кругосветки — за ${weeksAcc(dreamWeek)} 🏝 Сможете быстрее?`)}>Поделиться результатом</button>
         </div>
+        {feedbackUrl && <a className="secondary-link feedback-link" href={feedbackUrl} target="_blank" rel="noreferrer" onClick={() => track('feedback-open')}>Написать отзыв ↗</a>}
       </div>
     </div>
   );

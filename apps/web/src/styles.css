@@ -370,6 +370,29 @@ button, input { font: inherit; color: inherit; }
 .toast.bad { background: rgba(220, 75, 67, 0.94); }
 @keyframes toast-in { from { opacity: 0; transform: translate(-50%, -12px) scale(.95); } }
 
+/* ───────── Первые ходы ───────── */
+.coach { position: fixed; inset: 0; z-index: 70; pointer-events: none; }
+.coach-ring {
+  position: fixed; border: 3px solid var(--gold); pointer-events: none;
+  box-shadow: 0 0 0 9999px rgba(31,42,68,.45); animation: coach-pulse 1.6s ease-in-out infinite alternate;
+}
+@keyframes coach-pulse { from { opacity: .6; } to { opacity: 1; } }
+.coach-bubble {
+  position: fixed; width: min(300px, calc(100vw - 24px)); padding: 14px 16px; pointer-events: auto;
+  background: var(--paper-solid); border-radius: 18px; box-shadow: var(--shadow); color: var(--ink);
+}
+.coach-bubble::after { content: ''; position: absolute; left: 50%; width: 0; height: 0; border: 10px solid transparent; transform: translateX(-50%); }
+.coach-bubble.above::after { top: 100%; border-top-color: var(--paper-solid); }
+.coach-bubble.below::after { bottom: 100%; border-bottom-color: var(--paper-solid); }
+.coach-kicker { font-size: 11px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-soft); }
+.coach-bubble p { margin: 6px 0 10px; font-size: 15px; line-height: 1.4; font-weight: 700; }
+.coach-skip { border: 0; background: none; padding: 2px 0; cursor: pointer; font-size: 13px; font-weight: 700; color: var(--ink-soft); }
+.secondary-link { display: inline-block; font-size: 13px; font-weight: 700; color: var(--ink-soft); text-decoration: none; }
+.secondary-link:hover { text-decoration: underline; }
+.feedback-link { text-align: center; align-self: center; }
+.share-result { align-self: flex-start; }
+@media (prefers-reduced-motion: reduce) { .coach-ring { animation: none; } }
+
 .confetti { position: fixed; top: -20px; width: 10px; height: 14px; border-radius: 3px; pointer-events: none; z-index: 49; animation: fall linear forwards; }
 @keyframes fall { to { transform: translate(var(--dx), 110vh) rotate(var(--rot)); } }
 

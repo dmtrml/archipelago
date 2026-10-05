@@ -61,7 +61,7 @@ export function NextWeekButton({ compact }: { compact?: boolean }) {
   const busy = useGame((s) => s.busy);
   const fin = financeView(world, HUMAN);
   return (
-    <button className={`btn next ${compact ? 'compact' : ''}`} onClick={endWeek} disabled={busy}>
+    <button className={`btn next ${compact ? 'compact' : ''}`} onClick={endWeek} disabled={busy} data-coach="next-week">
       <span className="next-main">Следующая неделя <span aria-hidden>→</span></span>
       {!compact && <span className="next-sub">≈ {signed(fin.net)} к наличным</span>}
     </button>

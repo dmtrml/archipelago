@@ -14,6 +14,7 @@ export function plural(n: number, [one, few, many]: [string, string, string]) {
 }
 
 export const weeks = (n: number) => `${n} ${plural(n, ['неделя', 'недели', 'недель'])}`;
+export const weeksAcc = (n: number) => `${n} ${plural(n, ['неделю', 'недели', 'недель'])}`;
 
 export const SECTOR_NAME: Record<Sector, string> = {
   fish: 'рыба',

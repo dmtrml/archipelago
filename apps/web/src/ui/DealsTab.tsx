@@ -17,7 +17,7 @@ function OfferCard({ v, cash, freedom }: { v: OfferView; cash: number; freedom: 
         : null;
 
   return (
-    <article className={`offer ${v.warning ? 'warned' : ''}`}>
+    <article className={`offer ${v.warning ? 'warned' : ''}`} data-offer={v.def.id} data-offer-uid={v.offer.uid}>
       <div className="offer-top">
         <span className={`tag ${isStatus ? 'liability' : 'asset'}`}>
           {isStatus ? 'Пассив · статус' : `Актив · ${SECTOR_NAME[v.def.sector]}`}

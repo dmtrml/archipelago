@@ -1,16 +1,19 @@
 import { useEffect, useState } from 'react';
 import { DREAMS, DREAM_WORK_EMPLOYED, getPlayer } from '@arch/engine';
 import { HUMAN, useGame, type WeekModal as WeekModalData } from '../store';
-import { fmt, signed, weeks } from '../format';
+import { fmt, signed, weeksAcc } from '../format';
 import { Confetti } from './common';
 import { EpilogueModal } from './Epilogue';
 import { daysText, lowerFirst, speedUpText } from './text';
 import { Emblem } from './TopBar';
+import { share } from '../share';
+import { track } from '../analytics';
 
 export function WelcomeModal() {
   const newGame = useGame((s) => s.newGame);
   const [island, setIsland] = useState('Тихая Гавань');
   const [name, setName] = useState('');
+  const feedbackUrl = import.meta.env.VITE_FEEDBACK_URL?.trim();
   return (
     <div className="modal-backdrop">
       <form
@@ -35,6 +38,7 @@ export function WelcomeModal() {
           <input value={name} maxLength={20} placeholder="Например, Аня" onChange={(e) => setName(e.target.value)} />
         </label>
         <button className="btn primary big" type="submit">Начать игру</button>
+        {feedbackUrl && <a className="secondary-link feedback-link" href={feedbackUrl} target="_blank" rel="noreferrer" onClick={() => track('feedback-open')}>Написать отзыв ↗</a>}
       </form>
     </div>
   );
@@ -110,8 +114,9 @@ export function WeekModal() {
             <h2>Финансовая свобода!</h2>
             <p className="lead">
               Ваши активы теперь приносят больше, чем стоит вся ваша жизнь на острове.
-              Вы добились этого за {weeks(modal.report.week)}.
+              Вы добились этого за {weeksAcc(modal.report.week)}.
             </p>
+            <button className="btn ghost share-result" type="button" onClick={() => void share(`Архипелаг: финансовая свобода за ${weeksAcc(modal.report.week)} 🏝 Сможете быстрее?`)}>Поделиться результатом</button>
             {dreamTitle && <div className="dream-unlocked">Мечта открыта: {dreamTitle}. Теперь её можно строить.</div>}
           </>
         ) : (
