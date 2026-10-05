@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { resolve } from 'node:path';
 
 export default defineConfig({
   base: process.env.VITE_BASE || '/',
@@ -7,6 +8,10 @@ export default defineConfig({
   server: { port: 5173, strictPort: true },
   build: {
     rolldownOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        en: resolve(__dirname, 'en/index.html'),
+      },
       output: {
         codeSplitting: {
           groups: [

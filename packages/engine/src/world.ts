@@ -48,7 +48,7 @@ function newPlayer(id: string, name: string, islandName: string, botStyle?: BotS
 
 export function createWorld(opts: { seed: number; playerName: string; islandName: string }): WorldState {
   const world: WorldState = {
-    version: 3,
+    version: 4,
     seed: opts.seed,
     rng: opts.seed >>> 0,
     nextUid: 1,

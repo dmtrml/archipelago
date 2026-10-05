@@ -50,7 +50,7 @@ export default function SoundShowcase() {
         <div className="sound-workbench">
           <section className="panel sound-settings" aria-labelledby="sound-settings-title">
             <h2 id="sound-settings-title">Громкость</h2>
-            <AudioSliders quiet />
+            <AudioSliders quiet localized={false} />
             <p className="sound-hint">Громкость и выбор звуков общие с игрой и сохраняются автоматически. Если запись недоступна, прозвучит запасной синтез.</p>
             <button type="button" className="sound-text-button" data-ui-sound="none" onClick={() => updateAudioSettings({ sources: {} })}>Вернуть исходный выбор звуков</button>
           </section>

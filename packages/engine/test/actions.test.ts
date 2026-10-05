@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { saleValue } from '../src/economy';
 import { applyAction } from '../src/reducer';
 import { LOAN_RATE, REST_COST, REST_JOY } from '../src/rules';
-import { financeView, loanLimit, offerViews, SCAM_WARNING } from '../src/selectors';
+import { financeView, loanLimit, offerViews } from '../src/selectors';
 import type { WorldState } from '../src/types';
 import { giveAsset, player, putOffer, soloWorld } from './helpers';
 
@@ -39,7 +39,7 @@ describe('покупка и продажа', () => {
     const offer = putOffer(world, 'boat', { price: 100 });
     expect(offerViews(world, 'p1').find((v) => v.offer.uid === offer.uid)!.slotFull).toBe(true);
     const result = applyAction(world, { type: 'buyOffer', playerId: 'p1', offerUid: offer.uid });
-    expect(result.error).toBe('На пирсе нет места');
+    expect(result.error).toEqual({ code: 'slotFull', slot: 'pier' });
   });
 
   it('продажа освобождает место и приносит стоимость продажи', () => {
@@ -50,15 +50,15 @@ describe('покупка и продажа', () => {
     const after = ok(world, { type: 'sellAsset', playerId: 'p1', assetUid: asset.uid });
     expect(player(after).cash).toBe(600 + value);
     expect(player(after).owned).toHaveLength(0);
-    expect(applyAction(after, { type: 'sellAsset', playerId: 'p1', assetUid: asset.uid }).error).toBe('Такого объекта у вас нет');
+    expect(applyAction(after, { type: 'sellAsset', playerId: 'p1', assetUid: asset.uid }).error).toEqual({ code: 'noSuchAsset' });
   });
 
   it('не хватает денег — понятная ошибка с суммой', () => {
     const world = soloWorld();
     const offer = putOffer(world, 'cottage', { price: 720 });
-    expect(applyAction(world, { type: 'buyOffer', playerId: 'p1', offerUid: offer.uid }).error).toBe('Не хватает 120 монет');
+    expect(applyAction(world, { type: 'buyOffer', playerId: 'p1', offerUid: offer.uid }).error).toEqual({ code: 'notEnoughCash', missing: 120 });
     player(world).cash = 719;
-    expect(applyAction(world, { type: 'buyOffer', playerId: 'p1', offerUid: offer.uid }).error).toBe('Не хватает 1 монеты');
+    expect(applyAction(world, { type: 'buyOffer', playerId: 'p1', offerUid: offer.uid }).error).toEqual({ code: 'notEnoughCash', missing: 1 });
   });
 });
 
@@ -68,7 +68,7 @@ describe('знания', () => {
     player(world).cash = 2000;
     const offer = putOffer(world, 'cafe');
     expect(offerViews(world, 'p1').find((v) => v.offer.uid === offer.uid)!.locked).toBe(true);
-    expect(applyAction(world, { type: 'buyOffer', playerId: 'p1', offerUid: offer.uid }).error).toBe('Нужно знание 1');
+    expect(applyAction(world, { type: 'buyOffer', playerId: 'p1', offerUid: offer.uid }).error).toEqual({ code: 'needKnowledge', level: 1 });
     world = ok(world, { type: 'study', playerId: 'p1' });
     expect(player(world).knowledge).toBe(1);
     expect(player(world).cash).toBe(1800);
@@ -79,14 +79,14 @@ describe('знания', () => {
     let world = soloWorld();
     player(world).cash = 5000;
     world = ok(world, { type: 'study', playerId: 'p1' });
-    expect(applyAction(world, { type: 'study', playerId: 'p1' }).error).toBe('Учиться можно раз в неделю');
+    expect(applyAction(world, { type: 'study', playerId: 'p1' }).error).toEqual({ code: 'studiedThisWeek' });
     world = ok(world, { type: 'endWeek' });
     const before = player(world).cash;
     world = ok(world, { type: 'study', playerId: 'p1' });
     expect(before - player(world).cash).toBe(400);
     player(world).knowledge = 3;
     player(world).studiedThisWeek = false;
-    expect(applyAction(world, { type: 'study', playerId: 'p1' }).error).toBe('Вы уже знаете всё, чему здесь учат');
+    expect(applyAction(world, { type: 'study', playerId: 'p1' }).error).toEqual({ code: 'maxKnowledge' });
   });
 
   it('предупреждение об афере видно только со знанием ≥ 1', () => {
@@ -94,7 +94,7 @@ describe('знания', () => {
     const scam = putOffer(world, 'pearlFarm');
     expect(offerViews(world, 'p1').find((v) => v.offer.uid === scam.uid)!.warning).toBeUndefined();
     player(world).knowledge = 1;
-    expect(offerViews(world, 'p1').find((v) => v.offer.uid === scam.uid)!.warning).toBe(SCAM_WARNING);
+    expect(offerViews(world, 'p1').find((v) => v.offer.uid === scam.uid)!.warning).toBe('scam');
   });
 
   it('окупаемость: ceil(цена / чистый доход), у статуса — null', () => {
@@ -113,15 +113,15 @@ describe('отдых и подработка', () => {
     world = ok(world, { type: 'rest', playerId: 'p1' });
     expect(player(world).cash).toBe(600 - REST_COST);
     expect(player(world).happiness).toBe(70 + REST_JOY);
-    expect(applyAction(world, { type: 'rest', playerId: 'p1' }).error).toBe('Отдыхать можно раз в неделю');
-    expect(applyAction(world, { type: 'setExtraShift', playerId: 'p1', on: true }).error).toBe('Эта неделя — для отдыха, подработку уже не взять');
+    expect(applyAction(world, { type: 'rest', playerId: 'p1' }).error).toEqual({ code: 'restedThisWeek' });
+    expect(applyAction(world, { type: 'setExtraShift', playerId: 'p1', on: true }).error).toEqual({ code: 'shiftAfterRest' });
   });
 
   it('подработка: +50% зарплаты и −12 счастья к концу недели, флаг сбрасывается', () => {
     let world = soloWorld();
     world = ok(world, { type: 'setExtraShift', playerId: 'p1', on: true });
     expect(financeView(world, 'p1').salary).toBe(270);
-    expect(applyAction(world, { type: 'rest', playerId: 'p1' }).error).toBe('В неделю подработки отдохнуть не выйдет');
+    expect(applyAction(world, { type: 'rest', playerId: 'p1' }).error).toEqual({ code: 'restDuringShift' });
     world = ok(world, { type: 'endWeek' });
     const report = world.lastReport!.players.p1;
     expect(report.salary).toBe(270);
@@ -136,8 +136,8 @@ describe('кредиты', () => {
     const limit = loanLimit(world, 'p1');
     expect(limit).toBeGreaterThan(0);
     expect(limit % 100).toBe(0);
-    expect(applyAction(world, { type: 'takeLoan', playerId: 'p1', amount: limit + 100 }).error).toBe(`Банк даёт не больше ${limit} монет`);
-    expect(applyAction(world, { type: 'takeLoan', playerId: 'p1', amount: 0 }).error).toBe('Укажите сумму больше нуля');
+    expect(applyAction(world, { type: 'takeLoan', playerId: 'p1', amount: limit + 100 }).error).toEqual({ code: 'loanOverLimit', limit });
+    expect(applyAction(world, { type: 'takeLoan', playerId: 'p1', amount: 0 }).error).toEqual({ code: 'badAmount' });
 
     world = ok(world, { type: 'takeLoan', playerId: 'p1', amount: 400 });
     expect(player(world).cash).toBe(1000);
@@ -168,7 +168,7 @@ describe('кредиты', () => {
     world = ok(world, { type: 'takeLoan', playerId: 'p1', amount: 500 });
     player(world).cash = 100;
     const loanUid = player(world).loans[0].uid;
-    expect(applyAction(world, { type: 'repayLoan', playerId: 'p1', loanUid, amount: 300 }).error).toBe('Не хватает 200 монет');
+    expect(applyAction(world, { type: 'repayLoan', playerId: 'p1', loanUid, amount: 300 }).error).toEqual({ code: 'notEnoughCash', missing: 200 });
   });
 });
 
@@ -180,6 +180,6 @@ describe('ремонт', () => {
     world = ok(world, { type: 'repairAsset', playerId: 'p1', assetUid: boat.uid });
     expect(player(world).cash).toBe(600 - 75);
     expect(player(world).owned[0].damaged).toBe(false);
-    expect(applyAction(world, { type: 'repairAsset', playerId: 'p1', assetUid: boat.uid }).error).toBe('Этот объект не повреждён');
+    expect(applyAction(world, { type: 'repairAsset', playerId: 'p1', assetUid: boat.uid }).error).toEqual({ code: 'notDamaged' });
   });
 });

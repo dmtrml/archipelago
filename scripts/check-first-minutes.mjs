@@ -39,7 +39,7 @@ async function expectedBest(page) {
 
 try {
   for (const [width, height] of [[390, 844], [1366, 768]]) {
-    const page = await browser.newPage({ viewport: { width, height } });
+    const page = await browser.newPage({ viewport: { width, height }, locale: 'ru-RU' });
     await start(page);
     const expected = await expectedBest(page);
     assert(expected, 'Initial world must contain an eligible asset');
@@ -68,7 +68,7 @@ try {
     await page.close();
   }
 
-  const skip = await browser.newPage();
+  const skip = await browser.newPage({ locale: 'ru-RU' });
   await start(skip);
   await skip.getByText('Пропустить обучение', { exact: true }).waitFor({ timeout: 2500 });
   await skip.getByText('Пропустить обучение', { exact: true }).click();
@@ -81,7 +81,7 @@ try {
   assert.equal(await skip.evaluate(() => localStorage.getItem('archipelago.coach.v1')), 'done');
   await skip.close();
 
-  const loaded = await browser.newPage();
+  const loaded = await browser.newPage({ locale: 'ru-RU' });
   await start(loaded);
   await loaded.evaluate(() => localStorage.removeItem('archipelago.coach.v1'));
   await loaded.reload();
@@ -90,7 +90,7 @@ try {
   assert.equal(await loaded.locator('.coach-bubble').count(), 0, 'Loaded save shows coach');
   await loaded.close();
 
-  const noAsset = await browser.newPage();
+  const noAsset = await browser.newPage({ locale: 'ru-RU' });
   await start(noAsset);
   await noAsset.evaluate(async () => {
     const { useGame } = await import('/src/store.ts');
@@ -101,7 +101,7 @@ try {
   await noAsset.getByRole('dialog').filter({ hasText: 'Шаг 2 из 3' }).waitFor({ timeout: 2500 });
   await noAsset.close();
 
-  const shared = await browser.newPage();
+  const shared = await browser.newPage({ locale: 'ru-RU' });
   await shared.addInitScript(() => Object.defineProperty(navigator, 'share', { configurable: true, value: (data) => { window.__shared = data; return Promise.resolve(); } }));
   await shared.goto(url); await shared.evaluate(() => localStorage.setItem('archipelago.coach.v1', 'done')); await shared.reload();
   if (!await shared.locator('.hud').count()) await shared.getByRole('button', { name: 'Начать игру', exact: true }).click();
@@ -123,7 +123,7 @@ try {
   data = await shared.evaluate(() => window.__shared); assert.match(data.text, /21 неделю/); assert.match(data.text, /37 недель/);
   await shared.close();
 
-  const clip = await browser.newContext({ permissions: ['clipboard-read', 'clipboard-write'] });
+  const clip = await browser.newContext({ permissions: ['clipboard-read', 'clipboard-write'], locale: 'ru-RU' });
   const clipPage = await clip.newPage();
   await clipPage.addInitScript(() => Object.defineProperty(navigator, 'share', { configurable: true, value: undefined }));
   await clipPage.goto(url); await clipPage.evaluate(() => localStorage.setItem('archipelago.coach.v1', 'done')); await clipPage.reload();
@@ -138,7 +138,7 @@ try {
   await clipPage.getByText('Скопировано — вставьте в сообщение или пост', { exact: true }).waitFor();
   await clip.close();
 
-  const analytics = await browser.newPage();
+  const analytics = await browser.newPage({ locale: 'ru-RU' });
   const requests = [];
   analytics.on('request', (request) => { if (request.url().includes('gc.zgo.at')) requests.push(request.url()); });
   await analytics.route('**/gc.zgo.at/count.js', (route) => route.fulfill({ contentType:'text/javascript', body:'window.goatcounter={count:(x)=>(window.__gc||(window.__gc=[])).push(x)}' }));
@@ -153,7 +153,7 @@ try {
   assert(requests.length > 0, 'Configured GoatCounter script was not requested');
   await analytics.close();
 
-  const plain = await browser.newPage(); const plainRequests=[]; plain.on('request',(r)=>{if(r.url().includes('gc.zgo.at'))plainRequests.push(r.url());});
+  const plain = await browser.newPage({ locale: 'ru-RU' }); const plainRequests=[]; plain.on('request',(r)=>{if(r.url().includes('gc.zgo.at'))plainRequests.push(r.url());});
   await plain.goto(plainUrl); await plain.waitForTimeout(300);
   assert.equal(plainRequests.length,0,'GoatCounter requested without env');
   assert.equal(await plain.locator('.feedback-link').count(), 0, 'Feedback link visible without VITE_FEEDBACK_URL');

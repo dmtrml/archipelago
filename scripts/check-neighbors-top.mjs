@@ -29,7 +29,7 @@ await mkdir(output, { recursive: true });
 const errors = [];
 const consoleErrors = [];
 const results = [];
-const page = await browser.newPage();
+const page = await browser.newPage({ locale: 'ru-RU' });
 page.on('pageerror', (error) => errors.push(error.message));
 page.on('console', (msg) => {
   if (msg.type() === 'error') consoleErrors.push({ text: msg.text(), url: msg.location().url });

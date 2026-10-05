@@ -198,7 +198,7 @@ function runGame(seed: number, weeks: number, humanPolicy: Policy): Map<string, 
     if (turn.errors.length) throw new Error(`seed ${seed}: ${turn.errors.join('; ')}`);
     stats.get(HUMAN_ID)!.upgrades += turn.actions.filter((a) => a.type === 'upgradeAsset').length;
     const result = applyAction(turn.world, { type: 'endWeek' });
-    if (result.error) throw new Error(result.error);
+    if (result.error) throw new Error(result.error.code);
     world = result.world;
     for (const [id, report] of Object.entries(world.lastReport!.players)) {
       const s = stats.get(id)!;

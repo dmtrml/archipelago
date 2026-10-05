@@ -1,0 +1,22 @@
+{
+  "ruScreens": [
+    "welcome",
+    "game",
+    "tab:Отчёт",
+    "tab:Сделки",
+    "tab:Остров",
+    "tab:Действия",
+    "purchase",
+    "sound",
+    "week"
+  ],
+  "screenshots": [
+    "C:\\Users\\user\\Documents\\CoDevelopment\\CashFlow\\docs\\qa\\launch-3-english\\screenshots\\en-welcome-390.jpg",
+    "C:\\Users\\user\\Documents\\CoDevelopment\\CashFlow\\docs\\qa\\launch-3-english\\screenshots\\en-game-390.jpg",
+    "C:\\Users\\user\\Documents\\CoDevelopment\\CashFlow\\docs\\qa\\launch-3-english\\screenshots\\en-after-week-390.jpg",
+    "C:\\Users\\user\\Documents\\CoDevelopment\\CashFlow\\docs\\qa\\launch-3-english\\screenshots\\en-welcome-1366.jpg",
+    "C:\\Users\\user\\Documents\\CoDevelopment\\CashFlow\\docs\\qa\\launch-3-english\\screenshots\\en-game-1366.jpg",
+    "C:\\Users\\user\\Documents\\CoDevelopment\\CashFlow\\docs\\qa\\launch-3-english\\screenshots\\en-after-week-1366.jpg"
+  ],
+  "runtimeErrors": []
+}

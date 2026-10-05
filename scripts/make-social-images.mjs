@@ -10,7 +10,8 @@ const option = (name, fallback) => {
   const index = args.indexOf(name);
   return index < 0 ? fallback : args[index + 1];
 };
-if (args.includes('--lang')) throw new Error('--lang пока не поддерживается; английские изображения добавит этап 3.');
+const lang = option('--lang', 'ru');
+if (lang !== 'ru' && lang !== 'en') throw new Error(`Unsupported --lang: ${lang}`);
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const web = resolve(root, 'apps/web');
@@ -57,7 +58,7 @@ try {
 
   await page.setContent(`<!doctype html><style>html,body{margin:0;width:180px;height:180px}img{display:block;width:180px;height:180px}</style><img src="${baseUrl}favicon.svg">`);
   await page.locator('img').evaluate((image) => image.complete ? undefined : new Promise((resolveImage) => image.addEventListener('load', resolveImage, { once: true })));
-  await page.screenshot({ path: resolve(publicDir, 'apple-touch-icon.png'), type: 'png' });
+  if (lang === 'ru') await page.screenshot({ path: resolve(publicDir, 'apple-touch-icon.png'), type: 'png' });
 
   await page.setViewportSize({ width: 1488, height: 630 });
   await page.goto(`${baseUrl}?sandbox`, { waitUntil: 'networkidle' });
@@ -70,7 +71,7 @@ try {
   await page.getByRole('button', { name: 'Заполнить всё', exact: true }).click();
   await page.getByRole('button', { name: 'built 3', exact: true }).click();
   await page.waitForTimeout(2500);
-  await page.evaluate(async () => {
+  await page.evaluate(async (cardLang) => {
     await document.fonts.ready;
     if (!document.fonts.check('700 20px Unbounded')) throw new Error('Unbounded 700 не загрузился');
     const fillButton = [...document.querySelectorAll('button')].find((button) => button.textContent?.trim() === 'Заполнить всё');
@@ -91,28 +92,28 @@ try {
     icon.src = '/favicon.svg';
     Object.assign(icon.style, { width: '84px', height: '84px', display: 'block' });
     const title = document.createElement('div');
-    title.textContent = 'Архипелаг';
+    title.textContent = cardLang === 'en' ? 'Archipelago' : 'Архипелаг';
     title.style.font = '700 58px/1 Unbounded, system-ui, sans-serif';
     title.style.color = '#1F2A44';
     const subtitle = document.createElement('div');
-    subtitle.textContent = 'Уютная игра про деньги и свободу';
+    subtitle.textContent = cardLang === 'en' ? 'A cozy game about money and freedom' : 'Уютная игра про деньги и свободу';
     subtitle.style.font = '800 25px/1.25 Manrope, system-ui, sans-serif';
     subtitle.style.color = '#5B6680';
     const cta = document.createElement('div');
-    cta.textContent = 'Играть бесплатно в браузере';
+    cta.textContent = cardLang === 'en' ? 'Play free in your browser' : 'Играть бесплатно в браузере';
     Object.assign(cta.style, {
       font: '800 21px/1.2 Manrope, system-ui, sans-serif', background: '#F5B83D', color: '#3A2600',
       borderBottom: '4px solid #D9931C', borderRadius: '14px', padding: '12px 20px',
     });
     card.append(icon, title, subtitle, cta);
     document.body.append(card);
-  });
+  }, lang);
   await page.locator('#social-card img').evaluate((image) => image.complete ? undefined : new Promise((resolveImage) => image.addEventListener('load', resolveImage, { once: true })));
-  const ogPath = resolve(publicDir, 'og-image.jpg');
+  const ogPath = resolve(publicDir, lang === 'en' ? 'og-image-en.jpg' : 'og-image.jpg');
   await page.screenshot({ path: ogPath, type: 'jpeg', quality: 88, clip: { x: 0, y: 0, width: 1200, height: 630 } });
   const og = await stat(ogPath);
   assert(og.size <= 300 * 1024, `og-image.jpg больше 300 КБ: ${Math.round(og.size / 1024)} КБ`);
-  console.log(`Созданы apple-touch-icon.png и og-image.jpg (${Math.round(og.size / 1024)} КБ).`);
+  console.log('Created ' + (lang === 'en' ? 'og-image-en.jpg' : 'apple-touch-icon.png and og-image.jpg') + ` (${Math.round(og.size / 1024)} KB).`);
 } finally {
   await browser?.close();
   preview.kill();

@@ -57,12 +57,6 @@ export function nextUpgrade(asset: OwnedAsset): UpgradeDef | null {
   return getDef(asset.defId).upgrades?.[asset.level - 1] ?? null;
 }
 
-/** Название с учётом уровня: «Траулер», а не «Рыбацкая лодка». */
-export function assetTitle(asset: OwnedAsset): string {
-  const def = getDef(asset.defId);
-  return (asset.level > 1 ? def.upgrades?.[asset.level - 2]?.title : undefined) ?? def.title;
-}
-
 /**
  * На сколько вырастет доход в неделю по текущему рынку (без учёта поломки): разница дохода до и после,
  * поэтому округление то же, что и у настоящего дохода.

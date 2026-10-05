@@ -57,3 +57,32 @@
 ### Не сделано после этапа 2
 
 - Настройка реальных GoatCounter/feedback URL владельцем по-прежнему не выполнялась по one-pass fallback; обе интеграции проверены тестовыми env.
+
+## Этап 3 — английская версия
+
+| № | Результат | Доказательство |
+|---|---|---|
+| 1 | выполнен | `npm run typecheck`; `npm test` — 141/141; `npm run build`; world v4 migration tests |
+| 2 | выполнен | Проверка строковых литералов `packages/engine/src`: кириллица только в разрешённом `BOT_ROSTER` |
+| 3 | выполнен | `scripts/check-i18n.mjs`: 9 RU-состояний дословно совпали с checkpoint `40b2a41` после удаления только новых language controls |
+| 4 | выполнен | `scripts/check-i18n.mjs`: EN 390×844 + 1366×768; 6 JPEG, кириллица/overflow/runtime errors — 0 |
+| 5 | выполнен | `/en/`, navigator ru/de, сохранённый выбор и переключение посреди партии без навигации/изменения мира прошли |
+| 6 | выполнен | engine migration test v3 → v4: legacy event/news text сохранён |
+| 7 | выполнен | `dist/en/index.html` создан multi-page build с английскими meta; EN social image генерируется `--lang en` |
+| 8 | выполнен | `check-i18n`: `breakdown: 3`, `gift: 3` совпадают в engine, RU и EN |
+| 9 | выполнен | [приёмка этапа 3](launch-3-english.md), STATUS и история обновляются в этом коммите |
+
+Баланс: Stage 2 — 144,6 с, Stage 3 — 123,1 с. После нормализации только поля времени оба вывода имеют SHA-256 `9F77B95342F5965543C2208ABE7593268DF7595B3709DF17582C1BDC4695EA19`; diff пуст.
+
+### Отклонения этапа 3
+
+- В one-pass `main` не содержит этапы 1–2, поэтому RU baseline — checkpoint `40b2a41`, семантический эквивалент описанного в спецификации `main` после двух предыдущих этапов.
+- Полный вывод `npm run sim` содержит недетерминированное время выполнения; баланс дополнительно сравнивается после нормализации только этого поля. Числа и проверки должны совпасть полностью.
+- Для `dreamView` нехватка денег хранится числом `missingCash`, так как перечисленный спецификацией `reason` не содержит параметризованного варианта.
+
+### Материалы этапа 3
+
+- [Приёмка этапа 3](launch-3-english.md)
+- `apps/web/public/og-image-en.jpg`
+- `README.en.md`
+- `launch-3-english/results.json` и 6 JPEG в `launch-3-english/screenshots/`

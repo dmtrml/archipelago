@@ -1,14 +1,13 @@
 // Улучшения активов: лодка → баркас → траулер. Действие, виды для UI, новости, боты, миграция.
 import { describe, expect, it } from 'vitest';
 import { POLICIES, runBots, runBotTurn, type Policy } from '../src/bots';
-import { ASSET_DEFS, UPGRADE_NAMES } from '../src/content';
+import { ASSET_DEFS } from '../src/content';
 import { insurancePremium, repairCost, saleValue } from '../src/economy';
 import { rollWorldEvent } from '../src/events';
 import { migrateWorld } from '../src/migrate';
 import { applyAction } from '../src/reducer';
 import { Rng } from '../src/rng';
 import { assetViews, financeView, offerViews } from '../src/selectors';
-import { ERRORS } from '../src/text';
 import type { Action, AssetView, PlayerWeekReport, WorldState } from '../src/types';
 import { settleWeek } from '../src/week';
 import { badNumbers, deepFreeze, giveAsset, newWorld, player, putOffer, soloWorld } from './helpers';
@@ -51,14 +50,12 @@ describe('контент улучшений', () => {
     for (const def of Object.values(ASSET_DEFS)) {
       if (UPGRADABLE.includes(def.id)) {
         expect(def.upgrades, def.id).toHaveLength(2);
-        expect(UPGRADE_NAMES[def.id], def.id).toHaveLength(2);
       } else {
         expect(def.upgrades, def.id).toBeUndefined();
-        expect(UPGRADE_NAMES[def.id], def.id).toBeUndefined();
       }
     }
-    expect(ASSET_DEFS.boat.upgrades!.map((u) => u.title)).toEqual(['Баркас', 'Траулер']);
-    expect(ASSET_DEFS.cottage.upgrades!.map((u) => u.title)).toEqual(['Гостевой дом', 'Мини-отель']);
+    expect(ASSET_DEFS.boat.upgrades!.map((u) => [u.cost, u.income, u.upkeep])).toEqual([[400, 32, 12], [700, 40, 15]]);
+    expect(ASSET_DEFS.cottage.upgrades!.map((u) => [u.cost, u.income, u.upkeep])).toEqual([[800, 52, 18], [1100, 63, 24]]);
   });
 
   it('окупаемость при рынке 1.0: вторая ступень 18–24 недели, третья 22–30 — медленнее новой сделки', () => {
@@ -117,7 +114,7 @@ describe('улучшение актива', () => {
     expect(player(world).owned[0]).toMatchObject({ level: 3, price: 250 + 400 + 700, income: 20 + 32 + 40, upkeep: 4 + 12 + 15 });
     expect(player(world).cash).toBe(5000 - 400 - 700);
     const result = applyAction(world, upgradeOf(boat.uid));
-    expect(result.error).toBe('Улучшать больше некуда');
+    expect(result.error).toEqual({ code: 'noUpgrade' });
     expect(result.world).toBe(world);
   });
 
@@ -134,23 +131,23 @@ describe('улучшение актива', () => {
     player(world).knowledge = 3;
     for (const id of ['deposit', 'shares', 'pearlFarm', 'fountain', 'garden']) {
       const asset = giveAsset(world, 'p1', id);
-      expect(applyAction(world, upgradeOf(asset.uid)).error, id).toBe('Улучшать больше некуда');
+      expect(applyAction(world, upgradeOf(asset.uid)).error, id).toEqual({ code: 'noUpgrade' });
     }
   });
 
   it('чужой или несуществующий объект — отказ', () => {
     const world = newWorld();
     const miaBoat = giveAsset(world, 'bot-mia', 'boat');
-    expect(applyAction(world, upgradeOf(miaBoat.uid)).error).toBe('Такого объекта у вас нет');
-    expect(applyAction(world, upgradeOf('nope')).error).toBe('Такого объекта у вас нет');
-    expect(applyAction(world, { type: 'upgradeAsset', playerId: 'ghost', assetUid: miaBoat.uid }).error).toBe('Такого игрока нет');
+    expect(applyAction(world, upgradeOf(miaBoat.uid)).error).toEqual({ code: 'noSuchAsset' });
+    expect(applyAction(world, upgradeOf('nope')).error).toEqual({ code: 'noSuchAsset' });
+    expect(applyAction(world, { type: 'upgradeAsset', playerId: 'ghost', assetUid: miaBoat.uid }).error).toEqual({ code: 'unknownPlayer' });
   });
 
   it('повреждённое сначала чинят', () => {
     let world = richWorld();
     const boat = giveAsset(world, 'p1', 'boat', { damaged: true });
     const result = applyAction(world, upgradeOf(boat.uid));
-    expect(result.error).toBe('Сначала почините');
+    expect(result.error).toEqual({ code: 'repairFirst' });
     expect(result.world).toBe(world);
     world = ok(world, { type: 'repairAsset', playerId: 'p1', assetUid: boat.uid });
     ok(world, upgradeOf(boat.uid));
@@ -160,32 +157,32 @@ describe('улучшение актива', () => {
     const world = richWorld();
     const boat = giveAsset(world, 'p1', 'boat', { level: 2 });
     const cafe = giveAsset(world, 'p1', 'cafe', { level: 2 });
-    expect(applyAction(world, upgradeOf(boat.uid)).error).toBe('Нужно знание 1');
+    expect(applyAction(world, upgradeOf(boat.uid)).error).toEqual({ code: 'needKnowledge', level: 1 });
     player(world).knowledge = 1;
-    expect(applyAction(world, upgradeOf(cafe.uid)).error).toBe('Нужно знание 2');
+    expect(applyAction(world, upgradeOf(cafe.uid)).error).toEqual({ code: 'needKnowledge', level: 2 });
     ok(world, upgradeOf(boat.uid));
   });
 
   it('не хватает монет — сумма в ошибке', () => {
     const world = richWorld(399);
     const boat = giveAsset(world, 'p1', 'boat');
-    expect(applyAction(world, upgradeOf(boat.uid)).error).toBe('Не хватает 1 монеты');
+    expect(applyAction(world, upgradeOf(boat.uid)).error).toEqual({ code: 'notEnoughCash', missing: 1 });
     player(world).cash = 280;
-    expect(applyAction(world, upgradeOf(boat.uid)).error).toBe('Не хватает 120 монет');
+    expect(applyAction(world, upgradeOf(boat.uid)).error).toEqual({ code: 'notEnoughCash', missing: 120 });
   });
 
   it('порядок причин: поломка → знания → монеты', () => {
     const world = richWorld(0);
     const boat = giveAsset(world, 'p1', 'boat', { level: 2, damaged: true });
-    expect(applyAction(world, upgradeOf(boat.uid)).error).toBe('Сначала почините');
+    expect(applyAction(world, upgradeOf(boat.uid)).error).toEqual({ code: 'repairFirst' });
     player(world).owned[0].damaged = false;
-    expect(applyAction(world, upgradeOf(boat.uid)).error).toBe('Нужно знание 1');
+    expect(applyAction(world, upgradeOf(boat.uid)).error).toEqual({ code: 'needKnowledge', level: 1 });
     player(world).knowledge = 1;
-    expect(applyAction(world, upgradeOf(boat.uid)).error).toBe('Не хватает 700 монет');
+    expect(applyAction(world, upgradeOf(boat.uid)).error).toEqual({ code: 'notEnoughCash', missing: 700 });
   });
 
-  it('тексты ошибок — ровно те, что просили', () => {
-    expect(ERRORS).toMatchObject({ noUpgrade: 'Улучшать больше некуда', repairFirst: 'Сначала почините' });
+  it('коды ошибок стабильны', () => {
+    expect(applyAction(richWorld(), upgradeOf('missing')).error).toEqual({ code: 'noSuchAsset' });
   });
 
   it('не меняет входной мир', () => {
@@ -248,25 +245,25 @@ describe('после улучшения', () => {
     };
     rollWorldEvent(world, new ZeroRng(0), { p1: report });
     expect(report.events[0].id).toBe('stormDamage');
-    expect(report.events[0].text).toContain('Траулер');
+    expect(report.events[0].params).toEqual({ assetRefs: ['boat:3'] });
   });
 });
 
 // ───────────── Виды для UI ─────────────
 
 describe('вид актива и улучшения', () => {
-  it('название, уровень и сколько всего уровней', () => {
+  it('id, уровень и сколько всего уровней', () => {
     const world = richWorld();
     giveAsset(world, 'p1', 'boat');
     giveAsset(world, 'p1', 'boat', { level: 2 });
     giveAsset(world, 'p1', 'cottage', { level: 3 });
     giveAsset(world, 'p1', 'deposit');
     const views = assetViews(world, 'p1');
-    expect(views.map((v) => [v.title, v.level, v.maxLevel])).toEqual([
-      ['Рыбацкая лодка', 1, 3],
-      ['Баркас', 2, 3],
-      ['Мини-отель', 3, 3],
-      ['Вклад в банк архипелага', 1, 1],
+    expect(views.map((v) => [v.def.id, v.level, v.maxLevel])).toEqual([
+      ['boat', 1, 3],
+      ['boat', 2, 3],
+      ['cottage', 3, 3],
+      ['deposit', 1, 1],
     ]);
     expect(views[2].upgrade).toBeNull();
     expect(views[3].upgrade).toBeNull();
@@ -304,11 +301,11 @@ describe('вид актива и улучшения', () => {
   it('причины — в том же порядке, что у действия', () => {
     const world = richWorld(100);
     const boat = giveAsset(world, 'p1', 'boat', { level: 2, damaged: true });
-    expect(viewOf(world, boat.uid).upgrade).toMatchObject({ canUpgrade: false, reason: 'Сначала почините' });
+    expect(viewOf(world, boat.uid).upgrade).toMatchObject({ canUpgrade: false, reason: { code: 'repairFirst' } });
     player(world).owned[0].damaged = false;
-    expect(viewOf(world, boat.uid).upgrade).toMatchObject({ canUpgrade: false, reason: 'Нужно знание 1' });
+    expect(viewOf(world, boat.uid).upgrade).toMatchObject({ canUpgrade: false, reason: { code: 'needKnowledge', level: 1 } });
     player(world).knowledge = 1;
-    expect(viewOf(world, boat.uid).upgrade).toMatchObject({ canUpgrade: false, reason: 'Не хватает 600 монет' });
+    expect(viewOf(world, boat.uid).upgrade).toMatchObject({ canUpgrade: false, reason: { code: 'notEnoughCash', missing: 600 } });
     player(world).cash = 700;
     expect(viewOf(world, boat.uid).upgrade).toMatchObject({ canUpgrade: true });
     expect(viewOf(world, boat.uid).upgrade!.reason).toBeUndefined();
@@ -359,8 +356,8 @@ describe('новости об улучшениях', () => {
     mia.cash = 450;
     giveAsset(world, 'bot-mia', 'boat');
     const turn = runBotTurn(world, 'bot-mia', upgradeFirst);
-    expect(turn.errors).toEqual(['bot-mia upgradeAsset: Нужно знание 1']);
-    expect(turn.news.map((n) => n.text)).toEqual(['Мия улучшила рыбацкую лодку — теперь это баркас']);
+    expect(turn.errors).toEqual(['bot-mia upgradeAsset: needKnowledge']);
+    expect(turn.news).toEqual([{ playerId: 'bot-mia', kind: 'upgraded', defId: 'boat', fromLevel: 1 }]);
   });
 
   it('Борис улучшил баркас — теперь это траулер; продал траулер', () => {
@@ -370,9 +367,9 @@ describe('новости об улучшениях', () => {
     boris.knowledge = 1;
     const boat = giveAsset(world, 'bot-boris', 'boat', { level: 2 });
     const turn = runBotTurn(world, 'bot-boris', upgradeFirst);
-    expect(turn.news.map((n) => n.text)).toEqual(['Борис улучшил баркас — теперь это траулер']);
+    expect(turn.news).toEqual([{ playerId: 'bot-boris', kind: 'upgraded', defId: 'boat', fromLevel: 2 }]);
     const sell: Policy = (_w, me) => (me.owned.length ? { type: 'sellAsset', playerId: me.id, assetUid: boat.uid } : null);
-    expect(runBotTurn(turn.world, 'bot-boris', sell).news.map((n) => n.text)).toEqual(['Борис продал траулер']);
+    expect(runBotTurn(turn.world, 'bot-boris', sell).news).toEqual([{ playerId: 'bot-boris', kind: 'sold', defId: 'boat', level: 3 }]);
   });
 
   it('у каждой ступени есть название для новостей', () => {
@@ -385,18 +382,12 @@ describe('новости об улучшениях', () => {
       const a = me.owned.find((x) => x.level < 3);
       return a ? { type: 'upgradeAsset', playerId: me.id, assetUid: a.uid } : null;
     };
-    const texts = runBotTurn(world, 'bot-timur', all).news.map((n) => n.text);
-    expect(texts).toEqual([
-      'Тимур улучшил рыбацкую лодку — теперь это баркас',
-      'Тимур улучшил баркас — теперь это траулер',
-      'Тимур улучшил коптильню — теперь это рыбный цех',
-      'Тимур улучшил рыбный цех — теперь это консервный заводик',
-      'Тимур улучшил домик под сдачу — теперь это гостевой дом',
-      'Тимур улучшил гостевой дом — теперь это мини-отель',
-      'Тимур улучшил бунгало — теперь это бунгало с террасой',
-      'Тимур улучшил бунгало с террасой — теперь это пляжный клуб',
-      'Тимур улучшил пляжное кафе — теперь это ресторан у моря',
-      'Тимур улучшил ресторан у моря — теперь это ресторан на сваях',
+    const news = runBotTurn(world, 'bot-timur', all).news;
+    expect(news).toHaveLength(10);
+    expect(news.every((n) => n.kind === 'upgraded')).toBe(true);
+    expect(news.map((n) => n.kind === 'upgraded' ? [n.defId, n.fromLevel] : null)).toEqual([
+      ['boat', 1], ['boat', 2], ['smokehouse', 1], ['smokehouse', 2], ['cottage', 1], ['cottage', 2],
+      ['bungalow', 1], ['bungalow', 2], ['cafe', 1], ['cafe', 2],
     ]);
   });
 });
@@ -511,7 +502,7 @@ describe('миграция: версия 3', () => {
     const snapshot = JSON.stringify(raw);
     const world = migrateWorld(raw)!;
     expect(world).not.toBeNull();
-    expect(world.version).toBe(3);
+    expect(world.version).toBe(4);
     expect(JSON.stringify(raw)).toBe(snapshot);
     const owned = world.players.flatMap((p) => p.owned);
     expect(owned).toHaveLength(ownedOf(raw).length);
@@ -540,7 +531,7 @@ describe('миграция: версия 3', () => {
     }
     const world = migrateWorld(raw)!;
     expect(world).not.toBeNull();
-    expect(world.version).toBe(3);
+    expect(world.version).toBe(4);
     expect(world.players[0].dream).toMatchObject({ id: 'schooner', built: 0 });
     expect(world.players.flatMap((p) => p.owned).every((a) => a.level === 1)).toBe(true);
     expect(JSON.stringify(ok(migrateWorld(raw)!, { type: 'endWeek' }))).toBe(JSON.stringify(ok(world, { type: 'endWeek' })));

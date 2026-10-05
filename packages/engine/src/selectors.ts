@@ -1,21 +1,18 @@
 // Производные данные для UI. Только чтение мира.
 import { upgradeError } from './actions';
 import {
-  assetsValue, assetTitle, currentIncome, dreamWorkPerWeek, freedomLevel, getDef, getDream, isSlotFull,
+  assetsValue, currentIncome, dreamWorkPerWeek, freedomLevel, getDef, getDream, isSlotFull,
   maxLevel, nextUpgrade, offerIncome, passiveIncome, repairCost, saleValue, totalDebt, upgradedAsset,
   upgradeIncomeGain, weeklyExpenses,
   loanLimit as playerLoanLimit,
 } from './economy';
 import * as R from './rules';
-import { notEnoughCash } from './text';
 import type {
   AssetView, DreamView, FinanceView, LeaderboardRow, MarketState, Offer, OfferView, OwnedAsset, PlayerState,
   UpgradeDef, UpgradeView, WorldState,
 } from './types';
 
 export { insurancePremium, studyCost } from './economy';
-
-export const SCAM_WARNING = 'Обещают слишком много — похоже на пирамиду';
 
 /** Игрок по id. Неизвестный id — ошибка программиста, а не игрока. */
 export function getPlayer(world: WorldState, playerId: string): PlayerState {
@@ -128,7 +125,7 @@ export function offerViews(world: WorldState, playerId: string): OfferView[] {
       slotFull: isSlotFull(player, def.slot),
       freedomAfter: freedomAfterBuying(world, player, offer),
     };
-    if (def.kind === 'scam' && player.knowledge >= R.SCAM_SIGHT_KNOWLEDGE) view.warning = SCAM_WARNING;
+    if (def.kind === 'scam' && player.knowledge >= R.SCAM_SIGHT_KNOWLEDGE) view.warning = 'scam';
     return view;
   });
 }
@@ -140,7 +137,6 @@ export function assetViews(world: WorldState, playerId: string): AssetView[] {
     return {
       asset,
       def,
-      title: assetTitle(asset),
       level: asset.level,
       maxLevel: maxLevel(def),
       currentIncome: currentIncome(asset, world.market, player.knowledge),
@@ -169,11 +165,12 @@ export function dreamView(world: WorldState, playerId: string): DreamView | null
     weeksLeft = Math.max(0, Math.ceil(daysLeft / workPerWeek));
   }
 
-  let reason: string | undefined;
-  if (player.freedomWeek === null) reason = 'Откроется после финансовой свободы';
-  else if (done || !stage) reason = 'Мечта готова';
-  else if (state.building) reason = 'Этап строится';
-  else if (player.cash < stage.cost) reason = notEnoughCash(stage.cost - player.cash);
+  let reason: DreamView['reason'];
+  let missingCash: number | undefined;
+  if (player.freedomWeek === null) reason = 'beforeFreedom';
+  else if (done || !stage) reason = 'done';
+  else if (state.building) reason = 'building';
+  else if (player.cash < stage.cost) missingCash = stage.cost - player.cash;
 
   const finished = structuredClone(player);
   if (finished.dream && finished.dream.doneWeek === null) finished.dream.doneWeek = world.week;
@@ -185,10 +182,11 @@ export function dreamView(world: WorldState, playerId: string): DreamView | null
     stageIndex,
     workPerWeek,
     weeksLeft,
-    canStart: reason === undefined,
+    canStart: reason === undefined && missingCash === undefined,
     freedomAfterDone: shownFreedomRatio(finished, world.market),
   };
   if (reason !== undefined) view.reason = reason;
+  if (missingCash !== undefined) view.missingCash = missingCash;
   return view;
 }
 

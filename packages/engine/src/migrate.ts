@@ -1,4 +1,4 @@
-// Миграция сохранений: старый мир (версии 1 или 2) превращается в текущий (версия 3) по цепочке 1 → 2 → 3.
+// Миграция сохранений: старые версии последовательно приводятся к текущей v4.
 // Вход — «сырой» JSON из localStorage, поэтому всё проверяем руками; непонятное — null.
 import { DREAMS } from './content';
 import type { WorldState } from './types';
@@ -51,6 +51,37 @@ function isPlayerV3(value: unknown): boolean {
   return isPlayerV2(value) && value.owned.every((a) => isObj(a) && isLevel(a.level));
 }
 
+function migrateLegacyEvent(value: unknown): unknown {
+  if (!isObj(value)) return value;
+  const event = { ...value };
+  if (typeof event.title === 'string') event.legacyTitle = event.title;
+  if (typeof event.text === 'string') event.legacyText = event.text;
+  delete event.title;
+  delete event.text;
+  return event;
+}
+
+/** 3 → 4: готовые пользовательские фразы остаются только legacy-полями старого отчёта. */
+function v3ToV4(world: Obj): boolean {
+  if (world.lastReport !== null) {
+    if (!isObj(world.lastReport)) return false;
+    const report = world.lastReport;
+    if (!Array.isArray(report.worldEvents) || !isObj(report.players) || !Array.isArray(report.news)) return false;
+    report.worldEvents = report.worldEvents.map(migrateLegacyEvent);
+    for (const playerReport of Object.values(report.players)) {
+      if (!isObj(playerReport) || !Array.isArray(playerReport.events)) return false;
+      playerReport.events = playerReport.events.map(migrateLegacyEvent);
+    }
+    report.news = report.news.map((item) => {
+      if (!isObj(item) || typeof item.playerId !== 'string') return item;
+      if (typeof item.text === 'string') return { playerId: item.playerId, kind: 'legacy', legacyText: item.text };
+      return item;
+    });
+  }
+  world.version = 4;
+  return true;
+}
+
 /** 1 → 2: все остаются на работе, уже достигнутая свобода — первый уровень, мечта только у человека. */
 function v1ToV2(players: Obj[]): void {
   players.forEach((p, i) => {
@@ -84,7 +115,7 @@ function isWorldBase(raw: unknown): raw is Obj & { players: unknown[] } {
 }
 
 /**
- * Принимает сохранённый мир версии 1, 2 или 3 и возвращает мир версии 3 (копию, вход не меняется).
+ * Принимает сохранённый мир версии 1–4 и возвращает мир версии 4 (копию, вход не меняется).
  * Версия 1 сначала становится версией 2: игрок-человек (первый, не бот) получает чистую мечту,
  * все остаются на работе, уже достигнутая свобода считается первым уровнем.
  * Версия 2 становится версией 3: всё купленное — первого уровня. Всё непонятное — null.
@@ -92,7 +123,7 @@ function isWorldBase(raw: unknown): raw is Obj & { players: unknown[] } {
 export function migrateWorld(raw: unknown): WorldState | null {
   if (!isWorldBase(raw)) return null;
   const version = raw.version;
-  if (version !== 1 && version !== 2 && version !== 3) return null;
+  if (version !== 1 && version !== 2 && version !== 3 && version !== 4) return null;
 
   let world: Obj;
   try {
@@ -102,7 +133,7 @@ export function migrateWorld(raw: unknown): WorldState | null {
   }
   const players = world.players as unknown[];
 
-  if (version === 3) {
+  if (version === 4) {
     return players.every(isPlayerV3) ? (world as unknown as WorldState) : null;
   }
 
@@ -110,7 +141,7 @@ export function migrateWorld(raw: unknown): WorldState | null {
     if (!players.every(isPlayerBase)) return null;
     v1ToV2(players);
   }
-  if (!players.every(isPlayerV2) || !v2ToV3(players)) return null;
-  world.version = 3;
+  if (version !== 3 && (!players.every(isPlayerV2) || !v2ToV3(players))) return null;
+  if (!players.every(isPlayerV3) || !v3ToV4(world)) return null;
   return world as unknown as WorldState;
 }

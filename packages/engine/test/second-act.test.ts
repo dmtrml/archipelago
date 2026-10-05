@@ -1,7 +1,7 @@
 // Второй акт: уход с работы, мечта-шхуна, свобода под угрозой, уровни свободы, миграция сохранений.
 import { describe, expect, it } from 'vitest';
 import { runBots } from '../src/bots';
-import { DREAMS, FREEDOM_LEVEL_TITLES } from '../src/content';
+import { DREAMS } from '../src/content';
 import { DREAM_UPKEEP_UID, freedomLevel, isFree, weeklyExpenses } from '../src/economy';
 import { rollPersonalEvent } from '../src/events';
 import { migrateWorld } from '../src/migrate';
@@ -9,7 +9,6 @@ import { applyAction } from '../src/reducer';
 import { Rng } from '../src/rng';
 import * as R from '../src/rules';
 import { dreamView, financeView, getPlayer, offerViews } from '../src/selectors';
-import { ERRORS } from '../src/text';
 import type { Action, GameEvent, WorldState } from '../src/types';
 import { settleWeek } from '../src/week';
 import { badNumbers, deepFreeze, giveAsset, newWorld, player, putOffer, soloWorld } from './helpers';
@@ -66,7 +65,7 @@ describe('уход с работы', () => {
   it('до свободы уйти нельзя', () => {
     const world = soloWorld();
     const result = applyAction(world, actionOf('quitJob'));
-    expect(result.error).toBe('Уйти с работы можно после финансовой свободы');
+    expect(result.error).toEqual({ code: 'quitBeforeFreedom' });
     expect(result.world).toBe(world);
   });
 
@@ -80,11 +79,11 @@ describe('уход с работы', () => {
 
   it('второй раз подряд — отказ', () => {
     const world = ok(freeWorld(), actionOf('quitJob'));
-    expect(applyAction(world, actionOf('quitJob')).error).toBe('Вы уже не работаете');
+    expect(applyAction(world, actionOf('quitJob')).error).toEqual({ code: 'alreadyQuit' });
   });
 
   it('вернуться, пока работаешь, нельзя', () => {
-    expect(applyAction(freeWorld(), actionOf('returnToWork')).error).toBe('Вы и так работаете');
+    expect(applyAction(freeWorld(), actionOf('returnToWork')).error).toEqual({ code: 'alreadyEmployed' });
   });
 
   it('возвращение режет зарплату до ближайших 5 и сбрасывает угрозу', () => {
@@ -138,7 +137,7 @@ describe('жизнь без работы', () => {
   it('подработку взять нельзя, а выключить — можно', () => {
     const world = ok(freeWorld(), actionOf('quitJob'));
     const result = applyAction(world, { type: 'setExtraShift', playerId: 'p1', on: true });
-    expect(result.error).toBe('Подработка бывает только у тех, кто работает');
+    expect(result.error).toEqual({ code: 'shiftUnemployed' });
     expect(result.world).toBe(world);
     ok(world, { type: 'setExtraShift', playerId: 'p1', on: false });
   });
@@ -210,21 +209,21 @@ describe('постройка мечты: начало этапа', () => {
     expect(dreamView(world, 'p1')).not.toBeNull();
     expect(dreamView(world, 'bot-mia')).toBeNull();
     const result = applyAction(world, { type: 'buildDream', playerId: 'bot-mia' });
-    expect(result.error).toBe('Мечты пока нет');
+    expect(result.error).toEqual({ code: 'noDream' });
     expect(result.world).toBe(world);
   });
 
   it('до свободы строить нельзя', () => {
     const world = soloWorld();
     player(world).cash = 5000;
-    expect(applyAction(world, actionOf('buildDream')).error).toBe('Строить мечту можно после финансовой свободы');
+    expect(applyAction(world, actionOf('buildDream')).error).toEqual({ code: 'dreamBeforeFreedom' });
   });
 
   it('не хватает монет — понятная ошибка с суммой', () => {
     const world = freeWorld({ cash: 399 });
-    expect(applyAction(world, actionOf('buildDream')).error).toBe('Не хватает 1 монеты');
+    expect(applyAction(world, actionOf('buildDream')).error).toEqual({ code: 'notEnoughCash', missing: 1 });
     player(world).cash = 100;
-    expect(applyAction(world, actionOf('buildDream')).error).toBe('Не хватает 300 монет');
+    expect(applyAction(world, actionOf('buildDream')).error).toEqual({ code: 'notEnoughCash', missing: 300 });
   });
 
   it('плата списывается, этап начинает строиться', () => {
@@ -237,27 +236,19 @@ describe('постройка мечты: начало этапа', () => {
     const world = ok(freeWorld(), actionOf('buildDream'));
     player(world).cash = 0;
     const result = applyAction(world, actionOf('buildDream'));
-    expect(result.error).toBe('Этот этап ещё строится');
+    expect(result.error).toEqual({ code: 'dreamBusy' });
     expect(result.world).toBe(world);
   });
 
   it('готовая мечта: строить больше нечего', () => {
     const world = freeWorld();
     Object.assign(player(world).dream!, { built: 3, building: false, doneWeek: 5 });
-    expect(applyAction(world, actionOf('buildDream')).error).toBe('Мечта уже готова');
+    expect(applyAction(world, actionOf('buildDream')).error).toEqual({ code: 'dreamDone' });
   });
 
-  it('тексты ошибок второго акта — ровно те, что просили', () => {
-    expect(ERRORS).toMatchObject({
-      quitBeforeFreedom: 'Уйти с работы можно после финансовой свободы',
-      alreadyQuit: 'Вы уже не работаете',
-      alreadyEmployed: 'Вы и так работаете',
-      shiftUnemployed: 'Подработка бывает только у тех, кто работает',
-      noDream: 'Мечты пока нет',
-      dreamBeforeFreedom: 'Строить мечту можно после финансовой свободы',
-      dreamBusy: 'Этот этап ещё строится',
-      dreamDone: 'Мечта уже готова',
-    });
+  it('коды ошибок второго акта стабильны', () => {
+    expect(applyAction(soloWorld(), actionOf('quitJob')).error).toEqual({ code: 'quitBeforeFreedom' });
+    expect(applyAction(soloWorld(), actionOf('buildDream')).error).toEqual({ code: 'dreamBeforeFreedom' });
   });
 });
 
@@ -272,7 +263,7 @@ describe('постройка мечты: ход работ', () => {
     world = endWeek(world);
     expect(player(world).dream).toMatchObject({ built: 1, building: false, progress: 0, doneWeek: null });
     const [stageEvent] = eventsOf(world, 'dreamStage');
-    expect(stageEvent.title).toBe('Готово: Стапель и киль');
+    expect(stageEvent.params).toMatchObject({ dreamId: 'schooner', finishedStage: 0, nextStage: 1 });
     expect(stageEvent.tone).toBe('good');
     expect(eventsOf(world, 'dreamDone')).toEqual([]);
   });
@@ -283,7 +274,7 @@ describe('постройка мечты: ход работ', () => {
     expect(player(world).dream).toMatchObject({ built: 0, building: true, progress: 3 });
     world = endWeek(world);
     expect(player(world).dream).toMatchObject({ built: 1, building: false, progress: 0 });
-    expect(eventsOf(world, 'dreamStage')[0].title).toBe('Готово: Стапель и киль');
+    expect(eventsOf(world, 'dreamStage')[0].params).toMatchObject({ finishedStage: 0 });
   });
 
   it('скорость зависит от того, работает ли игрок в эту неделю', () => {
@@ -296,25 +287,25 @@ describe('постройка мечты: ход работ', () => {
 
   it('все три этапа: события по пути, мечта готова, неделя запоминается, выходит новость', () => {
     let world = ok(freeWorld(), actionOf('quitJob'));
-    const titles: string[] = [];
+    const finishedStages: number[] = [];
     for (let stage = 0; stage < 3; stage++) {
       world = ok(world, actionOf('buildDream'));
-      expect(dreamView(world, 'p1')!.stage!.title).toBe(DREAMS.schooner.stages[stage].title);
+      expect(dreamView(world, 'p1')!.stage).toBe(DREAMS.schooner.stages[stage]);
       while (player(world).dream!.building) {
         world = endWeek(world);
-        titles.push(...eventsOf(world, 'dreamStage').map((e) => e.title));
+        finishedStages.push(...eventsOf(world, 'dreamStage').map((e) => Number(e.params?.finishedStage)));
       }
     }
-    expect(titles).toEqual(['Готово: Стапель и киль', 'Готово: Корпус']);
+    expect(finishedStages).toEqual([0, 1]);
     const dream = player(world).dream!;
     expect(dream).toMatchObject({ built: 3, building: false, progress: 0 });
     expect(dream.doneWeek).toBe(world.lastReport!.week);
 
     const [done] = eventsOf(world, 'dreamDone');
     expect(done.tone).toBe('good');
-    expect(done.text).toContain('Шхуна');
-    expect(world.lastReport!.news.map((n) => n.text)).toContain('Аня: шхуна готова и уходит в кругосветку!');
-    expect(applyAction(world, actionOf('buildDream')).error).toBe('Мечта уже готова');
+    expect(done.params).toEqual({ dreamId: 'schooner', upkeep: DREAMS.schooner.upkeep });
+    expect(world.lastReport!.news).toContainEqual({ playerId: 'p1', kind: 'dreamDone' });
+    expect(applyAction(world, actionOf('buildDream')).error).toEqual({ code: 'dreamDone' });
   });
 });
 
@@ -398,7 +389,7 @@ describe('свобода под угрозой', () => {
       expect(player(world)).toMatchObject({ employed: false, threatWeeks: week });
       const [threat] = eventsOf(world, 'freedomThreat');
       expect(threat.tone).toBe('bad');
-      expect(threat.text).toContain(`${expectedLeft[week - 1]} `);
+      expect(threat.params).toEqual({ weeksLeft: expectedLeft[week - 1] });
       expect(world.lastReport!.players.p1.salary).toBe(0);
     }
     world = endWeek(world);
@@ -406,7 +397,7 @@ describe('свобода под угрозой', () => {
     expect(eventsOf(world, 'freedomThreat')).toEqual([]);
     const [back] = eventsOf(world, 'backToWork');
     expect(back.tone).toBe('bad');
-    expect(back.text).toContain('155');
+    expect(back.params).toEqual({ salary: 155 });
     // свободу «навсегда» это не отменяет: она была достигнута
     expect(player(world).freedomWeek).toBe(1);
 
@@ -416,16 +407,14 @@ describe('свобода под угрозой', () => {
     expect(eventsOf(world, 'freedomThreat')).toEqual([]);
   });
 
-  it('число оставшихся недель склоняется правильно', () => {
-    const texts: string[] = [];
+  it('число оставшихся недель передаётся данными', () => {
+    const left: number[] = [];
     let world = exposedWorld();
     for (let week = 1; week <= 3; week++) {
       world = endWeek(world);
-      texts.push(eventsOf(world, 'freedomThreat')[0].text);
+      left.push(Number(eventsOf(world, 'freedomThreat')[0].params?.weeksLeft));
     }
-    expect(texts[0]).toContain('3 недели');
-    expect(texts[1]).toContain('2 недели');
-    expect(texts[2]).toContain('1 неделя');
+    expect(left).toEqual([3, 2, 1]);
   });
 
   it('вернулись вовремя: свобода снова на месте — угроза миновала, счётчик сброшен', () => {
@@ -437,7 +426,7 @@ describe('свобода под угрозой', () => {
     expect(player(world)).toMatchObject({ employed: false, threatWeeks: 0 });
     const [over] = eventsOf(world, 'threatOver');
     expect(over.tone).toBe('good');
-    expect(over.title).toBe('Угроза миновала');
+    expect(over.params).toEqual({});
     expect(eventsOf(world, 'backToWork')).toEqual([]);
 
     // дальше тихо: угроза миновала один раз
@@ -491,7 +480,6 @@ describe('уровни свободы', () => {
     expect(R.FREEDOM_LEVEL_RATIOS).toEqual([1, 1.5, 2]);
     const levels = [0, 0.99, 1, 1.49, 1.5, 1.99, 2, 10].map(freedomLevel);
     expect(levels).toEqual([0, 0, 1, 1, 2, 2, 3, 3]);
-    expect(FREEDOM_LEVEL_TITLES).toEqual(['Свобода', 'Уверенность', 'Богатство']);
   });
 
   /** Безработный свободный: повышения исключены, поэтому расходы стоят на месте и пороги точные. */
@@ -515,15 +503,13 @@ describe('уровни свободы', () => {
     world = endWeek(world);
     expect(player(world).bestLevel).toBe(2);
     const [mid] = eventsOf(world, 'freedomLevel');
-    expect(mid).toMatchObject({ title: 'Уверенность', tone: 'good' });
-    expect(mid.text).toContain('в полтора раза');
+    expect(mid).toMatchObject({ tone: 'good', params: { level: 2 } });
 
     setIncome(world, 300); // ровно 200%
     world = endWeek(world);
     expect(player(world).bestLevel).toBe(3);
     const [top] = eventsOf(world, 'freedomLevel');
-    expect(top).toMatchObject({ title: 'Богатство', tone: 'good' });
-    expect(top.text).toContain('вдвое');
+    expect(top).toMatchObject({ tone: 'good', params: { level: 3 } });
   });
 
   it('уровень отмечается один раз: падение и новый подъём не празднуются заново', () => {
@@ -547,7 +533,7 @@ describe('уровни свободы', () => {
     const after = endWeek(world);
     expect(player(after).bestLevel).toBe(3);
     const events = eventsOf(after, 'freedomLevel');
-    expect(events.map((e) => e.title)).toEqual(['Богатство']);
+    expect(events.map((e) => e.params?.level)).toEqual([3]);
   });
 
   it('первый уровень празднует обычное событие свободы, а не уровень', () => {
@@ -629,7 +615,7 @@ describe('вид мечты', () => {
     expect(view.state).toEqual({ id: 'schooner', built: 0, building: false, progress: 0, doneWeek: null });
     expect(view.stage).toBe(DREAMS.schooner.stages[0]);
     expect(view).toMatchObject({ stageIndex: 0, workPerWeek: 1, weeksLeft: 4, canStart: false });
-    expect(view.reason).toBe('Откроется после финансовой свободы');
+    expect(view.reason).toBe('beforeFreedom');
   });
 
   it('после свободы: хватает монет — можно начать, нет — причина с суммой', () => {
@@ -637,13 +623,13 @@ describe('вид мечты', () => {
     expect(dreamView(world, 'p1')).toMatchObject({ canStart: true });
     expect(dreamView(world, 'p1')!.reason).toBeUndefined();
     player(world).cash = 390;
-    expect(dreamView(world, 'p1')).toMatchObject({ canStart: false, reason: 'Не хватает 10 монет' });
+    expect(dreamView(world, 'p1')).toMatchObject({ canStart: false, missingCash: 10 });
   });
 
   it('строится: недели считаются по остатку дней и по тому, работает ли игрок', () => {
     let world = ok(freeWorld(), actionOf('buildDream'));
     expect(dreamView(world, 'p1')).toMatchObject({
-      canStart: false, reason: 'Этап строится', stageIndex: 0, workPerWeek: 1, weeksLeft: 4,
+      canStart: false, reason: 'building', stageIndex: 0, workPerWeek: 1, weeksLeft: 4,
     });
     world = endWeek(world);
     expect(dreamView(world, 'p1')!.weeksLeft).toBe(3);
@@ -663,7 +649,7 @@ describe('вид мечты', () => {
     const world = freeWorld();
     Object.assign(player(world).dream!, { built: 3, building: false, doneWeek: 9 });
     const view = dreamView(world, 'p1')!;
-    expect(view).toMatchObject({ stage: null, stageIndex: 3, weeksLeft: 0, canStart: false, reason: 'Мечта готова' });
+    expect(view).toMatchObject({ stage: null, stageIndex: 3, weeksLeft: 0, canStart: false, reason: 'done' });
   });
 
   it('свобода, когда мечта будет готова: доход тот же, расходы + содержание', () => {
@@ -705,7 +691,7 @@ function v1Save(): Record<string, unknown> {
 }
 
 describe('миграция сохранений', () => {
-  it('версия 1 → 2 → 3: поля второго акта заполняются, человек получает мечту', () => {
+  it('версия 1 → 2 → 3 → 4: поля второго акта заполняются, человек получает мечту', () => {
     const raw = v1Save();
     const players = raw.players as Record<string, unknown>[];
     players[0].freedomWeek = 7;
@@ -714,7 +700,7 @@ describe('миграция сохранений', () => {
 
     const world = migrateWorld(raw)!;
     expect(world).not.toBeNull();
-    expect(world.version).toBe(3);
+    expect(world.version).toBe(4);
     expect(JSON.stringify(raw)).toBe(snapshot); // вход не изменился
 
     const [human, mia, timur] = world.players;
@@ -748,6 +734,22 @@ describe('миграция сохранений', () => {
     expect(migrated).not.toBe(raw);
   });
 
+  it('версия 3 переносит старые события и новости как legacy без изменения входа', () => {
+    const source = endWeek(newWorld(4));
+    const raw = JSON.parse(JSON.stringify(source)) as Record<string, any>;
+    raw.version = 3;
+    raw.lastReport.worldEvents = [{ id: 'storm', title: 'Шторм', text: 'Старый шторм', tone: 'bad' }];
+    raw.lastReport.players.p1.events = [{ id: 'gift', title: 'Подарок', text: 'Старый подарок', tone: 'good', cashDelta: 10 }];
+    raw.lastReport.news = [{ playerId: 'bot-mia', text: 'Старая новость' }];
+    const snapshot = JSON.stringify(raw);
+    const migrated = migrateWorld(raw)!;
+    expect(JSON.stringify(raw)).toBe(snapshot);
+    expect(migrated.version).toBe(4);
+    expect(migrated.lastReport!.worldEvents[0]).toMatchObject({ id: 'storm', legacyTitle: 'Шторм', legacyText: 'Старый шторм' });
+    expect(migrated.lastReport!.players.p1.events[0]).toMatchObject({ id: 'gift', legacyTitle: 'Подарок', legacyText: 'Старый подарок' });
+    expect(migrated.lastReport!.news).toEqual([{ playerId: 'bot-mia', kind: 'legacy', legacyText: 'Старая новость' }]);
+  });
+
   it('мусор и чужие версии отвергаются', () => {
     const good = JSON.parse(JSON.stringify(newWorld(2))) as Record<string, unknown>;
     const broken = (patch: (w: Record<string, unknown>) => void): unknown => {
@@ -757,7 +759,7 @@ describe('миграция сохранений', () => {
     };
     const garbage: unknown[] = [
       null, undefined, 0, 42, 'world', true, [], {}, { version: 2 }, { version: 1, players: [] },
-      broken((w) => { w.version = 4; }),
+      broken((w) => { w.version = 5; }),
       broken((w) => { w.version = 0; }),
       broken((w) => { delete w.version; }),
       broken((w) => { w.players = 'no'; }),

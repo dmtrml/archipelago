@@ -15,7 +15,7 @@ await mkdir(output, { recursive: true });
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const browser = await chromium.launch({ headless: true, channel: option('--channel', process.platform === 'win32' ? 'msedge' : undefined) });
-const context = await browser.newContext({ viewport: { width: 1366, height: 768 }, ignoreHTTPSErrors: true });
+const context = await browser.newContext({ viewport: { width: 1366, height: 768 }, ignoreHTTPSErrors: true, locale: 'ru-RU' });
 const page = await context.newPage();
 const errors = [], autoplay = [], consoleErrors = [], checks = [], audioLogs = {};
 const observe = (target) => {

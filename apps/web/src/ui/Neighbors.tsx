@@ -3,30 +3,22 @@
 import { useEffect, useState } from 'react';
 import {
   assetViews, financeView, getPlayer, leaderboard,
-  type AssetView, type BotStyle, type PlayerState, type WorldState,
+  type AssetView, type PlayerState, type WorldState,
 } from '@arch/engine';
 import { HUMAN, useGame, type FreedomHistory } from '../store';
 import { fmt } from '../format';
+import { assetCopy, displayPlayer, getI18n, newsText, useI18n } from '../i18n';
 import { levelTitle, lowerFirst, percent } from './text';
 import { Meter } from './common';
-
-const STYLE: Record<BotStyle, string> = {
-  saver: 'Бережливая',
-  spender: 'Транжира',
-  gambler: 'Рисковый',
-};
 
 /** Цвет аватара по порядку игроков в мире: вы, Мия, Тимур, Борис. */
 const AVATAR = ['#3E9A9A', '#E8735A', '#F0A93B', '#7B6CC4'];
 
-/** Род известен только у ботов (как в новостях движка). */
-const FEMALE_IDS = ['bot-mia'];
-const past = (p: PlayerState, m: string, f: string) => (FEMALE_IDS.includes(p.id) ? f : m);
-/** «у Мии», «у Тимура» — родительный падеж имён соседей. */
-const GENITIVE: Record<string, string> = { 'bot-mia': 'Мии', 'bot-timur': 'Тимура', 'bot-boris': 'Бориса' };
-
 const colorOf = (world: WorldState, playerId: string) =>
   AVATAR[Math.max(0, world.players.findIndex((p) => p.id === playerId)) % AVATAR.length];
+
+const renderedNews = (item: ReturnType<typeof useGame.getState>['news'][number]) =>
+  'text' in item ? item.text : newsText(item);
 
 // ───────── Аватар с кольцом прогресса к свободе ─────────
 
@@ -53,6 +45,9 @@ function RingAvatar({ letter, color, ratio, size = 40, free }: { letter: string;
 interface Insight { text: string; tone: 'good' | 'bad' | 'neutral' }
 
 function insightFor(world: WorldState, p: PlayerState, views: AssetView[]): Insight {
+  const { t } = getI18n();
+  const shown = displayPlayer(p);
+  const bot = t.bots[p.id as keyof typeof t.bots];
   const fin = financeView(world, p.id);
   const me = getPlayer(world, HUMAN);
   const total = fin.expenses.total;
@@ -63,45 +58,46 @@ function insightFor(world: WorldState, p: PlayerState, views: AssetView[]): Insi
   const scam = me.knowledge >= 1 && views.some((v) => v.def.kind === 'scam');
 
   if (emergency) {
-    return { tone: 'bad', text: `${p.name} ${past(p, 'занял', 'заняла')} у ростовщика: ${fmt(fin.expenses.interest)} монет в неделю уходят только на проценты.` };
+    return { tone: 'bad', text: t.ui.neighbors.insightEmergency(shown.name, fmt(fin.expenses.interest), p.id === 'bot-mia') };
   }
   if (scam) {
-    return { tone: 'bad', text: `У ${GENITIVE[p.id] ?? p.name} «жемчужная ферма». Доход обещают слишком большой — похоже на пирамиду.` };
+    return { tone: 'bad', text: t.ui.neighbors.insightScam(bot?.genitive ?? shown.name) };
   }
   if (status.length > 0 && total > 0 && statusUpkeep / total >= 0.12) {
-    const names = status.map((v) => lowerFirst(v.title)).join(', ');
-    return { tone: 'bad', text: `Статусные вещи (${names}) съедают ${fmt(statusUpkeep)} монет в неделю — ${percent(statusUpkeep / total)}% всех расходов, а дохода не дают.` };
+    const names = status.map((v) => lowerFirst(assetCopy(v.def.id, v.level).title)).join(', ');
+    return { tone: 'bad', text: t.ui.neighbors.insightStatus(names, fmt(statusUpkeep), percent(statusUpkeep / total)) };
   }
   if (fin.debt > 0 && fin.expenses.interest > 0) {
-    return { tone: 'neutral', text: `Долг ${fmt(fin.debt)}: ${fmt(fin.expenses.interest)} монет в неделю уходят банку. Кредит ускоряет покупки, но проценты платятся всегда.` };
+    return { tone: 'neutral', text: t.ui.neighbors.insightDebt(fmt(fin.debt), fmt(fin.expenses.interest)) };
   }
   if (fin.freedomRatio >= 1) {
     return {
       tone: 'good',
-      text: `Активы приносят ${fmt(fin.passiveIncome)} в неделю — больше, чем стоит вся жизнь (${fmt(total)}). ${p.employed ? 'Работает по желанию, а не по необходимости.' : 'Можно больше не работать.'}`,
+      text: t.ui.neighbors.insightFree(fmt(fin.passiveIncome), fmt(total), p.employed),
     };
   }
   const salary = p.employed ? p.salary : 0;
   const share = salary + fin.passiveIncome > 0 ? fin.passiveIncome / (salary + fin.passiveIncome) : 0;
   if (share >= 0.3) {
-    return { tone: 'good', text: `Уже ${percent(share)}% дохода — от активов. Чем больше эта доля, тем меньше всё зависит от зарплаты.` };
+    return { tone: 'good', text: t.ui.neighbors.insightShare(percent(share)) };
   }
   if (p.happiness < 25) {
-    return { tone: 'bad', text: 'Счастье на исходе — без отдыха недалеко до выгорания и половины зарплаты.' };
+    return { tone: 'bad', text: t.ui.neighbors.insightTired };
   }
   const assets = views.filter((v) => v.def.kind !== 'status').length;
   return {
     tone: 'neutral',
-    text: assets === 0 ? 'Активов пока нет: весь доход — зарплата.' : `Почти весь доход пока — зарплата. Активов: ${assets}.`,
+    text: assets === 0 ? t.ui.neighbors.insightNoAssets : t.ui.neighbors.insightAssets(assets),
   };
 }
 
 // ───────── График пути к свободе ─────────
 
 function Sparkline({ history, id, color }: { history: FreedomHistory; id: string; color: string }) {
+  const { t } = useI18n();
   const line = history[id] ?? [];
   const mine = history[HUMAN] ?? [];
-  if (line.length < 2) return <div className="muted-text">График появится через пару недель.</div>;
+  if (line.length < 2) return <div className="muted-text">{t.ui.neighbors.graphSoon}</div>;
 
   const W = 320, H = 70, pad = 4;
   const weeks = [...line, ...mine].map((p) => p.week);
@@ -114,15 +110,15 @@ function Sparkline({ history, id, color }: { history: FreedomHistory; id: string
 
   return (
     <div className="spark">
-      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-label="Путь к свободе по неделям">
+      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-label={t.ui.neighbors.graphLabel}>
         <line x1={pad} x2={W - pad} y1={y(1)} y2={y(1)} className="spark-goal" />
         {mine.length > 1 && <path d={path(mine)} className="spark-me" />}
         <path d={path(line)} fill="none" stroke={color} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
       </svg>
       <div className="spark-legend">
-        <span><i style={{ background: color }} /> сосед</span>
-        <span><i className="me" /> вы</span>
-        <span className="muted">пунктир — свобода</span>
+        <span><i style={{ background: color }} /> {t.ui.neighbors.neighbor}</span>
+        <span><i className="me" /> {t.ui.neighbors.you}</span>
+        <span className="muted">{t.ui.neighbors.dashed}</span>
       </div>
     </div>
   );
@@ -131,10 +127,13 @@ function Sparkline({ history, id, color }: { history: FreedomHistory; id: string
 // ───────── Карточка соседа ─────────
 
 export function NeighborCard({ playerId, onClose }: { playerId: string; onClose: () => void }) {
+  const { t } = useI18n();
   const world = useGame((s) => s.world)!;
   const history = useGame((s) => s.history);
   const news = useGame((s) => s.news);
   const p = getPlayer(world, playerId);
+  const shown = displayPlayer(p);
+  const bot = t.bots[p.id as keyof typeof t.bots];
   const fin = financeView(world, playerId);
   const mine = financeView(world, HUMAN);
   const views = assetViews(world, playerId);
@@ -151,32 +150,33 @@ export function NeighborCard({ playerId, onClose }: { playerId: string; onClose:
   // Что стоит на острове: одинаковые объекты — одной плашкой «Баркас ×2»
   const groups = new Map<string, { title: string; count: number; status: boolean }>();
   for (const v of views) {
-    const key = `${v.def.kind === 'status'}|${v.title}`;
-    const g = groups.get(key) ?? { title: v.title, count: 0, status: v.def.kind === 'status' };
+    const title = assetCopy(v.def.id, v.level).title;
+    const key = `${v.def.kind === 'status'}|${title}`;
+    const g = groups.get(key) ?? { title, count: 0, status: v.def.kind === 'status' };
     g.count++;
     groups.set(key, g);
   }
   const items = [...groups.values()].sort((a, b) => Number(a.status) - Number(b.status));
 
   const status = free
-    ? `Свобода с ${p.freedomWeek}-й недели · ${p.employed ? 'работает' : 'не работает'}`
-    : `${p.employed ? 'Работает' : 'Без работы'} · ${percent(fin.freedomRatio)}% до свободы`;
+    ? `${t.ui.neighbors.freedomSince(p.freedomWeek!)} · ${p.employed ? t.ui.neighbors.works : t.ui.neighbors.noWork}`
+    : `${p.employed ? t.ui.neighbors.working : t.ui.neighbors.withoutWork} · ${t.ui.neighbors.toFreedom(percent(fin.freedomRatio))}`;
   const myNews = news.filter((n) => n.playerId === playerId).slice(0, 4);
 
   return (
-    <div className="neighbor-card panel" role="dialog" aria-label={`Сосед: ${p.name}`}>
-      <button className="icon-btn close" onClick={onClose} aria-label="Закрыть">×</button>
+    <div className="neighbor-card panel" role="dialog" aria-label={`${t.ui.neighbors.neighbor.charAt(0).toUpperCase()}${t.ui.neighbors.neighbor.slice(1)}: ${shown.name}`}>
+      <button className="icon-btn close" onClick={onClose} aria-label={t.ui.neighbors.close}>×</button>
       <div className="nc-head">
-        <RingAvatar letter={p.name.slice(0, 1)} color={color} ratio={fin.freedomRatio} size={52} free={free} />
+        <RingAvatar letter={shown.name.slice(0, 1)} color={color} ratio={fin.freedomRatio} size={52} free={free} />
         <div>
-          <div className="nc-name">{p.name} <span className="muted">· остров {p.islandName}</span></div>
-          <div className="nc-sub">{p.botStyle ? STYLE[p.botStyle] : ''}{p.botStyle ? ' · ' : ''}{status}</div>
+          <div className="nc-name">{shown.name} <span className="muted">· {t.ui.neighbors.island} {shown.islandName}</span></div>
+          <div className="nc-sub">{bot?.style ?? ''}{p.botStyle ? ' · ' : ''}{status}</div>
         </div>
       </div>
 
       <div className="freedom compact">
         <div className="freedom-head">
-          <span>{fin.level >= 1 ? levelTitle(fin.level) : 'До свободы'}</span>
+          <span>{fin.level >= 1 ? levelTitle(fin.level) : t.ui.neighbors.toFreedomLabel}</span>
           <b>{percent(fin.freedomRatio)}%</b>
         </div>
         <div className="bar"><div className="fill" style={{ width: `${Math.min(100, percent(fin.freedomRatio))}%` }} /></div>
@@ -185,17 +185,17 @@ export function NeighborCard({ playerId, onClose }: { playerId: string; onClose:
       <div className={`insight ${insight.tone}`}>{insight.text}</div>
 
       <div className="nc-grid">
-        <div><span>Доход активов</span><b className="pos">+{fmt(fin.passiveIncome)}<small>/нед</small></b><em>у вас +{fmt(mine.passiveIncome)}</em></div>
-        <div><span>Расходы</span><b className="neg">−{fmt(fin.expenses.total)}<small>/нед</small></b><em>у вас −{fmt(mine.expenses.total)}</em></div>
-        <div><span>Наличные</span><b>{fmt(p.cash)}</b></div>
-        <div><span>Долги</span><b className={fin.debt > 0 ? 'neg' : ''}>{fin.debt > 0 ? `−${fmt(fin.debt)}` : '0'}</b></div>
-        <div><span>Капитал</span><b>{fmt(fin.netWorth)}</b><em>у вас {fmt(mine.netWorth)}</em></div>
-        <div><span>Счастье</span><b>{Math.round(p.happiness)}</b><Meter value={p.happiness} /></div>
+        <div><span>{t.ui.neighbors.assetIncome}</span><b className="pos">+{fmt(fin.passiveIncome)}<small>{t.ui.perWeek}</small></b><em>{t.ui.neighbors.yours(fmt(mine.passiveIncome))}</em></div>
+        <div><span>{t.ui.neighbors.expenses}</span><b className="neg">−{fmt(fin.expenses.total)}<small>{t.ui.perWeek}</small></b><em>{t.ui.neighbors.yoursNeg(fmt(mine.expenses.total))}</em></div>
+        <div><span>{t.ui.neighbors.cash}</span><b>{fmt(p.cash)}</b></div>
+        <div><span>{t.ui.neighbors.debt}</span><b className={fin.debt > 0 ? 'neg' : ''}>{fin.debt > 0 ? `−${fmt(fin.debt)}` : '0'}</b></div>
+        <div><span>{t.ui.neighbors.netWorth}</span><b>{fmt(fin.netWorth)}</b><em>{t.ui.neighbors.yoursPlain(fmt(mine.netWorth))}</em></div>
+        <div><span>{t.ui.neighbors.happiness}</span><b>{Math.round(p.happiness)}</b><Meter value={p.happiness} /></div>
       </div>
 
-      <div className="list-title">На острове</div>
+      <div className="list-title">{t.ui.neighbors.onIsland}</div>
       {items.length === 0
-        ? <div className="muted-text">Пока только дом.</div>
+        ? <div className="muted-text">{t.ui.neighbors.onlyHome}</div>
         : (
           <div className="nc-items">
             {items.map((g) => (
@@ -206,14 +206,14 @@ export function NeighborCard({ playerId, onClose }: { playerId: string; onClose:
           </div>
         )}
 
-      <div className="list-title">Путь к свободе</div>
+      <div className="list-title">{t.ui.neighbors.path}</div>
       <Sparkline history={history} id={playerId} color={color} />
 
       {myNews.length > 0 && (
         <>
-          <div className="list-title">Недавно</div>
+          <div className="list-title">{t.ui.neighbors.recent}</div>
           {myNews.map((n, i) => (
-            <div key={i} className="news"><span className="muted">Нед. {n.week}</span> {n.text}</div>
+            <div key={i} className="news"><span className="muted">{t.ui.weekShort} {n.week}</span> {renderedNews(n)}</div>
           ))}
         </>
       )}
@@ -237,7 +237,7 @@ function NewsTicker() {
   }, [week, fresh.length]);
   if (fresh.length === 0) return null;
   const item = fresh[i % fresh.length];
-  return <div key={`${week}-${i}`} className="ticker">{item.text}</div>;
+  return <div key={`${week}-${i}`} className="ticker">{renderedNews(item)}</div>;
 }
 
 // ───────── Полоска соседей ─────────
@@ -246,6 +246,7 @@ export type NeighborsSize = 'full' | 'medium' | 'compact' | 'badge';
 
 /** Компьютер: три размера в верхней строке; телефон (`compact`) — аватары в плашке. */
 export function NeighborsBar({ compact, size = 'full' }: { compact?: boolean; size?: NeighborsSize }) {
+  const { t } = useI18n();
   const world = useGame((s) => s.world)!;
   const selected = useGame((s) => s.neighborId);
   const show = useGame((s) => s.showNeighbor);
@@ -253,15 +254,16 @@ export function NeighborsBar({ compact, size = 'full' }: { compact?: boolean; si
 
   const chips = (mode: NeighborsSize, interactive = true) => rows.map((r, place) => {
     const me = !r.isBot;
+    const shown = displayPlayer({ id: r.playerId, name: r.name, islandName: r.islandName, isBot: r.isBot });
     const color = colorOf(world, r.playerId);
     const free = r.freedomWeek !== null;
-    const label = `${r.name}${me ? ' (вы)' : ''}: ${percent(r.freedomRatio)}% до свободы`;
+    const label = `${shown.name}${me ? t.ui.neighbors.meSuffix : ''}: ${t.ui.neighbors.toFreedom(percent(r.freedomRatio))}`;
     const contents = <>
-      <RingAvatar letter={me ? 'В' : r.name.slice(0, 1)} color={color} ratio={r.freedomRatio} size={mode === 'full' ? 38 : 32} free={free} />
+      <RingAvatar letter={me ? t.ui.neighbors.you.slice(0, 1).toUpperCase() : shown.name.slice(0, 1)} color={color} ratio={r.freedomRatio} size={mode === 'full' ? 38 : 32} free={free} />
       {(mode === 'full' || mode === 'medium') && (
         <span className="nb-text">
-          <b>{me ? 'Вы' : r.name}</b>
-          <small>{mode === 'medium' ? `${percent(r.freedomRatio)}%` : `${free ? 'свобода' : `${percent(r.freedomRatio)}%`} · ${place + 1}-е`}</small>
+          <b>{me ? t.ui.neighbors.youLabel : shown.name}</b>
+          <small>{mode === 'medium' ? `${percent(r.freedomRatio)}%` : `${free ? t.ui.neighbors.freedom : `${percent(r.freedomRatio)}%`} · ${t.ui.neighbors.place(place + 1)}`}</small>
         </span>
       )}
     </>;
@@ -281,7 +283,8 @@ export function NeighborsBar({ compact, size = 'full' }: { compact?: boolean; si
   });
 
   if (compact) return <div className="nb-mini">{chips('compact')}</div>;
-  const label = <span className="nb-label">Гонка<br />к свободе</span>;
+  const race = t.ui.neighbors.race.split('\n');
+  const label = <span className="nb-label">{race[0]}<br />{race[1]}</span>;
   return (
     <div className="neighbors" data-size={size}>
       <div className={`nb-bar panel nb-${size}`}>

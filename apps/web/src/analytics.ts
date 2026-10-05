@@ -4,7 +4,7 @@ import { HUMAN, useGame } from './store';
 export type AnalyticsEvent =
   | 'game-start' | 'week-5' | 'week-10' | 'week-20'
   | 'freedom' | 'dream-done' | 'share' | 'feedback-open'
-  | 'coach-done' | 'coach-skip';
+  | 'coach-done' | 'coach-skip' | 'lang-switch';
 
 declare global {
   interface Window {
@@ -30,6 +30,8 @@ function flush() {
 
 export function initAnalytics() {
   if (initialized) return;
+  const params = new URLSearchParams(location.search);
+  if (params.has('sound') || params.has('sandbox') || params.has('director')) return;
   initialized = true;
   if (endpoint) {
     const script = document.createElement('script');

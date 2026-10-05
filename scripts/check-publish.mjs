@@ -43,7 +43,7 @@ async function mp3Files(directory) {
 }
 
 try {
-  const context = await browser.newContext({ viewport: { width: 1366, height: 768 }, deviceScaleFactor: 1 });
+  const context = await browser.newContext({ viewport: { width: 1366, height: 768 }, deviceScaleFactor: 1, locale: 'ru-RU' });
   const page = await context.newPage();
   watch(page);
   await page.goto(baseUrl.href, { waitUntil: 'networkidle' });
@@ -73,7 +73,7 @@ try {
   }
   await context.close();
 
-  const slow = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
+  const slow = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, locale: 'ru-RU' });
   const slowPage = await slow.newPage();
   watch(slowPage);
   const cdp = await slow.newCDPSession(slowPage);

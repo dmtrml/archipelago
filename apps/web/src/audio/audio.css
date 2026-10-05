@@ -16,6 +16,10 @@
 .audio-volume { display: grid; grid-template-columns: 1fr auto; gap: 8px; font-size: 13px; font-weight: 700; }
 .audio-volume output { font-variant-numeric: tabular-nums; color: var(--ink-soft); }
 .audio-volume input { width: 100%; grid-column: 1 / -1; margin: 0; height: 20px; accent-color: var(--teal); cursor: pointer; }
+.language-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 13px; font-weight: 800; }
+.language-switch { display: flex; gap: 5px; }
+.language-switch button { min-width: 38px; border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; background: var(--well); color: var(--ink-soft); font: inherit; cursor: pointer; }
+.language-switch button.active { background: rgba(245, 184, 61, .32); border-color: var(--gold-deep); color: var(--ink); }
 .audio-button:focus-visible, .audio-panel button:focus-visible, .audio-sliders input:focus-visible,
 .sound-showcase button:focus-visible, .sound-showcase a:focus-visible, .sound-showcase select:focus-visible, .sound-storm-switch input:focus-visible { outline: 3px solid var(--teal); outline-offset: 3px; }
 

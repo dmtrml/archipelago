@@ -1,15 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useCoach } from './coach';
-
-const TEXT = {
-  1: 'Купите первый актив — он будет приносить деньги каждую неделю.',
-  2: 'Теперь завершите неделю: придут зарплата и доход от активов.',
-  3: 'Главная цель: когда доход от активов покроет все расходы, шкала дойдёт до 100%. Это и есть финансовая свобода.',
-} as const;
+import { useI18n } from '../i18n';
 
 interface Placement { target: DOMRect; bubbleTop: number; bubbleLeft: number; above: boolean }
 
 export function Coach() {
+  const { t } = useI18n();
   const step = useCoach((s) => s.step);
   const targetUid = useCoach((s) => s.targetUid);
   const skip = useCoach((s) => s.skip);
@@ -60,11 +56,11 @@ export function Coach() {
     <div className="coach" role="dialog" aria-live="polite">
       <div className="coach-ring" style={{ left: r.left - 6, top: r.top - 6, width: r.width + 12, height: r.height + 12, borderRadius: 18 }} />
       <div className={`coach-bubble ${placement.above ? 'above' : 'below'}`} style={{ left: placement.bubbleLeft, top: placement.bubbleTop }}>
-        <div className="coach-kicker">Шаг {step} из 3</div>
-        <p>{TEXT[step]}</p>
+        <div className="coach-kicker">{t.ui.coach.kicker(step)}</div>
+        <p>{t.ui.coach.steps[step - 1]}</p>
         {step === 3
-          ? <button className="btn primary" type="button" onClick={finish}>Понятно</button>
-          : <button className="coach-skip" type="button" onClick={skip}>Пропустить обучение</button>}
+          ? <button className="btn primary" type="button" onClick={finish}>{t.ui.coach.done}</button>
+          : <button className="coach-skip" type="button" onClick={skip}>{t.ui.coach.skip}</button>}
       </div>
     </div>
   );

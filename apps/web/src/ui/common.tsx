@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { percent } from './text';
+import { useI18n } from '../i18n';
 
 /** «Свобода: 92% → 99%» — что покупка или улучшение сделает со шкалой свободы. */
 export function FreedomLine({ before, after }: { before: number; after: number }) {
+  const { t } = useI18n();
   const a = percent(before), b = percent(after);
   const tone = b > a ? 'pos' : b < a ? 'neg' : '';
-  return <div className={`freedom-line ${tone}`}>Свобода: {a}% → {b}%</div>;
+  return <div className={`freedom-line ${tone}`}>{t.levels[0]}: {a}% → {b}%</div>;
 }
 
 export function Coin({ size = 'md' }: { size?: 'sm' | 'md' }) {
@@ -23,7 +25,7 @@ export function Meter({ value, max = 100, tone }: { value: number; max?: number;
 
 export function Pips({ value, max }: { value: number; max: number }) {
   return (
-    <span className="pips" aria-label={`${value} из ${max}`}>
+    <span className="pips" aria-label={`${value}/${max}`}>
       {Array.from({ length: max }, (_, i) => <span key={i} className={i < value ? 'on' : ''} />)}
     </span>
   );

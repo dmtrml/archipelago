@@ -1,6 +1,7 @@
 import { useId, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { asset } from '../asset';
+import { useI18n } from '../i18n';
 import { audio } from './engine';
 import { getAudioSettings, subscribeAudioSettings, updateAudioSettings, type AudioSettings } from './settings';
 import './audio.css';
@@ -16,9 +17,11 @@ const VOLUMES = [
 ] as const;
 
 /** Одни настройки шин для игры и витрины; ползунки работают и при выключенном звуке. */
-export function AudioSliders({ quiet = false }: { quiet?: boolean }) {
+export function AudioSliders({ quiet = false, localized = true }: { quiet?: boolean; localized?: boolean }) {
   const settings = useAudioSettings();
+  const { t } = useI18n();
   const id = useId();
+  const labels = localized ? [t.ui.music, t.ui.effects, t.ui.nature] : ['Музыка', 'Эффекты', 'Природа'];
   const change = (patch: Partial<AudioSettings>) => {
     audio.unlock();
     updateAudioSettings(patch);
@@ -26,16 +29,16 @@ export function AudioSliders({ quiet = false }: { quiet?: boolean }) {
   return (
     <div className="audio-sliders">
       <label className="audio-switch">
-        <span>Звук включён</span>
+        <span>{localized ? t.ui.soundOn : 'Звук включён'}</span>
         <input
           type="checkbox" role="switch" checked={settings.enabled}
           data-ui-sound={quiet ? 'none' : 'ui.toggle'}
           onChange={(event) => change({ enabled: event.target.checked })}
         />
       </label>
-      {VOLUMES.map(({ key, label }) => (
+      {VOLUMES.map(({ key }, i) => (
         <div className="audio-volume" key={key}>
-          <label htmlFor={`${id}-${key}`}>{label}</label>
+          <label htmlFor={`${id}-${key}`}>{labels[i]}</label>
           <output htmlFor={`${id}-${key}`}>{Math.round(settings[key] * 100)}%</output>
           <input
             id={`${id}-${key}`} type="range" min="0" max="1" step="0.01"
@@ -62,6 +65,7 @@ function Speaker({ enabled }: { enabled: boolean }) {
 }
 
 export function AudioControls() {
+  const { t, lang, setLang } = useI18n();
   const settings = useAudioSettings();
   const [open, setOpen] = useState(false);
   const [position, setPosition] = useState<CSSProperties>({ visibility: 'hidden' });
@@ -127,7 +131,7 @@ export function AudioControls() {
     <>
       <button
         ref={button} type="button" className={`icon-btn audio-button ${open ? 'active' : ''}`}
-        aria-label={`Звук: ${settings.enabled ? 'включён' : 'выключен'}`} title="Настройки звука"
+        aria-label={`${t.ui.sound}: ${settings.enabled ? t.ui.soundEnabled : t.ui.soundDisabled}`} title={t.ui.soundSettings}
         aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? `${id}-panel` : undefined}
         data-ui-sound={open ? 'ui.click' : 'ui.open'}
         onClick={() => { audio.unlock(); setOpen(!open); }}
@@ -137,12 +141,13 @@ export function AudioControls() {
       {open && createPortal(
         <div ref={panel} id={`${id}-panel`} className="panel audio-panel" role="dialog" aria-labelledby={`${id}-title`} style={position}>
           <div className="audio-panel-head">
-            <h2 id={`${id}-title`}>Звук</h2>
-            <button type="button" className="icon-btn" aria-label="Закрыть настройки звука" onClick={() => close(true)}>×</button>
+            <h2 id={`${id}-title`}>{t.ui.sound}</h2>
+            <button type="button" className="icon-btn" aria-label={t.ui.closeSound} onClick={() => close(true)}>×</button>
           </div>
           <AudioSliders />
-          <a className="audio-catalog-link" href={asset('?sound')} data-ui-sound="none">Выбрать запись или синтез →</a>
-          <a className="audio-credits" href={asset('audio/CREDITS.md')} target="_blank" rel="noreferrer">Авторы и лицензии звуков ↗</a>
+          <div className="language-row"><span>{t.ui.language}</span><div className="language-switch"><button type="button" className={lang === 'ru' ? 'active' : ''} onClick={() => setLang('ru')}>RU</button><button type="button" className={lang === 'en' ? 'active' : ''} onClick={() => setLang('en')}>EN</button></div></div>
+          <a className="audio-catalog-link" href={asset('?sound')} data-ui-sound="none">{t.ui.audioCatalog}</a>
+          <a className="audio-credits" href={asset('audio/CREDITS.md')} target="_blank" rel="noreferrer">{t.ui.audioCredits}</a>
         </div>,
         document.body,
       )}
