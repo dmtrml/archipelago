@@ -41,7 +41,7 @@ PSNR min 61.97 dB и visual review. Финалы остаются вне Git и 
 [План запуска](docs/specs/launch.md) — четыре этапа выполнены в one-pass ветке:
 [публикация](docs/specs/launch-1-publish.md) → [первые минуты и «Поделиться»](docs/specs/launch-2-first-minutes.md) →
 [английская версия](docs/specs/launch-3-english.md) → [рекламный ролик](docs/specs/launch-4-trailer.md).
-Единственный draft PR #8 `Запуск: этапы 1-4 (chat)` открыт в `main`, его CI зелёный; следующий шаг — review PR.
+Единственный draft PR #8 `Запуск: этапы 1–4 (chat)` открыт в `main`, его CI зелёный; следующий шаг — review PR.
 Owner-only плейтест и реальные внешние настройки остаются ручными fallback-действиями.
 
 ## Блокеры и открытые вопросы

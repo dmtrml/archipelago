@@ -10,7 +10,7 @@
 `.trailer/out/final/` и не входят в Git; актуальные файлы опубликованы ассетами prerelease `trailer-chat`.
 
 Closure one-pass: prerelease `trailer-chat` указывает на `e3a9de0`; единственный draft PR — #8
-`Запуск: этапы 1-4 (chat)` (`main` ← `chat/launch`), CI для push и PR зелёный.
+`Запуск: этапы 1–4 (chat)` (`main` ← `chat/launch`), CI для push и PR зелёный.
 
 ## Окружение
 

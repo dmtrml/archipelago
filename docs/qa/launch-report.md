@@ -121,4 +121,4 @@
 - [Приёмка этапа 4](launch-4-trailer.md)
 - `docs/qa/trailer/draft/` — 2 RU draft MP4, 2 storyboard JPEG и timeline
 - `.trailer/out/final/` — 4 final MP4, 4 covers, 4 sheets, timeline и render-report (ignored; опубликованы как prerelease `trailer-chat` assets)
-- draft PR #8 — `Запуск: этапы 1-4 (chat)`, base `main`, head `chat/launch`; push CI и PR CI завершены успешно
+- draft PR #8 — `Запуск: этапы 1–4 (chat)`, base `main`, head `chat/launch`; push CI и PR CI завершены успешно
