@@ -26,7 +26,7 @@
 ### Отклонения
 
 - Ручное включение GitHub Pages, GoatCounter и `FEEDBACK_URL` пропущено по таблице режима одного прохода. Pages проверен локальной сборкой/preview; переменные аналитики и отзывов будут проверяться тестовыми значениями на этапе 2.
-- `actionlint` не установлен. Workflow YAML проверен вручную; окончательная проверка выполняется CI в draft PR.
+- `actionlint` не установлен. Workflow YAML проверен вручную; окончательная проверка выполнена CI в draft PR #8.
 
 ### Не сделано
 
@@ -108,7 +108,7 @@
 ### Отклонения этапа 4
 
 - One-pass отменяет отдельный draft PR и owner feedback loop: source-current RU draft сразу продолжен final.
-- Standalone `trailer-v1` заменён master/user target `trailer-chat`; финальные MP4 не коммитятся и публикуются после Stage4 push.
+- Standalone `trailer-v1` заменён master/user target `trailer-chat`; финальные MP4 не коммитятся и опубликованы в prerelease `trailer-chat` после Stage4 push.
 - `package-lock.json` сохранён по прямому указанию пользователя вместе с Stage4 package prep, несмотря на узкий standalone allowed-file list.
 - Playwright 1.63.0 использован как локальный extraneous package, в permanent dependencies не добавлен; clean-host reproduction после `npm ci` делает `npm install --no-save --package-lock=false playwright@1.63.0` перед render-командой.
 
@@ -120,4 +120,5 @@
 
 - [Приёмка этапа 4](launch-4-trailer.md)
 - `docs/qa/trailer/draft/` — 2 RU draft MP4, 2 storyboard JPEG и timeline
-- `.trailer/out/final/` — 4 final MP4, 4 covers, 4 sheets, timeline и render-report (ignored; публикуются как prerelease assets)
+- `.trailer/out/final/` — 4 final MP4, 4 covers, 4 sheets, timeline и render-report (ignored; опубликованы как prerelease `trailer-chat` assets)
+- draft PR #8 — `Запуск: этапы 1-4 (chat)`, base `main`, head `chat/launch`; push CI и PR CI завершены успешно

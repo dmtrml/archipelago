@@ -7,7 +7,10 @@
 
 Этап 4 выполнен: детерминированные миры, `?director`, виртуальное время, камера, покадровый рендер,
 офлайн-звук, монтаж по долям, два RU-черновика и четыре финальных ролика. Финальные MP4 остаются в
-`.trailer/out/final/` и не входят в Git; после push они публикуются ассетами prerelease `trailer-chat`.
+`.trailer/out/final/` и не входят в Git; актуальные файлы опубликованы ассетами prerelease `trailer-chat`.
+
+Closure one-pass: prerelease `trailer-chat` указывает на `e3a9de0`; единственный draft PR — #8
+`Запуск: этапы 1-4 (chat)` (`main` ← `chat/launch`), CI для push и PR зелёный.
 
 ## Окружение
 

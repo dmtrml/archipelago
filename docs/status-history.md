@@ -10,6 +10,8 @@
 Двойной `asset` render дал minimum PSNR 61.97 dB. Visual review четырёх sheets и covers выявил один
 transient пустой cached capture `v30-en/hook`; shot был принудительно переснят, после чего выполнен новый
 единый final pass. Stage4 simulator output совпал со свежим прогоном checkpoint Stage 2 `40b2a41` после нормализации только времени.
+После push опубликован prerelease `trailer-chat` с current-source финалами и открыт единственный draft PR #8
+`Запуск: этапы 1-4 (chat)` в `main`; CI для Stage4 push и PR завершился успешно.
 Подробности: [приёмка этапа 4](qa/launch-4-trailer.md) и [общий отчёт](qa/launch-report.md).
 
 ## 2026-10-05 — запуск, этап 3: английская версия

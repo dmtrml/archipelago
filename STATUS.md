@@ -10,7 +10,7 @@ blockers: "нет"
 
 В `chat/launch` выполнен этап 4: deterministic fixtures/director/render/audio pipeline собрал два RU-черновика
 и четыре финальных trailer MP4 (v30 RU/EN и h45 RU/EN). Финальный all-target report прошёл codecs/duration/audio,
-PSNR min 61.97 dB и visual review. Финалы остаются вне Git и публикуются prerelease `trailer-chat`.
+PSNR min 61.97 dB и visual review. Финалы остаются вне Git и опубликованы в prerelease `trailer-chat`.
 Приёмка: [docs/qa/launch-4-trailer.md](docs/qa/launch-4-trailer.md).
 
 В `chat/launch` выполнен этап 3: движок хранит локализуемые события/новости/ошибки как данные,
@@ -41,7 +41,8 @@ PSNR min 61.97 dB и visual review. Финалы остаются вне Git и 
 [План запуска](docs/specs/launch.md) — четыре этапа выполнены в one-pass ветке:
 [публикация](docs/specs/launch-1-publish.md) → [первые минуты и «Поделиться»](docs/specs/launch-2-first-minutes.md) →
 [английская версия](docs/specs/launch-3-english.md) → [рекламный ролик](docs/specs/launch-4-trailer.md).
-Следующий шаг после автоматической приёмки — review единственного draft PR; owner-only плейтест и реальные внешние настройки остаются ручными fallback-действиями.
+Единственный draft PR #8 `Запуск: этапы 1-4 (chat)` открыт в `main`, его CI зелёный; следующий шаг — review PR.
+Owner-only плейтест и реальные внешние настройки остаются ручными fallback-действиями.
 
 ## Блокеры и открытые вопросы
 
