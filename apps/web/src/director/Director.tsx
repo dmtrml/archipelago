@@ -12,6 +12,7 @@ import './director.css';
 
 const App = lazy(() => import('../App'));
 type CueEntry = { t: number; cue: CueId; pitchStep?: number; variant?: number } | { t: number; weather: 'clear' | 'storm' };
+type CaptionFrame = { visible: boolean; top: number | null; modalOverlap: boolean };
 type Save = { world: WorldState; news: unknown[]; history: Record<string, unknown[]> };
 type Fixtures = { seed:number; F:number; S:number; N:number; heroItemsByWeek:PlacedItem[][]; scamCard:Save; scamCollapse:Save; neighbors:Save; freedom:Save };
 const fixtures = fixturesData as unknown as Fixtures;
@@ -45,11 +46,32 @@ const hookChanges = (() => {
 
 declare global {
   interface Window {
-    __director: { ready:boolean; shotReady:boolean; start():void; cueLog:CueEntry[]; edit:typeof DIRECTOR_EDIT; errors:string[]; frameOffset:number; renderCue?: (cue:CueId,pitchStep?:number,variant?:number)=>Promise<number[][]> };
+    __director: { ready:boolean; shotReady:boolean; start():void; cueLog:CueEntry[]; captionLog:CaptionFrame[]; captureCaption():CaptionFrame; edit:typeof DIRECTOR_EDIT; errors:string[]; frameOffset:number; renderCue?: (cue:CueId,pitchStep?:number,variant?:number)=>Promise<number[][]> };
   }
 }
 
-const director: Window['__director'] = window.__director = { ready: false, shotReady: false, start() {}, cueLog: [], edit: DIRECTOR_EDIT, errors: [], frameOffset: 0 };
+const director: Window['__director'] = window.__director = {
+  ready: false,
+  shotReady: false,
+  start() {},
+  cueLog: [],
+  captionLog: [],
+  captureCaption() {
+    const caption = document.querySelector<HTMLElement>('.director-caption:not([data-director-measure])');
+    const modal = document.querySelector<HTMLElement>('.modal');
+    const rect = caption?.getBoundingClientRect();
+    const modalRect = modal?.getBoundingClientRect();
+    const modalOverlap = !!(rect && modalRect
+      && rect.right > modalRect.left && rect.left < modalRect.right
+      && rect.bottom > modalRect.top && rect.top < modalRect.bottom);
+    const frame = { visible: !!rect, top: rect?.top ?? null, modalOverlap };
+    director.captionLog.push(frame);
+    return frame;
+  },
+  edit: DIRECTOR_EDIT,
+  errors: [],
+  frameOffset: 0,
+};
 let directorSeconds = 0;
 let started = false;
 let startAt = 0;
@@ -103,32 +125,26 @@ function captionStyle(format:TrailerFormat, kind:'scene'|'game', sec:number, sta
   const opacity=Math.min(1,Math.max(0,Math.min(enter,leave)));
   const progress=Math.min(1,Math.max(0,enter));
   const style:CSSProperties={opacity,transform:`translateX(-50%) translateY(${12*(1-progress)}px) scale(${.96+.04*progress})`};
-  if(format==='v') {
-    if(kind==='scene') style.top='13%';
-    else {
-      const header=document.querySelector('.top')?.getBoundingClientRect();
-      style.top=(header?.bottom??102)+14;
-    }
-  } else style.bottom='9%';
+  const headerBottom=document.querySelector('.top')?.getBoundingClientRect().bottom??0;
+  const defaultTop=format==='v'?(kind==='scene'?innerHeight*.13:headerBottom+14):null;
+  if(defaultTop!==null)style.top=defaultTop;
+  else style.bottom='9%';
   const modal=document.querySelector('.modal')?.getBoundingClientRect();
-  const old=document.querySelector('.director-caption')?.getBoundingClientRect();
-  if(modal&&old&&old.width>0&&old.height>0) {
-    const overlap=!(old.right<modal.left||old.left>modal.right||old.bottom<modal.top||old.top>modal.bottom);
+  const measure=document.querySelector<HTMLElement>('.director-caption[data-director-measure]')?.getBoundingClientRect();
+  if(modal&&measure&&measure.width>0&&measure.height>0) {
+    const top=defaultTop??innerHeight*.91-measure.height;
+    const left=(innerWidth-measure.width)/2;
+    const right=left+measure.width;
+    const bottom=top+measure.height;
+    const overlap=right>modal.left&&left<modal.right&&bottom>modal.top&&top<modal.bottom;
     if(overlap) {
-      if(format==='v') {
-        const headerBottom=document.querySelector('.top')?.getBoundingClientRect().bottom??0;
-        const minTop=headerBottom+14, maxBottom=innerHeight*.8;
-        const above=modal.top-old.height-16, below=modal.bottom+16;
-        if(above>=minTop)style.top=above;
-        else if(below+old.height<=maxBottom)style.top=below;
-        else return null;
-      } else {
-        const above=modal.top-old.height-16, below=modal.bottom+16;
-        delete style.bottom;
-        if(above>=16)style.top=above;
-        else if(below+old.height<=innerHeight-16)style.top=below;
-        else return null;
-      }
+      const minTop=format==='v'?headerBottom+14:16;
+      const maxBottom=format==='v'?innerHeight*.8:innerHeight-16;
+      const aboveSpace=modal.top-16-minTop;
+      const belowSpace=maxBottom-(modal.bottom+16);
+      if(Math.max(aboveSpace,belowSpace)<measure.height)return null;
+      delete style.bottom;
+      style.top=aboveSpace>=belowSpace?modal.top-16-measure.height:modal.bottom+16;
     }
   }
   return style;
@@ -265,8 +281,8 @@ export default function Director(){
   const entry=(format==='v'?EDIT.v30:EDIT.h45).shots.find(([shot])=>shot===id); const durationBeats=entry?entry[2]-entry[1]:4;
   useMemo(()=>{localStorage.setItem('archipelago.lang.v1',lang);useLanguage.getState().setLang(lang);},[lang]);
   const sec=useClock()-director.frameOffset;
-  useEffect(()=>{director.ready=false;director.shotReady=false;director.errors.length=0;director.cueLog.length=0;started=false;directorSeconds=0;director.frameOffset=0;director.start=()=>{started=true;startAt=performance.now();directorSeconds=0;for(const handler of startHandlers)handler()}; if(editOnly||audioOnly){director.ready=true;return;} let cancelled=false;(async()=>{await Promise.all([document.fonts.load('700 20px Unbounded'),document.fonts.load('800 16px Manrope')]);await document.fonts.ready;if(cancelled)return; if(!document.fonts.check('700 20px Unbounded'))director.errors.push('Unbounded 700 unavailable');if(!document.fonts.check('800 16px Manrope'))director.errors.push('Manrope 800 unavailable');for(let i=0;i<180&&!director.shotReady&&!cancelled;i++)await new Promise<void>(r=>requestAnimationFrame(()=>r()));if(!cancelled&&!director.shotReady)director.errors.push(`${id}: first frame not ready`);if(!cancelled)director.ready=director.errors.length===0;})();return()=>{cancelled=true};},[id,editOnly,audioOnly]);
+  useEffect(()=>{director.ready=false;director.shotReady=false;director.errors.length=0;director.cueLog.length=0;director.captionLog.length=0;started=false;directorSeconds=0;director.frameOffset=0;director.start=()=>{started=true;startAt=performance.now();directorSeconds=0;director.captionLog.length=0;for(const handler of startHandlers)handler()}; if(editOnly||audioOnly){director.ready=true;return;} let cancelled=false;(async()=>{await Promise.all([document.fonts.load('700 20px Unbounded'),document.fonts.load('800 16px Manrope')]);await document.fonts.ready;if(cancelled)return; if(!document.fonts.check('700 20px Unbounded'))director.errors.push('Unbounded 700 unavailable');if(!document.fonts.check('800 16px Manrope'))director.errors.push('Manrope 800 unavailable');for(let i=0;i<180&&!director.shotReady&&!cancelled;i++)await new Promise<void>(r=>requestAnimationFrame(()=>r()));if(!cancelled&&!director.shotReady)director.errors.push(`${id}: first frame not ready`);if(!cancelled)director.ready=director.errors.length===0;})();return()=>{cancelled=true};},[id,editOnly,audioOnly]);
   if(editOnly)return <div className="director-audio">edit ready</div>; if(audioOnly)return <AudioPage/>;
   const spec=SHOTS[id]; const showCaption=spec.caption&&id!=='end'; const captionStartSec=id==='scam-collapse'?.25*BEAT+1.2:(id==='asset'||id==='liability'?.5:.25)*BEAT; const captionEndSec=(durationBeats-.25)*BEAT; const modalOpen=id==='freedom'&&!!document.querySelector('.modal'); const capStyle=showCaption&&!modalOpen?captionStyle(format,spec.kind,sec,captionStartSec,captionEndSec):null;
-  return <div className={`director-root ${format==='v'?'vertical':'horizontal'} ${spec.kind}`}>{id==='end'?<EndCard lang={lang} format={format} durationBeats={durationBeats}/>:spec.kind==='scene'?<SceneShot id={id} format={format} durationBeats={durationBeats}/>:<GameShot id={id} lang={lang} durationBeats={durationBeats}/>} {capStyle&&<div className="director-caption" style={capStyle} dangerouslySetInnerHTML={captionHtml(spec.caption![lang])}/>} {id==='scam-card'&&<ClickIndicator durationBeats={durationBeats}/>}</div>;
+  return <div className={`director-root ${format==='v'?'vertical':'horizontal'} ${spec.kind}`}>{id==='end'?<EndCard lang={lang} format={format} durationBeats={durationBeats}/>:spec.kind==='scene'?<SceneShot id={id} format={format} durationBeats={durationBeats}/>:<GameShot id={id} lang={lang} durationBeats={durationBeats}/>} {showCaption&&<div className="director-caption" data-director-measure aria-hidden="true" style={{visibility:'hidden',top:0,pointerEvents:'none'}} dangerouslySetInnerHTML={captionHtml(spec.caption![lang])}/>} {capStyle&&<div className="director-caption" style={capStyle} dangerouslySetInnerHTML={captionHtml(spec.caption![lang])}/>} {id==='scam-card'&&<ClickIndicator durationBeats={durationBeats}/>}</div>;
 }
