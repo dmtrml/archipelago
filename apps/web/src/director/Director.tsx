@@ -229,6 +229,7 @@ function cubicBezierEase(t: number) {
 }
 
 function captionStyle(
+  id: ShotId,
   format: TrailerFormat,
   kind: 'scene' | 'game',
   sec: number,
@@ -248,6 +249,7 @@ function captionStyle(
   const defaultTop = format === 'v' ? (kind === 'scene' ? innerHeight * 0.13 : headerBottom + 14) : null;
   if (defaultTop !== null) style.top = defaultTop;
   else style.bottom = '9%';
+  if (id === 'scam-collapse' && format === 'h') return style;
   const modal = document.querySelector('.modal')?.getBoundingClientRect();
   const measure = document
     .querySelector<HTMLElement>('.director-caption[data-director-measure]')
@@ -725,9 +727,7 @@ export default function Director() {
   const captionStartSec =
     id === 'scam-collapse' ? 0.25 * BEAT + 1.2 : (id === 'asset' || id === 'liability' ? 0.5 : 0.25) * BEAT;
   const captionEndSec = (durationBeats - 0.25) * BEAT;
-  const modalOpen = id === 'freedom' && !!document.querySelector('.modal');
-  const capStyle =
-    showCaption && !modalOpen ? captionStyle(format, spec.kind, sec, captionStartSec, captionEndSec) : null;
+  const capStyle = showCaption ? captionStyle(id, format, spec.kind, sec, captionStartSec, captionEndSec) : null;
   director.subjects =
     spec.kind === 'scene'
       ? () => {

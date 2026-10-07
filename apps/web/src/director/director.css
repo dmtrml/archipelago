@@ -52,8 +52,26 @@
   place-items: start center;
   padding-top: 24px;
 }
+.director-root.vertical[data-shot='freedom']:has(.modal) .modal-backdrop {
+  place-items: start center;
+  padding-top: 16px;
+}
+.director-root.vertical[data-shot='freedom']:has(.modal) .modal {
+  max-height: 56vh;
+}
+.director-root.vertical[data-shot='freedom']:has(.modal) .director-caption:not([data-director-measure]) {
+  top: calc(56vh + 32px) !important;
+}
 .director-root.horizontal .director-caption {
   bottom: 9%;
+}
+.director-root.horizontal[data-shot='freedom']:has(.modal) .modal-backdrop {
+  justify-items: end;
+  padding-right: 64px;
+}
+.director-root.horizontal[data-shot='freedom']:has(.modal) .director-caption:not([data-director-measure]) {
+  left: 350px;
+  max-width: 440px;
 }
 .director-click {
   position: absolute;

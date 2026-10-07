@@ -59,6 +59,25 @@ async function waitForSnapshot(page) {
   await page.waitForFunction(() => !document.querySelector('.isl-float') && !document.querySelector('.toast'));
 }
 
+async function waitForWeekOutcome(page) {
+  const handle = await page.waitForFunction(async () => {
+    const { useGame } = await import('/src/store.ts');
+    const state = useGame.getState();
+    if (state.busy) return false;
+    if (state.modal) return 'modal';
+    if (state.toast) return 'toast';
+    return false;
+  }, null, { timeout: 5000 });
+  const outcome = await handle.jsonValue();
+  if (outcome === 'modal') {
+    await page.locator('.modal').waitFor({ state: 'visible', timeout: 2500 });
+  } else {
+    const toast = page.locator('.toast');
+    await toast.waitFor({ state: 'visible', timeout: 2500 });
+    await toast.waitFor({ state: 'detached', timeout: 5000 });
+  }
+}
+
 async function text(page) {
   await waitForSnapshot(page);
   return page.evaluate(() => {
@@ -392,6 +411,7 @@ async function captureRu(base, bank) {
   const next = page.locator('[data-coach="next-week"]:visible');
   if (await next.count()) {
     await next.click();
+    await waitForWeekOutcome(page);
     captures.week = normalizeRu(await text(page));
     news.week = await newsTexts(page);
   }
