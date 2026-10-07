@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useCoach } from './coach';
 import { useI18n } from '../i18n';
 
-interface Placement { target: DOMRect; bubbleTop: number; bubbleLeft: number; above: boolean }
+interface Placement { target: DOMRect; bubbleTop: number; bubbleLeft: number; above: boolean; measured: boolean }
 
 export function Coach() {
   const { t } = useI18n();
@@ -11,6 +11,7 @@ export function Coach() {
   const skip = useCoach((s) => s.skip);
   const finish = useCoach((s) => s.finish);
   const [placement, setPlacement] = useState<Placement | null>(null);
+  const bubbleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!step) { setPlacement(null); return; }
@@ -32,10 +33,16 @@ export function Coach() {
       else {
         const rect = target.getBoundingClientRect();
         const width = Math.min(300, innerWidth - 24);
-        const above = rect.top >= 150;
-        const bubbleTop = above ? Math.max(12, rect.top - 128) : Math.min(innerHeight - 120, rect.bottom + 18);
+        const bubbleHeight = bubbleRef.current?.getBoundingClientRect().height ?? 0;
+        const measured = bubbleHeight > 0;
+        const aboveTop = rect.top - 6 - 10 - bubbleHeight;
+        const belowTop = rect.bottom + 6 + 10;
+        const above = measured && aboveTop >= 12;
+        const bubbleTop = above
+          ? aboveTop
+          : Math.max(12, Math.min(innerHeight - bubbleHeight - 12, belowTop));
         const bubbleLeft = Math.max(12, Math.min(innerWidth - width - 12, rect.left + rect.width / 2 - width / 2));
-        setPlacement({ target: rect, bubbleTop, bubbleLeft, above });
+        setPlacement({ target: rect, bubbleTop, bubbleLeft, above, measured });
       }
       frame = requestAnimationFrame(update);
     };
@@ -55,7 +62,11 @@ export function Coach() {
   return (
     <div className="coach" role="dialog" aria-live="polite">
       <div className="coach-ring" style={{ left: r.left - 6, top: r.top - 6, width: r.width + 12, height: r.height + 12, borderRadius: 18 }} />
-      <div className={`coach-bubble ${placement.above ? 'above' : 'below'}`} style={{ left: placement.bubbleLeft, top: placement.bubbleTop }}>
+      <div
+        ref={bubbleRef}
+        className={`coach-bubble ${placement.above ? 'above' : 'below'}`}
+        style={{ left: placement.bubbleLeft, top: placement.bubbleTop, visibility: placement.measured ? 'visible' : 'hidden' }}
+      >
         <div className="coach-kicker">{t.ui.coach.kicker(step)}</div>
         <p>{t.ui.coach.steps[step - 1]}</p>
         {step === 3

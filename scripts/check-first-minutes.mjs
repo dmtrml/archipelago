@@ -37,6 +37,27 @@ async function expectedBest(page) {
   });
 }
 
+async function assertCoachClear(page, label) {
+  const boxes = await page.evaluate(() => {
+    const bubble = document.querySelector('.coach-bubble')?.getBoundingClientRect();
+    const ring = document.querySelector('.coach-ring')?.getBoundingClientRect();
+    if (!bubble || !ring) return null;
+    return {
+      bubble: { left: bubble.left, top: bubble.top, right: bubble.right, bottom: bubble.bottom },
+      ring: { left: ring.left, top: ring.top, right: ring.right, bottom: ring.bottom },
+      viewport: { width: innerWidth, height: innerHeight },
+    };
+  });
+  assert(boxes, `${label}: coach geometry is unavailable`);
+  const overlap = boxes.bubble.left < boxes.ring.right
+    && boxes.bubble.right > boxes.ring.left
+    && boxes.bubble.top < boxes.ring.bottom
+    && boxes.bubble.bottom > boxes.ring.top;
+  assert(!overlap, `${label}: coach bubble overlaps target ring: ${JSON.stringify(boxes)}`);
+  assert(boxes.bubble.left >= 11.5, `${label}: coach bubble is too close to left edge`);
+  assert(boxes.bubble.right <= boxes.viewport.width - 11.5, `${label}: coach bubble is too close to right edge`);
+}
+
 try {
   for (const [width, height] of [[390, 844], [1366, 768]]) {
     const page = await browser.newPage({ viewport: { width, height }, locale: 'ru-RU' });
@@ -45,11 +66,13 @@ try {
     assert(expected, 'Initial world must contain an eligible asset');
     await page.waitForTimeout(900);
     await page.getByRole('dialog').filter({ hasText: 'Шаг 1 из 3' }).waitFor({ timeout: 2500 });
+    await assertCoachClear(page, `step 1 ${width}x${height}`);
     const target = page.locator(`[data-offer-uid="${expected}"] .btn.primary`);
     assert(await target.isVisible(), `Best offer ${expected} is not visible`);
     await page.screenshot({ path: resolve(output, `coach-1-${width}.jpg`), type: 'jpeg', quality: 82 });
     await target.click();
     await page.getByRole('dialog').filter({ hasText: 'Шаг 2 из 3' }).waitFor();
+    await assertCoachClear(page, `step 2 ${width}x${height}`);
     await page.screenshot({ path: resolve(output, `coach-2-${width}.jpg`), type: 'jpeg', quality: 82 });
     await page.locator('[data-coach="next-week"]:visible').click();
     await page.waitForTimeout(1400);
@@ -61,6 +84,7 @@ try {
       return !state.modal && !state.toast && !state.busy;
     }, null, { timeout: 5000 });
     await page.getByRole('dialog').filter({ hasText: 'Шаг 3 из 3' }).waitFor({ timeout: 5000 });
+    await assertCoachClear(page, `step 3 ${width}x${height}`);
     await page.screenshot({ path: resolve(output, `coach-3-${width}.jpg`), type: 'jpeg', quality: 82 });
     await page.getByRole('button', { name: 'Понятно', exact: true }).click();
     assert.equal(await page.evaluate(() => localStorage.getItem('archipelago.coach.v1')), 'done');
