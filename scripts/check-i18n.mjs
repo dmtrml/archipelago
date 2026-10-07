@@ -55,7 +55,55 @@ async function startGame(page, lang = 'ru', values = {}) {
   await page.waitForTimeout(80);
 }
 
-async function text(page) { return (await page.locator('body').innerText()).trim(); }
+async function waitForSnapshot(page) {
+  await page.waitForFunction(() => !document.querySelector('.isl-float') && !document.querySelector('.toast'));
+}
+
+async function text(page) {
+  await waitForSnapshot(page);
+  return page.evaluate(() => {
+    const tickers = [...document.querySelectorAll('.ticker')];
+    const displays = tickers.map((ticker) => ticker.style.display);
+    tickers.forEach((ticker) => { ticker.style.display = 'none'; });
+    try { return document.body.innerText.trim(); }
+    finally { tickers.forEach((ticker, index) => { ticker.style.display = displays[index]; }); }
+  });
+}
+
+async function newsTexts(page) {
+  return page.evaluate(async () => {
+    const { useGame } = await import('/src/store.ts');
+    const state = useGame.getState();
+    if (!state.world) return [];
+    if (state.news.every((item) => 'text' in item)) return state.news.map((item) => item.text);
+    const { newsText } = await import('/src/i18n/index.ts');
+    return state.news.map((item) => 'text' in item ? item.text : newsText(item, state.world.players));
+  });
+}
+
+async function visibleHumanNews(page, needle) {
+  const selected = await page.evaluate(async ({ expected }) => {
+    const { useGame } = await import('/src/store.ts');
+    const state = useGame.getState();
+    if (!state.world) return false;
+    let rendered = [];
+    if (state.news.every((item) => 'text' in item)) rendered = state.news.map((item) => item.text);
+    else {
+      const { newsText } = await import('/src/i18n/index.ts');
+      rendered = state.news.map((item) => 'text' in item ? item.text : newsText(item, state.world.players));
+    }
+    const index = rendered.findIndex((value, i) => state.news[i]?.playerId === 'p1' && value.includes(expected));
+    if (index < 0) return false;
+    useGame.setState({ news: [state.news[index]] });
+    return true;
+  }, { expected: needle });
+  assert(selected, `Missing human news containing: ${needle}`);
+  const ticker = page.locator('.ticker');
+  await ticker.waitFor({ timeout: 2500 });
+  const rendered = (await ticker.innerText()).trim();
+  assert(rendered.includes(needle), `Visible human news mismatch: ${rendered}`);
+  return rendered;
+}
 
 async function assertEnglish(page, label) {
   const body = await text(page);
@@ -225,6 +273,7 @@ async function reportIds(page) {
 
 async function captureScenarioRu(base, bank) {
   const captures = {};
+  const news = {};
 
   {
     const { context, page } = await scenarioPage(base, bank.upgradeAsset);
@@ -232,6 +281,7 @@ async function captureScenarioRu(base, bank) {
     await page.locator(`[data-uid="${bank.upgradeAsset.action.assetUid}"] .upgrade .btn.primary.sm`).click();
     await page.waitForTimeout(650);
     captures.upgrade = normalizeRu(await text(page));
+    news.upgrade = await newsTexts(page);
     await context.close();
   }
   {
@@ -240,6 +290,7 @@ async function captureScenarioRu(base, bank) {
     await page.getByRole('button', { name: '+100', exact: true }).click();
     await page.locator('.action-row.loan').waitFor();
     captures.loan = normalizeRu(await text(page));
+    news.loan = await newsTexts(page);
     await context.close();
   }
   for (const [name, fixture, expected] of [
@@ -252,6 +303,7 @@ async function captureScenarioRu(base, bank) {
     await page.locator('.modal.week').waitFor({ timeout: 5000 });
     assert((await reportIds(page)).includes(expected), `${name}: expected ${expected} event`);
     captures[name] = normalizeRu(await text(page));
+    news[name] = await newsTexts(page);
     await context.close();
   }
   {
@@ -264,6 +316,9 @@ async function captureScenarioRu(base, bank) {
     });
     assert.equal(reached, true, 'freedom: report did not reach freedom');
     captures.freedom = normalizeRu(await text(page));
+    news.freedom = await newsTexts(page);
+    captures['news:freedom'] = await visibleHumanNews(page, 'финансовая свобода');
+    assert.match(captures['news:freedom'], /^Аня: финансовая свобода/);
     await context.close();
   }
   {
@@ -272,6 +327,7 @@ async function captureScenarioRu(base, bank) {
     await page.locator('.modal.week').waitFor({ timeout: 5000 });
     assert((await reportIds(page)).includes('freedomThreat'), 'freedom-threat: expected freedomThreat event');
     captures['freedom-threat'] = normalizeRu(await text(page));
+    news['freedom-threat'] = await newsTexts(page);
     await context.close();
   }
   {
@@ -280,6 +336,9 @@ async function captureScenarioRu(base, bank) {
     await page.locator('.modal.epilogue').waitFor({ timeout: 5000 });
     assert((await reportIds(page)).includes('dreamDone'), 'epilogue: expected dreamDone event');
     captures.epilogue = normalizeRu(await text(page));
+    news.epilogue = await newsTexts(page);
+    captures['news:dreamDone'] = await visibleHumanNews(page, 'шхуна готова');
+    assert.match(captures['news:dreamDone'], /^Аня: шхуна готова/);
     await context.close();
   }
   {
@@ -287,10 +346,11 @@ async function captureScenarioRu(base, bank) {
     await page.locator('.nb-chip:not(.me):visible').first().click();
     await page.locator('.neighbor-card').waitFor();
     captures['neighbor-card'] = normalizeRu(await text(page));
+    news['neighbor-card'] = await newsTexts(page);
     await context.close();
   }
 
-  return captures;
+  return { captures, news };
 }
 
 async function captureTabsRu(base) {
@@ -311,14 +371,17 @@ async function captureTabsRu(base) {
 async function captureRu(base, bank) {
   const { context, page } = await newPage(base, { lang: 'ru' });
   const captures = {};
+  const news = {};
   captures.welcome = normalizeRu(await text(page));
   await startGame(page, 'ru');
   captures.game = normalizeRu(await text(page));
+  news.game = await newsTexts(page);
   Object.assign(captures, await captureTabsRu(base));
   const buy = page.locator('[data-offer-uid] .btn.primary:not([disabled])').first();
   if (await buy.count()) {
     await buy.click(); await page.waitForTimeout(80);
     captures.purchase = normalizeRu(await text(page));
+    news.purchase = await newsTexts(page);
   }
   const sound = page.locator('.audio-button').first();
   if (await sound.count()) {
@@ -328,13 +391,16 @@ async function captureRu(base, bank) {
   }
   const next = page.locator('[data-coach="next-week"]:visible');
   if (await next.count()) {
-    await next.click(); await page.waitForTimeout(1250);
+    await next.click();
     captures.week = normalizeRu(await text(page));
+    news.week = await newsTexts(page);
   }
   const save = await page.evaluate(() => localStorage.getItem('archipelago.save.v1'));
   await context.close();
-  Object.assign(captures, await captureScenarioRu(base, bank));
-  return { captures, save };
+  const scenario = await captureScenarioRu(base, bank);
+  Object.assign(captures, scenario.captures);
+  Object.assign(news, scenario.news);
+  return { captures, news, save };
 }
 
 try {
@@ -346,6 +412,9 @@ try {
   const current = await captureRu(url, currentBank);
   assert.deepEqual(Object.keys(current.captures), Object.keys(baseline.captures), 'RU parity capture sets differ');
   const ruMismatches = Object.keys(baseline.captures).filter((key) => current.captures[key] !== baseline.captures[key]);
+  assert.deepEqual(Object.keys(current.news), Object.keys(baseline.news), 'RU parity news sets differ');
+  const newsMismatches = Object.keys(baseline.news)
+    .filter((key) => JSON.stringify(current.news[key]) !== JSON.stringify(baseline.news[key]));
 
   // Root precedence: browser RU -> RU; non-RU -> EN; saved choice beats browser.
   {
@@ -376,6 +445,18 @@ try {
     const { context, page } = await newPage(url, { lang: 'en', locale: 'en-US', width, height });
     await assertEnglish(page, `welcome-${width}`); await shot(page, `en-welcome-${width}`);
     await startGame(page, 'en');
+    if (width === 1366) {
+      const namedNews = await page.evaluate(async () => {
+        const [{ useGame }, { newsText }] = await Promise.all([import('/src/store.ts'), import('/src/i18n/index.ts')]);
+        const players = useGame.getState().world.players;
+        return {
+          freedom: newsText({ kind: 'freedom', playerId: 'p1', week: 42 }, players),
+          dreamDone: newsText({ kind: 'dreamDone', playerId: 'p1', week: 42 }, players),
+        };
+      });
+      assert.equal(namedNews.freedom, 'Alex: financial freedom in week 42!');
+      assert.equal(namedNews.dreamDone, 'Alex: the schooner is ready and setting off around the world!');
+    }
     await assertEnglish(page, `game-${width}`); await shot(page, `en-game-${width}`);
     const tabs = width < 1024 ? ['Report', 'Deals', 'Island', 'Actions'] : ['Deals', 'Island', 'Actions'];
     for (const tab of tabs) {
@@ -443,9 +524,25 @@ try {
   }
 
   assert.deepEqual(errors, [], `Browser runtime errors: ${errors.join('; ')}`);
-  await writeFile(resolve(output, 'results.json'), JSON.stringify({ ruScreens: Object.keys(baseline.captures), ruMismatches, screenshots, runtimeErrors: errors }, null, 2));
-  console.log(JSON.stringify({ ruParityScreens: Object.keys(baseline.captures).length, ruParityMismatches: ruMismatches, enScreenshots: screenshots.length, runtimeErrors: 0, output }, null, 2));
+  await writeFile(resolve(output, 'results.json'), JSON.stringify({
+    ruScreens: Object.keys(baseline.captures),
+    ruMismatches,
+    newsScreens: Object.keys(baseline.news),
+    newsMismatches,
+    screenshots,
+    runtimeErrors: errors,
+  }, null, 2));
+  console.log(JSON.stringify({
+    ruParityScreens: Object.keys(baseline.captures).length,
+    ruParityMismatches: ruMismatches,
+    newsParityScreens: Object.keys(baseline.news).length,
+    newsParityMismatches: newsMismatches,
+    enScreenshots: screenshots.length,
+    runtimeErrors: 0,
+    output,
+  }, null, 2));
   assert.deepEqual(ruMismatches, [], `RU parity differs at: ${ruMismatches.join(', ')}`);
+  assert.deepEqual(newsMismatches, [], `RU news parity differs at: ${newsMismatches.join(', ')}`);
 } finally {
   await browser.close();
 }
