@@ -115,12 +115,25 @@ try {
   await loaded.close();
 
   const noAsset = await browser.newPage({ locale: 'ru-RU' });
-  await start(noAsset);
+  await noAsset.goto(url);
+  await noAsset.evaluate(() => localStorage.clear());
+  await noAsset.reload();
+  await noAsset.getByRole('button', { name: 'Начать игру', exact: true }).waitFor();
   await noAsset.evaluate(async () => {
-    const { useGame } = await import('/src/store.ts');
-    const world = structuredClone(useGame.getState().world);
+    const [{ useGame }, { createWorld }] = await Promise.all([import('/src/store.ts'), import('/@id/@arch/engine')]);
+    const world = createWorld({ seed: 123456789, playerName: 'Аня', islandName: 'Тихая Гавань' });
     world.offers = world.offers.filter((offer) => ['fountain', 'statue', 'yacht', 'garden', 'pearlFarm'].includes(offer.defId));
-    useGame.setState({ world });
+    useGame.setState({
+      world,
+      news: [],
+      history: {},
+      neighborId: null,
+      modal: null,
+      floats: [],
+      weather: 'clear',
+      busy: false,
+      toast: null,
+    });
   });
   await noAsset.getByRole('dialog').filter({ hasText: 'Шаг 2 из 3' }).waitFor({ timeout: 2500 });
   await noAsset.close();
