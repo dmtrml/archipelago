@@ -1,9 +1,10 @@
-// Случайные события: движок хранит только данные; пользовательские фразы собирает UI.
+// Случайные события: личные (для каждого игрока) и общие (для всего архипелага).
 import { getDef, happinessJoy } from './economy';
 import type { Rng } from './rng';
 import * as R from './rules';
 import type { DreamDef, EventParam, GameEvent, PlayerState, PlayerWeekReport, WorldState } from './types';
 
+/** Все id событий — чтобы UI мог подобрать иконки. */
 export type EventId =
   | 'illness' | 'breakdown' | 'gift' | 'raise' | 'burnout'
   | 'storm' | 'stormDamage' | 'stormInsured' | 'fishShoal' | 'touristBoom' | 'crisis'
@@ -22,14 +23,19 @@ function event(
 function roundTo5(n: number): number { return Math.round(n / 5) * 5; }
 function pickVariant(rng: Rng, count: number): number { return rng.int(0, count - 1); }
 
+// ───────────── Выгорание ─────────────
+
 export function rollBurnout(player: PlayerState, rng: Rng): boolean {
   if (player.happiness >= R.BURNOUT_THRESHOLD) return false;
-  const depth = (R.BURNOUT_THRESHOLD - player.happiness) / R.BURNOUT_THRESHOLD;
+  const depth = (R.BURNOUT_THRESHOLD - player.happiness) / R.BURNOUT_THRESHOLD; // 0..1
   return rng.chance(R.BURNOUT_CHANCE_MIN + (R.BURNOUT_CHANCE_MAX - R.BURNOUT_CHANCE_MIN) * depth);
 }
 
 export function burnoutEvent(): GameEvent { return event('burnout', 'bad'); }
 
+// ───────────── Личные события ─────────────
+
+/** Бросает личное событие; повышение сразу меняет зарплату и расходы игрока. */
 export function rollPersonalEvent(player: PlayerState, rng: Rng): GameEvent | null {
   if (!rng.chance(R.PERSONAL_EVENT_CHANCE)) return null;
   const kind = rng.weighted(R.PERSONAL_EVENT_WEIGHTS);
@@ -52,17 +58,23 @@ export function rollPersonalEvent(player: PlayerState, rng: Rng): GameEvent | nu
     }
     case 'raise': {
       if (!player.employed) return null;
-      player.salary += R.RAISE_SALARY;
+      player.salary += R.RAISE_SALARY; // повышение бывает только на работе
       player.living += R.RAISE_LIVING;
       return event('raise', 'good', { salaryIncrease: R.RAISE_SALARY, livingIncrease: R.RAISE_LIVING });
     }
   }
 }
 
+/**
+ * Изменение счастья за неделю: будни (только пока работаешь) + радость от статусных вещей и мечты
+ * + штраф за подработку.
+ */
 export function weeklyHappinessDelta(player: PlayerState): number {
   const drift = player.employed ? R.HAPPINESS_DRIFT : 0;
   return drift + happinessJoy(player) + (player.extraShift ? R.EXTRA_SHIFT_JOY : 0);
 }
+
+// ───────────── Общие события ─────────────
 
 function applyStorm(world: WorldState, rng: Rng, reports: Record<string, PlayerWeekReport>): GameEvent {
   const damagedAll: string[] = [];
@@ -85,6 +97,7 @@ function applyStorm(world: WorldState, rng: Rng, reports: Record<string, PlayerW
   return event('storm', 'bad', {}, { affectedAssetUids: damagedAll });
 }
 
+/** Бросает общее событие недели (не больше одного). Мутирует рынок и имущество копии мира. */
 export function rollWorldEvent(world: WorldState, rng: Rng, reports: Record<string, PlayerWeekReport>): GameEvent[] {
   if (!rng.chance(R.WORLD_EVENT_CHANCE)) return [];
   const kind = rng.weighted(R.WORLD_EVENT_WEIGHTS);
@@ -104,6 +117,8 @@ export function rollWorldEvent(world: WorldState, rng: Rng, reports: Record<stri
   }
 }
 
+// ───────────── Аферы, долги, свобода ─────────────
+
 export function scamCollapseEvent(assetUid: string): GameEvent {
   return event('scamCollapse', 'bad', {}, { affectedAssetUids: [assetUid] });
 }
@@ -117,6 +132,9 @@ export function dreamStageEvent(dream: DreamDef, finishedStage: number): GameEve
 export function dreamDoneEvent(dream: DreamDef): GameEvent {
   return event('dreamDone', 'good', { dreamId: dream.id, upkeep: dream.upkeep });
 }
+// ───────────── Второй акт ─────────────
+
+/** Уровень 1 («Свобода») празднует freedomEvent; здесь — запас прочности: 2 и выше. */
 export function freedomLevelEvent(level: number): GameEvent { return event('freedomLevel', 'good', { level }); }
 export function freedomThreatEvent(weeksLeft: number): GameEvent { return event('freedomThreat', 'bad', { weeksLeft }); }
 export function threatOverEvent(): GameEvent { return event('threatOver', 'good'); }
