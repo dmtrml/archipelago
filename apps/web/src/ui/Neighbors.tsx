@@ -17,8 +17,8 @@ const AVATAR = ['#3E9A9A', '#E8735A', '#F0A93B', '#7B6CC4'];
 const colorOf = (world: WorldState, playerId: string) =>
   AVATAR[Math.max(0, world.players.findIndex((p) => p.id === playerId)) % AVATAR.length];
 
-const renderedNews = (item: ReturnType<typeof useGame.getState>['news'][number]) =>
-  'text' in item ? item.text : newsText(item);
+const renderedNews = (item: ReturnType<typeof useGame.getState>['news'][number], players: readonly PlayerState[]) =>
+  'text' in item ? item.text : newsText(item, players);
 
 // ───────── Аватар с кольцом прогресса к свободе ─────────
 
@@ -213,7 +213,7 @@ export function NeighborCard({ playerId, onClose }: { playerId: string; onClose:
         <>
           <div className="list-title">{t.ui.neighbors.recent}</div>
           {myNews.map((n, i) => (
-            <div key={i} className="news"><span className="muted">{t.ui.weekShort} {n.week}</span> {renderedNews(n)}</div>
+            <div key={i} className="news"><span className="muted">{t.ui.weekShort} {n.week}</span> {renderedNews(n, world.players)}</div>
           ))}
         </>
       )}
@@ -237,7 +237,7 @@ function NewsTicker() {
   }, [week, fresh.length]);
   if (fresh.length === 0) return null;
   const item = fresh[i % fresh.length];
-  return <div key={`${week}-${i}`} className="ticker">{renderedNews(item)}</div>;
+  return <div key={`${week}-${i}`} className="ticker">{renderedNews(item, world.players)}</div>;
 }
 
 // ───────── Полоска соседей ─────────

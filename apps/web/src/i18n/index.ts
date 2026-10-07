@@ -195,15 +195,17 @@ export function eventCopy(event: GameEvent): { title: string; text: string } {
 }
 
 const femaleBot = (id: string) => id === 'bot-mia';
-function newsPlayer(id: string, fallback?: string) {
+function newsPlayer(id: string, players: readonly PlayerState[]) {
+  const player = players.find((candidate) => candidate.id === id);
+  if (player) return displayPlayer(player).name;
   const bot = getI18n().t.bots[id as keyof typeof ru.bots];
-  return bot?.name ?? fallback ?? getI18n().t.meta.defaultPlayer;
+  return bot?.name ?? getI18n().t.meta.defaultPlayer;
 }
 
-export function newsText(item: WeekNewsItem): string {
+export function newsText(item: WeekNewsItem, players: readonly PlayerState[]): string {
   if (item.kind === 'legacy') return item.legacyText;
   const { t } = getI18n();
-  const name = newsPlayer(item.playerId);
+  const name = newsPlayer(item.playerId, players);
   const female = femaleBot(item.playerId);
   switch (item.kind) {
     case 'bought': return t.news.bought(name, female, assetCopy(item.defId).accusative);
