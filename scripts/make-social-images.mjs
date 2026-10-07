@@ -95,6 +95,9 @@ try {
     title.textContent = cardLang === 'en' ? 'Archipelago' : 'Архипелаг';
     title.style.font = '700 58px/1 Unbounded, system-ui, sans-serif';
     title.style.color = '#1F2A44';
+    title.style.maxWidth = '100%';
+    title.style.whiteSpace = 'nowrap';
+    title.style.overflow = 'hidden';
     const subtitle = document.createElement('div');
     subtitle.textContent = cardLang === 'en' ? 'A cozy game about money and freedom' : 'Уютная игра про деньги и свободу';
     subtitle.style.font = '800 25px/1.25 Manrope, system-ui, sans-serif';
@@ -107,8 +110,22 @@ try {
     });
     card.append(icon, title, subtitle, cta);
     document.body.append(card);
+    if (cardLang === 'en') {
+      // Measure the title in its final card layout; shrink only when it overflows.
+      for (let size = 58; size >= 20 && title.scrollWidth > title.clientWidth; size -= 2) {
+        title.style.fontSize = `${size - 2}px`;
+      }
+    }
   }, lang);
   await page.locator('#social-card img').evaluate((image) => image.complete ? undefined : new Promise((resolveImage) => image.addEventListener('load', resolveImage, { once: true })));
+  if (lang === 'en') {
+    const titleFits = await page.locator('#social-card').evaluate((card) => {
+      const title = card.children[1];
+      return { fits: title.scrollWidth <= title.clientWidth, fontSize: getComputedStyle(title).fontSize };
+    });
+    assert(titleFits.fits, 'Archipelago title overflows social preview');
+    console.log(`EN title fit: ${titleFits.fontSize}, scrollWidth <= clientWidth`);
+  }
   const ogPath = resolve(publicDir, lang === 'en' ? 'og-image-en.jpg' : 'og-image.jpg');
   await page.screenshot({ path: ogPath, type: 'jpeg', quality: 88, clip: { x: 0, y: 0, width: 1200, height: 630 } });
   const og = await stat(ogPath);
