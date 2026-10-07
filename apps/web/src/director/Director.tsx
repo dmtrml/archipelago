@@ -1,11 +1,13 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { ASSET_DEFS, financeView, offerViews, type WorldState } from '@arch/engine';
+import { PerspectiveCamera, Vector3 } from 'three';
 import { asset } from '../asset';
 import { audio } from '../audio/engine';
 import type { CueId } from '../audio/cues';
 import { getI18n, useLanguage } from '../i18n';
 import { IslandScene } from '../scene/IslandScene';
 import type { DreamProgress, FloatLabel, PlacedItem } from '../scene/contract';
+import { slotPlace } from '../scene/slots';
 import fixturesData from './fixtures.json';
 import { BEAT, EDIT, SHOTS, cameraAt, type ShotId, type TrailerFormat, type TrailerLang } from './shots';
 import './director.css';
@@ -13,6 +15,7 @@ import './director.css';
 const App = lazy(() => import('../App'));
 type CueEntry = { t: number; cue: CueId; pitchStep?: number; variant?: number } | { t: number; weather: 'clear' | 'storm' };
 type CaptionFrame = { visible: boolean; top: number | null; modalOverlap: boolean };
+type SubjectPoint = { name: string; x: number; y: number };
 type Save = { world: WorldState; news: unknown[]; history: Record<string, unknown[]> };
 type Fixtures = { seed:number; F:number; S:number; N:number; heroItemsByWeek:PlacedItem[][]; scamCard:Save; scamCollapse:Save; neighbors:Save; freedom:Save };
 const fixtures = fixturesData as unknown as Fixtures;
@@ -46,7 +49,7 @@ const hookChanges = (() => {
 
 declare global {
   interface Window {
-    __director: { ready:boolean; shotReady:boolean; start():void; cueLog:CueEntry[]; captionLog:CaptionFrame[]; captureCaption():CaptionFrame; edit:typeof DIRECTOR_EDIT; errors:string[]; frameOffset:number; renderCue?: (cue:CueId,pitchStep?:number,variant?:number)=>Promise<number[][]> };
+    __director: { ready:boolean; shotReady:boolean; start():void; cueLog:CueEntry[]; captionLog:CaptionFrame[]; captureCaption():CaptionFrame; subjects():SubjectPoint[]; edit:typeof DIRECTOR_EDIT; errors:string[]; frameOffset:number; renderCue?: (cue:CueId,pitchStep?:number,variant?:number)=>Promise<number[][]> };
   }
 }
 
@@ -68,6 +71,7 @@ const director: Window['__director'] = window.__director = {
     director.captionLog.push(frame);
     return frame;
   },
+  subjects() { return []; },
   edit: DIRECTOR_EDIT,
   errors: [],
   frameOffset: 0,
@@ -107,6 +111,47 @@ function setFixture(save: Save, lang: TrailerLang) {
 
 function captionHtml(text:string) {
   return { __html: text.replace(/\*\*(.+?)\*\*/g, (_, word) => `<span class="${/Пассив|Liabil/.test(word) ? 'liability' : 'asset'}">${word}</span>`) };
+}
+
+const projectionCamera = new PerspectiveCamera(30, 1, 0.5, 1200);
+const projectionTarget = new Vector3();
+const projectionPoint = new Vector3();
+const DEG = Math.PI / 180;
+function projectSubject(point: [number, number, number], pose: ReturnType<typeof cameraAt>) {
+  const az = pose.az * DEG, el = pose.el * DEG, cosEl = Math.cos(el);
+  projectionTarget.set(...pose.target);
+  projectionCamera.aspect = innerWidth / Math.max(1, innerHeight);
+  projectionCamera.position.set(
+    pose.target[0] + pose.d * cosEl * Math.sin(az),
+    pose.target[1] + pose.d * Math.sin(el),
+    pose.target[2] + pose.d * cosEl * Math.cos(az),
+  );
+  projectionCamera.lookAt(projectionTarget);
+  projectionCamera.updateProjectionMatrix();
+  projectionCamera.updateMatrixWorld();
+  projectionPoint.set(...point).project(projectionCamera);
+  return { x: (projectionPoint.x + 1) * innerWidth / 2, y: (1 - projectionPoint.y) * innerHeight / 2 };
+}
+
+function subjectWorldPoints(id: ShotId): { name: string; point: [number, number, number] }[] {
+  if (id === 'hook' || id === 'storm' || id === 'end') return [{ name: 'island', point: [0, 1.4, 0] }];
+  if (id === 'asset' || id === 'upgrade') {
+    const boat = slotPlace('pier', 0)!;
+    return [{ name: 'boat', point: [boat.x, boat.y, boat.z] }];
+  }
+  if (id === 'liability') {
+    const statue = slotPlace('plaza', 0)!;
+    const yacht = slotPlace('sea', 0)!;
+    return [
+      { name: 'statue', point: [statue.x, statue.y, statue.z] },
+      { name: 'yacht', point: [yacht.x, yacht.y, yacht.z] },
+    ];
+  }
+  if (id === 'dream') return [
+    { name: 'slipway', point: [16, 0.6, -6] },
+    { name: 'schooner', point: [20.8, 0, -4.4] },
+  ];
+  return [];
 }
 
 const clamp01 = (value:number) => Math.max(0, Math.min(1, value));
@@ -243,7 +288,7 @@ function GameShot({id,lang,durationBeats}:{id:ShotId;lang:TrailerLang;durationBe
     if(id==='scam-collapse'||id==='neighbors'||id==='freedom')schedule(id==='neighbors'?.5:.25,()=>useGame.getState().endWeek());
     if(id==='neighbors')schedule(3,()=>{const current=useGame.getState();const bots=current.world!.players.filter(p=>p.isBot).sort((a,b)=>financeView(current.world!,b.id).freedomRatio-financeView(current.world!,a.id).freedomRatio);current.showNeighbor(bots[0]?.id??null)});
   }, [id,durationBeats]);
-  useEffect(()=>{if(id!=='scam-card')return;let cancelled=false;const center=()=>{if(cancelled)return;const el=document.querySelector('[data-offer="pearlFarm"]');if(el){el.scrollIntoView({block:'center'});return;}requestAnimationFrame(center);};requestAnimationFrame(center);return()=>{cancelled=true};},[id]);
+  useEffect(()=>{if(id!=='scam-card')return;let cancelled=false,frame=0;const center=()=>{if(cancelled)return;const el=document.querySelector<HTMLElement>('[data-offer="pearlFarm"]');const scroller=el?.closest<HTMLElement>('.tab-scroll');if(el&&scroller){const card=el.getBoundingClientRect(),list=scroller.getBoundingClientRect();const desiredTop=list.top+(list.height-card.height)/2;const next=scroller.scrollTop+card.top-desiredTop;scroller.scrollTop=Math.max(0,Math.min(next,scroller.scrollHeight-scroller.clientHeight));}frame=requestAnimationFrame(center);};frame=requestAnimationFrame(center);return()=>{cancelled=true;cancelAnimationFrame(frame)};},[id]);
   const originRef=useRef<string|null>(null);
   if(id==='scam-card'&&!originRef.current){const card=document.querySelector('[data-offer="pearlFarm"]')?.getBoundingClientRect();if(card)originRef.current=`${card.left+card.width/2}px ${card.top+card.height/2}px`;}
   const zoom=id==='scam-card'?1+.08*Math.max(0,Math.min(1,sec/(durationBeats*BEAT))):1; const origin=originRef.current??'center';
@@ -284,5 +329,11 @@ export default function Director(){
   useEffect(()=>{director.ready=false;director.shotReady=false;director.errors.length=0;director.cueLog.length=0;director.captionLog.length=0;started=false;directorSeconds=0;director.frameOffset=0;director.start=()=>{started=true;startAt=performance.now();directorSeconds=0;director.captionLog.length=0;for(const handler of startHandlers)handler()}; if(editOnly||audioOnly){director.ready=true;return;} let cancelled=false;(async()=>{await Promise.all([document.fonts.load('700 20px Unbounded'),document.fonts.load('800 16px Manrope')]);await document.fonts.ready;if(cancelled)return; if(!document.fonts.check('700 20px Unbounded'))director.errors.push('Unbounded 700 unavailable');if(!document.fonts.check('800 16px Manrope'))director.errors.push('Manrope 800 unavailable');for(let i=0;i<180&&!director.shotReady&&!cancelled;i++)await new Promise<void>(r=>requestAnimationFrame(()=>r()));if(!cancelled&&!director.shotReady)director.errors.push(`${id}: first frame not ready`);if(!cancelled)director.ready=director.errors.length===0;})();return()=>{cancelled=true};},[id,editOnly,audioOnly]);
   if(editOnly)return <div className="director-audio">edit ready</div>; if(audioOnly)return <AudioPage/>;
   const spec=SHOTS[id]; const showCaption=spec.caption&&id!=='end'; const captionStartSec=id==='scam-collapse'?.25*BEAT+1.2:(id==='asset'||id==='liability'?.5:.25)*BEAT; const captionEndSec=(durationBeats-.25)*BEAT; const modalOpen=id==='freedom'&&!!document.querySelector('.modal'); const capStyle=showCaption&&!modalOpen?captionStyle(format,spec.kind,sec,captionStartSec,captionEndSec):null;
-  return <div className={`director-root ${format==='v'?'vertical':'horizontal'} ${spec.kind}`}>{id==='end'?<EndCard lang={lang} format={format} durationBeats={durationBeats}/>:spec.kind==='scene'?<SceneShot id={id} format={format} durationBeats={durationBeats}/>:<GameShot id={id} lang={lang} durationBeats={durationBeats}/>} {showCaption&&<div className="director-caption" data-director-measure aria-hidden="true" style={{visibility:'hidden',top:0,pointerEvents:'none'}} dangerouslySetInnerHTML={captionHtml(spec.caption![lang])}/>} {capStyle&&<div className="director-caption" style={capStyle} dangerouslySetInnerHTML={captionHtml(spec.caption![lang])}/>} {id==='scam-card'&&<ClickIndicator durationBeats={durationBeats}/>}</div>;
+  director.subjects=spec.kind==='scene'?()=>{
+    const localSec=directorNow()-director.frameOffset;
+    const progress=Math.min(1,Math.max(0,localSec/(durationBeats*BEAT)));
+    const pose=cameraAt(spec,progress,format);
+    return subjectWorldPoints(id).map(({name,point})=>({name,...projectSubject(point,pose)}));
+  }:()=>[];
+  return <div className={`director-root ${format==='v'?'vertical':'horizontal'} ${spec.kind}`} data-shot={id}>{id==='end'?<EndCard lang={lang} format={format} durationBeats={durationBeats}/>:spec.kind==='scene'?<SceneShot id={id} format={format} durationBeats={durationBeats}/>:<GameShot id={id} lang={lang} durationBeats={durationBeats}/>} {showCaption&&<div className="director-caption" data-director-measure aria-hidden="true" style={{visibility:'hidden',top:0,pointerEvents:'none'}} dangerouslySetInnerHTML={captionHtml(spec.caption![lang])}/>} {capStyle&&<div className="director-caption" style={capStyle} dangerouslySetInnerHTML={captionHtml(spec.caption![lang])}/>} {id==='scam-card'&&<ClickIndicator durationBeats={durationBeats}/>}</div>;
 }

@@ -2,8 +2,10 @@
 #director-stage { position: absolute; inset: 0; transform-origin: center; }
 .director-caption { position: absolute; z-index: 1000; left: 50%; transform: translateX(-50%); width:max-content; max-width: 900px; padding: 16px 28px; border-radius: 26px; background: rgba(255,251,243,.9); backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(31,42,68,.18); color: #1f2a44; text-align: center; font: 700 34px/1.2 'Unbounded',sans-serif; }
 .director-caption .asset { color: #23935e; }.director-caption .liability { color: #dc4b43; }
-.director-root.vertical .director-caption { top: 13%; max-width: 236px; padding: 12px 18px; border-radius: 22px; font-size: 22px; }
+.director-root.vertical .director-caption { left: calc(50% - 14px); top: 13%; max-width: 300px; padding: 12px 18px; border-radius: 22px; font-size: 22px; }
 .director-root.vertical.game .director-caption { top: 116px; }
+.director-root.vertical[data-shot='scam-card'] .sheet.open { height: 73vh; max-height: 73vh; }
+.director-root.vertical[data-shot='scam-collapse'] .modal-backdrop { place-items: start center; padding-top: 24px; }
 .director-root.horizontal .director-caption { bottom: 9%; }
 .director-click { position: absolute; z-index: 1100; width: 24px; height: 24px; margin: -12px; border: 3px solid white; border-radius: 50%; background: rgba(255,255,255,.35); pointer-events: none; }
 .director-end-card { position:absolute; z-index:1000; left:50%; top:46%; transform:translate(-50%,-50%); display:flex; flex-direction:column; align-items:center; gap:14px; color:white; text-align:center; text-shadow:0 2px 12px rgba(0,0,0,.25); }

@@ -27,7 +27,7 @@ export const SHOTS: Record<ShotId, ShotSpec> = {
   liability: { id: 'liability', kind: 'scene', camera: pose([9.8, 0.8, 5], 35, 22, 50, 45, 50), caption: { ru: '**Пассивы** красивые — но только забирают деньги', en: '**Liabilities** look great — but only take your money' } },
   'scam-card': { id: 'scam-card', kind: 'game', caption: { ru: 'Купили бы?', en: 'Would you buy it?' } },
   'scam-collapse': { id: 'scam-collapse', kind: 'game', caption: { ru: 'Это была афера', en: 'It was a scam' } },
-  storm: { id: 'storm', kind: 'scene', camera: pose([2, -1.2, 4], 65, 18, 64, 60, 55), caption: { ru: 'Риски — настоящие', en: 'The risks are real' } },
+  storm: { id: 'storm', kind: 'scene', camera: pose([2, -0.8, 4], 65, 18, 64, 60, 55), caption: { ru: 'Риски — настоящие', en: 'The risks are real' } },
   neighbors: { id: 'neighbors', kind: 'game', caption: { ru: 'Соседи идут к той же цели — каждый своим путём', en: 'Your neighbors chase the same goal — each their own way' } },
   freedom: { id: 'freedom', kind: 'game', caption: { ru: 'Когда активы покрывают все расходы…', en: 'When your assets cover all your expenses…' } },
   dream: { id: 'dream', kind: 'scene', camera: pose([18, 0.5, -5.2], 80, 22, 36, 32, 95), caption: { ru: 'А потом — мечта', en: 'And then — your dream' } },
