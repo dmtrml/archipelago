@@ -1,55 +1,57 @@
 import { financeView, getPlayer, offerViews, type OfferView } from '@arch/engine';
 import { HUMAN, useGame } from '../store';
-import { fmt, marketLine, SECTOR_NAME, signed } from '../format';
+import { assetCopy, marketLine, sectorName, useI18n } from '../i18n';
 import { FreedomLine } from './common';
 
 function OfferCard({ v, cash, freedom }: { v: OfferView; cash: number; freedom: number }) {
+  const { t, fmt, signed } = useI18n();
   const act = useGame((s) => s.act);
   const setTab = useGame((s) => s.setTab);
+  const copy = assetCopy(v.def.id);
   // Афера выглядит как обычный актив — правду выдаёт только предупреждение от знаний
   const isStatus = v.def.kind === 'status';
   const reason = v.locked
-    ? `Нужно знание ${v.def.minKnowledge}`
+    ? t.ui.deals.noKnowledge(v.def.minKnowledge)
     : v.slotFull
-      ? 'На острове нет места'
+      ? t.ui.deals.noSpace
       : !v.canAfford
-        ? `Не хватает ${fmt(v.offer.price - cash)}`
+        ? t.ui.deals.missing(fmt(v.offer.price - cash))
         : null;
 
   return (
-    <article className={`offer ${v.warning ? 'warned' : ''}`}>
+    <article className={`offer ${v.warning ? 'warned' : ''}`} data-offer={v.def.id} data-offer-uid={v.offer.uid}>
       <div className="offer-top">
         <span className={`tag ${isStatus ? 'liability' : 'asset'}`}>
-          {isStatus ? 'Пассив · статус' : `Актив · ${SECTOR_NAME[v.def.sector]}`}
+          {isStatus ? t.ui.deals.liability : `${t.ui.deals.asset} · ${sectorName(v.def.sector)}`}
         </span>
         <span className={`expires ${v.weeksLeft === 0 ? 'last' : ''}`}>
-          {v.weeksLeft === 0 ? 'Последняя неделя' : `Ещё ${v.weeksLeft} нед.`}
+          {v.weeksLeft === 0 ? t.ui.deals.lastWeek : t.ui.deals.moreWeeks(v.weeksLeft)}
         </span>
       </div>
-      <h3>{v.def.title}</h3>
-      <p>{v.def.description}</p>
+      <h3>{copy.title}</h3>
+      <p>{copy.description}</p>
       <div className="nums">
-        <div className="num"><span>Цена</span><b>{fmt(v.offer.price)}</b></div>
-        <div className="num"><span>Доход</span><b className={v.expectedIncome ? 'pos' : ''}>{v.expectedIncome ? `+${fmt(v.expectedIncome)}` : '0'}<small>/нед</small></b></div>
-        <div className="num"><span>Содерж.</span>{v.upkeep > 0 ? <b className="neg">−{fmt(v.upkeep)}<small>/нед</small></b> : <b>0</b>}</div>
+        <div className="num"><span>{t.ui.deals.price}</span><b>{fmt(v.offer.price)}</b></div>
+        <div className="num"><span>{t.ui.income}</span><b className={v.expectedIncome ? 'pos' : ''}>{v.expectedIncome ? `+${fmt(v.expectedIncome)}` : '0'}<small>{t.ui.perWeek}</small></b></div>
+        <div className="num"><span>{t.ui.deals.upkeep}</span>{v.upkeep > 0 ? <b className="neg">−{fmt(v.upkeep)}<small>{t.ui.perWeek}</small></b> : <b>0</b>}</div>
       </div>
       <div className={`net ${v.net > 0 ? 'pos' : 'neg'}`}>
         {v.net > 0 && v.paybackWeeks
-          ? <>Итого {signed(v.net)}/нед · окупится за {v.paybackWeeks} нед.</>
-          : <>Итого {signed(v.net)}/нед — только расходы{v.def.joy > 0 ? `, зато +${v.def.joy} счастья` : ''}</>}
+          ? <>{t.ui.deals.total} {signed(v.net)}{t.ui.perWeek} · {t.ui.deals.pays(v.paybackWeeks)}</>
+          : <>{t.ui.deals.total} {signed(v.net)}{t.ui.perWeek} — {t.ui.deals.onlyExpenses}{v.def.joy > 0 ? `, ${t.ui.deals.joy(v.def.joy)}` : ''}</>}
       </div>
       <FreedomLine before={freedom} after={v.freedomAfter} />
-      {v.warning && <div className="warning"><span aria-hidden>⚠</span> {v.warning}</div>}
+      {v.warning && <div className="warning"><span aria-hidden>⚠</span> {t.ui.deals.scam}</div>}
       <button
         className="btn primary"
         disabled={!!reason}
-        onClick={() => act({ type: 'buyOffer', playerId: HUMAN, offerUid: v.offer.uid }, `Куплено: ${v.def.title}`)}
+        onClick={() => act({ type: 'buyOffer', playerId: HUMAN, offerUid: v.offer.uid }, t.ui.deals.bought(copy.title))}
       >
-        {reason ?? `Купить за ${fmt(v.offer.price)}`}
+        {reason ?? t.ui.deals.buy(fmt(v.offer.price))}
       </button>
       {v.slotFull && !isStatus && (
         <button className="link-btn" onClick={() => setTab('island')}>
-          Места нет — улучшите то, что уже есть →
+          {t.ui.deals.improveInstead}
         </button>
       )}
     </article>
@@ -57,6 +59,7 @@ function OfferCard({ v, cash, freedom }: { v: OfferView; cash: number; freedom: 
 }
 
 export function DealsTab() {
+  const { t } = useI18n();
   const world = useGame((s) => s.world)!;
   const me = getPlayer(world, HUMAN);
   const views = offerViews(world, HUMAN);
@@ -71,9 +74,9 @@ export function DealsTab() {
         <span className={`chip ${tourism.tone}`}>{tourism.text}</span>
       </div>
       {views.length === 0
-        ? <div className="empty">Доска пуста — новые сделки появятся на следующей неделе.</div>
+        ? <div className="empty">{t.ui.deals.empty}</div>
         : views.map((v) => <OfferCard key={v.offer.uid} v={v} cash={me.cash} freedom={freedom} />)}
-      <div className="hint-text">Соседи тоже смотрят на эту доску: что вы не купите, могут забрать они.</div>
+      <div className="hint-text">{t.ui.deals.hint}</div>
     </div>
   );
 }

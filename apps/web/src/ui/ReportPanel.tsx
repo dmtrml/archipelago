@@ -1,11 +1,12 @@
-import { assetViews, financeView, getPlayer, FREEDOM_LEVEL_RATIOS, FREEDOM_LEVEL_TITLES, THREAT_WEEKS } from '@arch/engine';
+import { assetViews, financeView, getPlayer, FREEDOM_LEVEL_RATIOS, THREAT_WEEKS } from '@arch/engine';
 import { HUMAN, useGame } from '../store';
-import { fmt, signed, weeks } from '../format';
 import { Meter, Pips } from './common';
-import { genitive, levelTitle, lowerFirst, percent } from './text';
+import { lowerFirst, percent } from './text';
+import { levelGenitive, levelTitle, useI18n, weeks } from '../i18n';
 
 /** До свободы шкала 0–100%; после — шкала запаса до последнего уровня, с отметками уровней. */
 export function FreedomBlock() {
+  const { t, fmt } = useI18n();
   const world = useGame((s) => s.world)!;
   const fin = financeView(world, HUMAN);
   const me = getPlayer(world, HUMAN);
@@ -15,13 +16,13 @@ export function FreedomBlock() {
   if (me.freedomWeek === null) {
     const covered = fin.freedomRatio >= 1;
     return (
-      <div className="freedom">
-        <div className="freedom-head"><span>До финансовой свободы</span><b>{pct}%</b></div>
+      <div className="freedom" data-coach="freedom">
+        <div className="freedom-head"><span>{t.ui.report.toFreedom}</span><b>{pct}%</b></div>
         <div className="bar"><div className="fill" style={{ width: `${Math.min(100, pct)}%` }} /></div>
         <div className="freedom-foot">
           {covered
-            ? <>Расходы покрыты! Свобода засчитается, если доход <b>продержится до конца недели</b></>
-            : <>Пассивный доход покрывает <b>{fmt(fin.passiveIncome)} из {fmt(fin.expenses.total)}</b> монет расходов в неделю</>}
+            ? <>{t.ui.report.covered} <b>{t.ui.report.hold}</b></>
+            : <>{t.ui.report.passiveCovers(fmt(fin.passiveIncome), fmt(fin.expenses.total))}</>}
         </div>
       </div>
     );
@@ -36,7 +37,7 @@ export function FreedomBlock() {
   const shortfall = !free && fin.freedomRatio < 1;
 
   return (
-    <div className={`freedom after ${free ? 'free' : ''}`}>
+    <div className={`freedom after ${free ? 'free' : ''}`} data-coach="freedom">
       <div className="freedom-head"><span>{levelTitle(level)}</span><b>{pct}%</b></div>
       <div className="bar scaled">
         <div className="fill" style={{ width: `${Math.min(100, (fin.freedomRatio / top) * 100)}%` }} />
@@ -47,25 +48,25 @@ export function FreedomBlock() {
       </div>
       <div className="freedom-foot">
         {level < FREEDOM_LEVEL_RATIOS.length
-          ? <>До «{genitive(FREEDOM_LEVEL_TITLES[level])}» — <b>{percent(FREEDOM_LEVEL_RATIOS[level])}%</b></>
-          : <>Высший уровень: <b>{lowerFirst(levelTitle(level))}</b></>}
+          ? <>{t.ui.report.toLevel(levelGenitive(level), percent(FREEDOM_LEVEL_RATIOS[level]))}</>
+          : <>{t.ui.report.highest} <b>{lowerFirst(levelTitle(level))}</b></>}
       </div>
       {!me.employed && me.threatWeeks > 0 && (
         <div className="warning freedom-warn">
           <span className="long">
-            Свобода под угрозой: пассивный доход ниже расходов. Через {weeksToReturn} нед. придётся вернуться на работу
+            {t.ui.report.threat(weeksToReturn)}
           </span>
-          <span className="short">Свобода под угрозой · через {weeksToReturn} нед. на работу</span>
+          <span className="short">{t.ui.report.threatShort(weeksToReturn)}</span>
         </div>
       )}
       {!me.employed && me.threatWeeks === 0 && shortfall && (
         <div className="freedom-note warn">
-          Пассивный доход ниже расходов. Если так будет в конце недели, начнётся отсчёт: {weeks(THREAT_WEEKS)} до возвращения на работу
+          {t.ui.report.shortfall(weeks(THREAT_WEEKS))}
         </div>
       )}
       {me.employed && shortfall && (
         <div className="freedom-note">
-          Пассивный доход снова ниже расходов. Пока вы на работе, это не страшно — но уходить с неё рано.
+          {t.ui.report.employedShortfall}
         </div>
       )}
     </div>
@@ -75,6 +76,7 @@ export function FreedomBlock() {
 function Row({ label, value, tone, strong, muted }: {
   label: string; value: number; tone?: 'pos' | 'neg'; strong?: boolean; muted?: boolean;
 }) {
+  const { fmt, signed } = useI18n();
   return (
     <div className={`row ${strong ? 'strong' : ''} ${muted ? 'muted-row' : ''}`}>
       <span>{label}</span>
@@ -85,6 +87,7 @@ function Row({ label, value, tone, strong, muted }: {
 
 /** Финансовый отчёт недели — главный обучающий инструмент, всегда на виду. */
 export function Statement() {
+  const { t, fmt } = useI18n();
   const world = useGame((s) => s.world)!;
   const me = getPlayer(world, HUMAN);
   const fin = financeView(world, HUMAN);
@@ -95,37 +98,37 @@ export function Statement() {
   return (
     <div className="statement">
       <div className="st-group">
-        <div className="st-title">Доходы за неделю</div>
+        <div className="st-title">{t.ui.report.incomeWeek}</div>
         {me.employed
-          ? <Row label={me.extraShift ? 'Зарплата + подработка' : 'Зарплата'} value={fin.salary} tone="pos" />
-          : <Row label="Зарплата · не работаете" value={0} muted />}
-        <Row label={`Активы${incomeCount ? ` (${incomeCount})` : ''}`} value={fin.passiveIncome} tone="pos" />
+          ? <Row label={me.extraShift ? t.ui.report.salaryShift : t.ui.report.salary} value={fin.salary} tone="pos" />
+          : <Row label={t.ui.report.noJob} value={0} muted />}
+        <Row label={`${t.ui.report.assets}${incomeCount ? ` (${incomeCount})` : ''}`} value={fin.passiveIncome} tone="pos" />
       </div>
       <div className="st-group">
-        <div className="st-title">Расходы за неделю</div>
-        <Row label="Жизнь" value={fin.expenses.living} tone="neg" />
-        {fin.expenses.upkeep > 0 && <Row label="Содержание имущества" value={fin.expenses.upkeep} tone="neg" />}
-        {fin.expenses.interest > 0 && <Row label="Проценты по долгам" value={fin.expenses.interest} tone="neg" />}
-        {fin.expenses.insurance > 0 && <Row label="Страховка" value={fin.expenses.insurance} tone="neg" />}
+        <div className="st-title">{t.ui.report.expensesWeek}</div>
+        <Row label={t.ui.report.living} value={fin.expenses.living} tone="neg" />
+        {fin.expenses.upkeep > 0 && <Row label={t.ui.report.upkeep} value={fin.expenses.upkeep} tone="neg" />}
+        {fin.expenses.interest > 0 && <Row label={t.ui.report.interest} value={fin.expenses.interest} tone="neg" />}
+        {fin.expenses.insurance > 0 && <Row label={t.ui.report.insurance} value={fin.expenses.insurance} tone="neg" />}
       </div>
-      <Row label="Итого за неделю" value={fin.net} tone={fin.net >= 0 ? 'pos' : 'neg'} strong />
-      {fin.net < 0 && <div className="st-note neg">Расходы больше доходов — наличные тают.</div>}
-      {me.employed && me.happiness < 30 && <div className="st-note neg">Счастье на исходе: ниже 20 — выгорание и ползарплаты. Отдохните во вкладке «Действия».</div>}
+      <Row label={t.ui.report.net} value={fin.net} tone={fin.net >= 0 ? 'pos' : 'neg'} strong />
+      {fin.net < 0 && <div className="st-note neg">{t.ui.report.negative}</div>}
+      {me.employed && me.happiness < 30 && <div className="st-note neg">{t.ui.report.burnout}</div>}
 
       <div className="capital">
-        <div><span>Наличные</span><b>{fmt(me.cash)}</b></div>
-        <div><span>Имущество</span><b>{fmt(assetsValue)}</b></div>
-        <div><span>Долги</span><b className={fin.debt > 0 ? 'neg' : ''}>{fin.debt > 0 ? `−${fmt(fin.debt)}` : '0'}</b></div>
-        <div className="total"><span>Капитал</span><b>{fmt(fin.netWorth)}</b></div>
+        <div><span>{t.ui.cash}</span><b>{fmt(me.cash)}</b></div>
+        <div><span>{t.ui.report.property}</span><b>{fmt(assetsValue)}</b></div>
+        <div><span>{t.ui.report.debt}</span><b className={fin.debt > 0 ? 'neg' : ''}>{fin.debt > 0 ? `−${fmt(fin.debt)}` : '0'}</b></div>
+        <div className="total"><span>{t.ui.report.netWorth}</span><b>{fmt(fin.netWorth)}</b></div>
       </div>
 
       <div className="traits">
         <div>
-          <span>Счастье</span>
+          <span>{t.ui.happiness}</span>
           <Meter value={me.happiness} />
         </div>
         <div>
-          <span>Знания</span>
+          <span>{t.ui.knowledge}</span>
           <Pips value={me.knowledge} max={3} />
         </div>
       </div>

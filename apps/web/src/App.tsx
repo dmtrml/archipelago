@@ -6,6 +6,10 @@ import { DesktopLayout, MobileLayout, useMediaQuery } from './ui/Panels';
 import { ToastView, WeekModal, WelcomeModal } from './ui/Modals';
 import { NeighborModal } from './ui/Neighbors';
 import { useUiSound } from './audio/useUiSound';
+import { Coach } from './ui/GuidedCoach';
+import { initAnalytics } from './analytics';
+
+initAnalytics();
 
 /** Какую долю ширины экрана занимают боковые колонки интерфейса (только раскладка для компьютера). */
 function useSideInsets(enabled: boolean): [number, number] {
@@ -65,6 +69,7 @@ export default function App() {
       {world && isMobile && <NeighborModal />}
       <WeekModal />
       <ToastView />
+      <Coach />
     </>
   );
 }

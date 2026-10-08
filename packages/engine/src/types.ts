@@ -19,8 +19,6 @@ export type DealKind = 'asset' | 'status' | 'scam';
 export interface AssetDef {
   id: string;
   kind: DealKind;
-  title: string;
-  description: string;
   /** Базовые значения; конкретное предложение отклоняется от них случайно. */
   price: number;
   income: number;            // в неделю, до умножения на индекс сектора; 0 у статусных вещей
@@ -40,8 +38,6 @@ export interface AssetDef {
 
 /** Ступень улучшения актива: лодка → баркас → траулер. Занимает то же место на острове. */
 export interface UpgradeDef {
-  title: string;             // название на этом уровне: «Баркас»
-  description: string;
   cost: number;              // сколько стоит перейти на этот уровень
   income: number;            // + к базовому доходу экземпляра (до индекса сектора)
   upkeep: number;            // + к содержанию в неделю
@@ -51,16 +47,12 @@ export interface UpgradeDef {
 // ───────────── Мечта (второй акт) ─────────────
 
 export interface DreamStageDef {
-  title: string;
-  description: string;
   cost: number;              // платится при начале этапа
   work: number;              // дней работы, чтобы закончить этап
 }
 
 export interface DreamDef {
   id: string;
-  title: string;
-  description: string;
   stages: DreamStageDef[];
   upkeep: number;            // содержание готовой мечты в неделю
   joy: number;               // + к счастью каждую неделю, когда мечта готова
@@ -143,14 +135,29 @@ export interface Offer {
 
 export type Tone = 'good' | 'bad' | 'neutral';
 
+export type EventParam = number | string | string[];
+
 export interface GameEvent {
   id: string;                // тип события: 'storm' | 'illness' | 'gift' | ...
-  title: string;
-  text: string;
   tone: Tone;
+  params?: Record<string, EventParam>;
+  variant?: number;
+  /** Сохранённый до v4 пользовательский текст: показывается дословно. */
+  legacyTitle?: string;
+  legacyText?: string;
   cashDelta?: number;
   affectedAssetUids?: string[];
 }
+
+export type WeekNewsItem =
+  | { playerId: string; kind: 'bought'; defId: string }
+  | { playerId: string; kind: 'sold'; defId: string; level: number }
+  | { playerId: string; kind: 'upgraded'; defId: string; fromLevel: number }
+  | { playerId: string; kind: 'loan' | 'repaid' | 'emergency'; amount: number }
+  | { playerId: string; kind: 'scam' }
+  | { playerId: string; kind: 'freedom'; week: number }
+  | { playerId: string; kind: 'dreamDone' }
+  | { playerId: string; kind: 'legacy'; legacyText: string };
 
 export interface PlayerWeekReport {
   playerId: string;
@@ -174,12 +181,11 @@ export interface WeekReport {
   week: number;              // какая неделя закончилась
   worldEvents: GameEvent[];
   players: Record<string, PlayerWeekReport>;
-  /** Человекочитаемые новости: «Мия купила бунгало». */
-  news: { playerId: string; text: string }[];
+  news: WeekNewsItem[];
 }
 
 export interface WorldState {
-  version: 3;
+  version: 4;
   seed: number;
   rng: number;               // текущее состояние ГПСЧ — вся случайность только через него
   nextUid: number;
@@ -210,9 +216,25 @@ export type Action =
 
 export interface ActionResult {
   world: WorldState;
-  /** Понятная игроку причина отказа на русском; world при этом не меняется. */
-  error?: string;
+  error?: EngineError;
 }
+
+export const ERROR_CODES = {
+  unknownPlayer: 'unknownPlayer', unknownAction: 'unknownAction', offerGone: 'offerGone', noSuchAsset: 'noSuchAsset',
+  notDamaged: 'notDamaged', noUpgrade: 'noUpgrade', repairFirst: 'repairFirst', badAmount: 'badAmount',
+  noCredit: 'noCredit', noSuchLoan: 'noSuchLoan', studiedThisWeek: 'studiedThisWeek', maxKnowledge: 'maxKnowledge',
+  restedThisWeek: 'restedThisWeek', restDuringShift: 'restDuringShift', shiftAfterRest: 'shiftAfterRest',
+  quitBeforeFreedom: 'quitBeforeFreedom', alreadyQuit: 'alreadyQuit', alreadyEmployed: 'alreadyEmployed',
+  shiftUnemployed: 'shiftUnemployed', noDream: 'noDream', dreamBeforeFreedom: 'dreamBeforeFreedom',
+  dreamBusy: 'dreamBusy', dreamDone: 'dreamDone',
+} as const;
+
+export type EngineError =
+  | { code: keyof typeof ERROR_CODES }
+  | { code: 'notEnoughCash'; missing: number }
+  | { code: 'needKnowledge'; level: number }
+  | { code: 'loanOverLimit'; limit: number }
+  | { code: 'slotFull'; slot: SlotType };
 
 // ───────────── Производные данные для UI ─────────────
 
@@ -244,8 +266,8 @@ export interface OfferView {
   /** Недель до окупаемости; null — никогда (net ≤ 0). */
   paybackWeeks: number | null;
   weeksLeft: number;         // сколько недель ещё висит на доске (0 = последняя)
-  /** Предупреждение, видимое благодаря знаниям (например, об афере). */
-  warning?: string;
+  /** Предупреждение, видимое благодаря знаниям. */
+  warning?: 'scam';
   locked: boolean;           // не хватает знаний
   canAfford: boolean;
   slotFull: boolean;
@@ -256,8 +278,6 @@ export interface OfferView {
 export interface AssetView {
   asset: OwnedAsset;
   def: AssetDef;
-  /** Название с учётом уровня: «Траулер», а не «Рыбацкая лодка». */
-  title: string;
   level: number;
   maxLevel: number;          // 1 — у сделки нет улучшений
   currentIncome: number;     // 0, если повреждён
@@ -279,8 +299,7 @@ export interface UpgradeView {
   /** Доля свободы (как FinanceView.freedomRatio) сразу после улучшения. */
   freedomAfter: number;
   canUpgrade: boolean;
-  /** Почему нельзя прямо сейчас: «Не хватает 120 монет», «Нужно знание 2», «Сначала почините». */
-  reason?: string;
+  reason?: EngineError;
 }
 
 export interface DreamView {
@@ -295,7 +314,8 @@ export interface DreamView {
   weeksLeft: number;
   /** Можно ли начать следующий этап прямо сейчас; иначе — причина для игрока. */
   canStart: boolean;
-  reason?: string;
+  reason?: 'beforeFreedom' | 'done' | 'building';
+  missingCash?: number;
   /** Доля свободы, когда мечта будет готова (с её содержанием и радостью). */
   freedomAfterDone: number;
 }

@@ -1,5 +1,5 @@
 // The only translation from game rules into sound. No audio code belongs in the rules or scene.
-import { ASSET_DEFS, type Action, type WeekReport, type WorldState } from '@arch/engine';
+import { ASSET_DEFS, type Action, type EngineError, type WeekReport, type WorldState } from '@arch/engine';
 import type { FloatLabel } from '../scene/contract';
 import { audio } from './engine';
 import type { CueId } from './cues';
@@ -14,7 +14,7 @@ export function startGameSounds(world: WorldState) {
 
 export function stopGameSounds() { audio.stop(); }
 
-export function onAction(action: Action, before: WorldState, after: WorldState, error?: string) {
+export function onAction(action: Action, before: WorldState, after: WorldState, error?: EngineError) {
   if ('playerId' in action && action.playerId !== HUMAN) return;
   if (error) { audio.play('ui.error'); return; }
   const pay = () => audio.play('coins.pay');

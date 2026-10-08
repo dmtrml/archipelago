@@ -59,7 +59,7 @@ describe('итоги недели', () => {
     expect(loan.principal).toBeGreaterThanOrEqual(370 - 200); // минимум: дыра за вычетом возможного подарка
     expect(loan.principal % 10).toBe(0);
     const event = world.lastReport!.players.p1.events.find((e) => e.id === 'emergencyLoan')!;
-    expect(event.text).toContain('ростовщика');
+    expect(event.params).toMatchObject({ amount: loan.principal, rate: Math.round(EMERGENCY_RATE * 100) });
     expect(event.tone).toBe('bad');
   });
 
@@ -100,7 +100,7 @@ describe('аферы', () => {
     expect(r.lostAssetUids).toEqual([farm.uid]);
     const event = r.events.find((e) => e.id === 'scamCollapse')!;
     expect(event.tone).toBe('bad');
-    expect(event.text).toContain('пирамида');
+    expect(event.params).toEqual({});
     expect(player(world).owned).toHaveLength(0);
   });
 
@@ -129,7 +129,7 @@ describe('шторм и страховка', () => {
     expect(player(world, 'p1').owned[0].damaged).toBe(false);
     const insuredEvent = reports.p1.events[0];
     expect(insuredEvent.id).toBe('stormInsured');
-    expect(insuredEvent.text).toContain('Страховка бесплатно');
+    expect(insuredEvent.params).toEqual({ assetRefs: ['boat:1'] });
     expect(insuredEvent.affectedAssetUids).toEqual([insuredBoat.uid]);
 
     expect(player(world, 'bot-mia').owned[0].damaged).toBe(true);
@@ -169,7 +169,7 @@ describe('свобода', () => {
     world = endWeek(world);
     expect(player(world).freedomWeek).toBe(1);
     expect(world.lastReport!.players.p1.freedomReached).toBe(true);
-    expect(world.lastReport!.news.map((n) => n.text)).toContain('Аня: финансовая свобода на 1-й неделе!');
+    expect(world.lastReport!.news).toContainEqual({ playerId: 'p1', kind: 'freedom', week: 1 });
 
     world = endWeek(world);
     expect(player(world).freedomWeek).toBe(1);
@@ -180,7 +180,7 @@ describe('свобода', () => {
     let world = newWorld();
     giveAsset(world, 'bot-mia', 'deposit', { income: 400 });
     world = endWeek(world);
-    expect(world.lastReport!.news.map((n) => n.text)).toContain('Мия достигла свободы на 1-й неделе!');
+    expect(world.lastReport!.news).toContainEqual({ playerId: 'bot-mia', kind: 'freedom', week: 1 });
   });
 
   it('ничего не делая, свободы не достичь', () => {
@@ -233,13 +233,13 @@ describe('боты и длинные партии', () => {
 
   it('боты покупают с общей доски и попадают в новости', () => {
     let world = newWorld(4);
-    const texts: string[] = [];
+    const news = [];
     for (let i = 0; i < 20; i++) {
       world = endWeek(world);
-      texts.push(...world.lastReport!.news.map((n) => n.text));
+      news.push(...world.lastReport!.news);
     }
-    expect(texts.some((t) => t.startsWith('Мия купила'))).toBe(true);
-    expect(texts.some((t) => t.startsWith('Борис'))).toBe(true);
+    expect(news.some((n) => n.playerId === 'bot-mia' && n.kind === 'bought')).toBe(true);
+    expect(news.some((n) => n.playerId === 'bot-boris')).toBe(true);
   });
 
   it('нигде нет NaN и бесконечностей за 300 недель', () => {

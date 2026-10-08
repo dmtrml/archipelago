@@ -23,7 +23,7 @@ export function createNeighborsTopFixture(
 
   function dispatch(action: Action): void {
     const result = applyAction(world, action);
-    if (result.error) throw new Error(`Fixture action ${action.type} failed: ${result.error}`);
+    if (result.error) throw new Error(`Fixture action ${action.type} failed: ${result.error.code}`);
     world = result.world;
   }
 

@@ -16,12 +16,13 @@ import { Items } from './Items';
 import { Shipyard } from './world/Shipyard';
 import { FloatLabels } from './FloatLabels';
 import { CameraRig, type CameraFocus } from './CameraRig';
+import { DirectorCamera } from './DirectorCamera';
 import { dreamFocusPoint } from './slots';
 import './scene.css';
 
 const GL = { antialias: true, toneMapping: NeutralToneMapping, toneMappingExposure: 1.05 };
 
-export function IslandScene({ items, floats, weather, dream, bottomInset = 0, sideInsets, onItemClick }: IslandSceneProps) {
+export function IslandScene({ items, floats, weather, dream, bottomInset = 0, sideInsets, cameraPose, dpr, onItemClick }: IslandSceneProps) {
   const storm = weather === 'storm';
   // шина создаётся один раз; погода стартует сразу в нужном состоянии
   const bus = useMemo(() => createBus(weather === 'storm'), []);
@@ -54,7 +55,7 @@ export function IslandScene({ items, floats, weather, dream, bottomInset = 0, si
       className={storm ? 'isl-root isl-storm' : 'isl-root'}
       style={{ '--isl-inset': Math.min(0.6, Math.max(0, bottomInset || 0)) } as CSSProperties}
     >
-      <Canvas shadows="percentage" dpr={[1, 2]} gl={GL} camera={camera}>
+      <Canvas shadows="percentage" dpr={dpr ?? [1, 2]} gl={GL} camera={camera}>
         <BusContext.Provider value={bus}>
           <Atmosphere />
           <Water segments={small ? 170 : 230} />
@@ -69,7 +70,7 @@ export function IslandScene({ items, floats, weather, dream, bottomInset = 0, si
           <Items items={items} clickRef={clickRef} />
           {dream && <Shipyard dream={dream} clickRef={clickRef} />}
           <FloatLabels floats={floats} items={items} />
-          <CameraRig bottomInset={bottomInset} sideInsets={sideInsets} focus={focus} />
+          {cameraPose ? <DirectorCamera pose={cameraPose} /> : <CameraRig bottomInset={bottomInset} sideInsets={sideInsets} focus={focus} />}
         </BusContext.Provider>
       </Canvas>
       <div className="isl-tilt isl-tilt-top" />

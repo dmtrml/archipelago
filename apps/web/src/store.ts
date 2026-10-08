@@ -1,14 +1,14 @@
 import { create } from 'zustand';
 import {
   applyAction, assetViews, createWorld, financeView, getPlayer, migrateWorld, ASSET_DEFS, DREAMS, DREAM_UPKEEP_UID,
-  type Action, type GameEvent, type WeekReport, type WorldState,
+  type Action, type GameEvent, type WeekNewsItem, type WeekReport, type WorldState,
 } from '@arch/engine';
 import type { DreamProgress, FloatLabel, PlacedItem, Weather } from './scene/contract';
-import { fmt, signed } from './format';
 import { onAction, onWeek, onWeather, startGameSounds, stopGameSounds } from './audio/gameSounds';
+import { errorText, getI18n } from './i18n';
 
 export const HUMAN = 'p1';
-const SAVE_KEY = 'archipelago.save.v1';
+const SAVE_KEY = new URLSearchParams(location.search).has('director') ? 'archipelago.director.save' : 'archipelago.save.v1';
 
 export type Tab = 'deals' | 'island' | 'actions' | 'report';
 
@@ -16,7 +16,7 @@ export interface Toast { id: number; text: string; tone: 'good' | 'bad' | 'neutr
 /** `epilogue` — на этой неделе достроена мечта: вместо обычных итогов недели показываем эпилог. */
 export interface WeekModal { report: WeekReport; events: GameEvent[]; freedom: boolean; epilogue: boolean }
 /** playerId нет у новостей из сохранений до экрана соседей. */
-export interface NewsItem { week: number; text: string; playerId?: string }
+export type NewsItem = ({ week: number; text: string; playerId?: string } | ({ week: number } & WeekNewsItem));
 /** Доля свободы каждого игрока по неделям — для графиков на карточках соседей. */
 export type FreedomHistory = Record<string, { week: number; ratio: number }[]>;
 
@@ -146,7 +146,7 @@ export const useGame = create<GameStore>((set, get) => {
       const res = applyAction(world, action);
       if (res.error) {
         onAction(action, world, res.world, res.error);
-        get().showToast(res.error, 'bad');
+        get().showToast(errorText(res.error), 'bad');
         return false;
       }
       set({ world: res.world });
@@ -159,7 +159,10 @@ export const useGame = create<GameStore>((set, get) => {
         const after = assetViews(res.world, HUMAN).find((v) => v.asset.uid === action.assetUid);
         if (before && after) {
           const gain = after.asset.income - before.income;
-          if (gain > 0) schedule(() => pushFloats([{ anchor: action.assetUid, text: `+${fmt(gain)} в неделю`, tone: 'pos' }]), 500);
+          if (gain > 0) schedule(() => {
+            const { fmt, t } = getI18n();
+            pushFloats([{ anchor: action.assetUid, text: `+${fmt(gain)} ${t.ui.store.perWeek}`, tone: 'pos' }]);
+          }, 500);
         }
       }
 
@@ -170,8 +173,11 @@ export const useGame = create<GameStore>((set, get) => {
         if (bought) {
           const def = ASSET_DEFS[bought.defId];
           const tone = def.kind === 'status' ? 'neg' : 'pos';
-          const text = def.kind === 'status' ? `−${fmt(bought.upkeep)} в неделю` : `+${fmt(bought.income)} в неделю`;
-          schedule(() => pushFloats([{ anchor: bought.uid, text, tone }]), 450);
+          schedule(() => {
+            const { fmt, t } = getI18n();
+            const text = def.kind === 'status' ? `−${fmt(bought.upkeep)} ${t.ui.store.perWeek}` : `+${fmt(bought.income)} ${t.ui.store.perWeek}`;
+            pushFloats([{ anchor: bought.uid, text, tone }]);
+          }, 450);
         }
       }
       if (success) get().showToast(success, 'good');
@@ -183,14 +189,14 @@ export const useGame = create<GameStore>((set, get) => {
       if (!world || busy) return;
       const res = applyAction(world, { type: 'endWeek' });
       if (res.error || !res.world.lastReport) {
-        if (res.error) get().showToast(res.error, 'bad');
+        if (res.error) get().showToast(errorText(res.error), 'bad');
         return;
       }
       const report = res.world.lastReport;
       const sounds = onWeek(report, world, res.world);
       const mine = report.players[HUMAN];
       const news = [
-        ...report.news.map((n) => ({ week: report.week, text: n.text, playerId: n.playerId })),
+        ...report.news.map((n) => ({ week: report.week, ...n })),
         ...get().news,
       ].slice(0, 80);
       const history = recordHistory(get().history, res.world);
@@ -199,6 +205,7 @@ export const useGame = create<GameStore>((set, get) => {
 
       // Деньги «текут» на острове: зарплата над домом, доход над каждым активом
       const owned = new Map(res.world.players[0].owned.map((a) => [a.uid, a]));
+      const { fmt, signed, t } = getI18n();
       const labels: Omit<FloatLabel, 'id'>[] = [{ anchor: 'home', text: `+${fmt(mine.salary)}`, tone: 'pos' }];
       for (const a of mine.assetIncome) if (a.amount > 0) labels.push({ anchor: a.assetUid, text: `+${fmt(a.amount)}`, tone: 'pos' });
       for (const u of mine.upkeep) {
@@ -229,7 +236,7 @@ export const useGame = create<GameStore>((set, get) => {
         } else {
           set({ busy: false });
           sounds.onModal(false);
-          get().showToast(`Неделя ${report.week}: ${signed(mine.net)} · наличные ${fmt(mine.cashAfter)}`, mine.net >= 0 ? 'good' : 'bad');
+          get().showToast(t.ui.store.weekToast(report.week, signed(mine.net), fmt(mine.cashAfter)), mine.net >= 0 ? 'good' : 'bad');
         }
       }, events.length > 0 || mine.freedomReached || epilogue || sounds.hasNotice ? 1100 : 500);
     },

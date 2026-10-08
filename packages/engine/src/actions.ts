@@ -5,24 +5,23 @@ import {
 import { nextUid } from './offers';
 import { Rng } from './rng';
 import * as R from './rules';
-import {
-  ERRORS, SLOT_FULL_TEXT, loanOverLimit, needKnowledge, notEnoughCash,
-} from './text';
-import type { Action, ActionResult, OwnedAsset, PlayerState, WorldState } from './types';
+import type { Action, ActionResult, EngineError, OwnedAsset, PlayerState, WorldState } from './types';
 
 export type PlayerAction = Exclude<Action, { type: 'endWeek' }>;
 
-/** Обработчик меняет копию мира; строка — причина отказа (копия тогда выбрасывается). */
-type Handler<A extends PlayerAction> = (world: WorldState, player: PlayerState, action: A) => string | null;
+type Handler<A extends PlayerAction> = (world: WorldState, player: PlayerState, action: A) => EngineError | null;
+const err = (code: EngineError['code']): EngineError => ({ code } as EngineError);
+const missingCash = (missing: number): EngineError => ({ code: 'notEnoughCash', missing });
+const needKnowledge = (level: number): EngineError => ({ code: 'needKnowledge', level });
 
 const buyOffer: Handler<Extract<PlayerAction, { type: 'buyOffer' }>> = (world, player, action) => {
   const offer = world.offers.find((o) => o.uid === action.offerUid);
-  if (!offer) return ERRORS.offerGone;
+  if (!offer) return err('offerGone');
   const def = getDef(offer.defId);
   if (player.knowledge < def.minKnowledge) return needKnowledge(def.minKnowledge);
   const slotIndex = freeSlotIndex(player, def.slot);
-  if (slotIndex === null) return SLOT_FULL_TEXT[def.slot];
-  if (player.cash < offer.price) return notEnoughCash(offer.price - player.cash);
+  if (slotIndex === null) return { code: 'slotFull', slot: def.slot };
+  if (player.cash < offer.price) return missingCash(offer.price - player.cash);
 
   player.cash -= offer.price;
   const asset: OwnedAsset = {
@@ -49,7 +48,7 @@ const buyOffer: Handler<Extract<PlayerAction, { type: 'buyOffer' }>> = (world, p
 
 const sellAsset: Handler<Extract<PlayerAction, { type: 'sellAsset' }>> = (world, player, action) => {
   const asset = player.owned.find((a) => a.uid === action.assetUid);
-  if (!asset) return ERRORS.noSuchAsset;
+  if (!asset) return err('noSuchAsset');
   player.cash += saleValue(asset, world.market);
   player.owned = player.owned.filter((a) => a.uid !== asset.uid);
   return null;
@@ -57,10 +56,10 @@ const sellAsset: Handler<Extract<PlayerAction, { type: 'sellAsset' }>> = (world,
 
 const repairAsset: Handler<Extract<PlayerAction, { type: 'repairAsset' }>> = (_world, player, action) => {
   const asset = player.owned.find((a) => a.uid === action.assetUid);
-  if (!asset) return ERRORS.noSuchAsset;
-  if (!asset.damaged) return ERRORS.notDamaged;
+  if (!asset) return err('noSuchAsset');
+  if (!asset.damaged) return err('notDamaged');
   const cost = repairCost(asset);
-  if (player.cash < cost) return notEnoughCash(cost - player.cash);
+  if (player.cash < cost) return missingCash(cost - player.cash);
   player.cash -= cost;
   asset.damaged = false;
   return null;
@@ -70,19 +69,19 @@ const repairAsset: Handler<Extract<PlayerAction, { type: 'repairAsset' }>> = (_w
  * Почему актив нельзя улучшить прямо сейчас; null — можно. Тот же порядок проверок показывает
  * и карточка улучшения (UpgradeView.reason), поэтому кнопка и действие не расходятся.
  */
-export function upgradeError(player: PlayerState, asset: OwnedAsset): string | null {
+export function upgradeError(player: PlayerState, asset: OwnedAsset): EngineError | null {
   const up = nextUpgrade(asset);
-  if (!up) return ERRORS.noUpgrade;
-  if (asset.damaged) return ERRORS.repairFirst;
+  if (!up) return err('noUpgrade');
+  if (asset.damaged) return err('repairFirst');
   if (player.knowledge < up.minKnowledge) return needKnowledge(up.minKnowledge);
-  if (player.cash < up.cost) return notEnoughCash(up.cost - player.cash);
+  if (player.cash < up.cost) return missingCash(up.cost - player.cash);
   return null;
 }
 
 /** Улучшение на том же месте: лодка → баркас → траулер. Место на острове не нужно. */
 const upgradeAsset: Handler<Extract<PlayerAction, { type: 'upgradeAsset' }>> = (_world, player, action) => {
   const asset = player.owned.find((a) => a.uid === action.assetUid);
-  if (!asset) return ERRORS.noSuchAsset;
+  if (!asset) return err('noSuchAsset');
   const error = upgradeError(player, asset);
   if (error) return error;
   const up = nextUpgrade(asset)!;
@@ -96,10 +95,10 @@ function isPositiveAmount(amount: unknown): amount is number {
 }
 
 const takeLoan: Handler<Extract<PlayerAction, { type: 'takeLoan' }>> = (world, player, action) => {
-  if (!isPositiveAmount(action.amount)) return ERRORS.badAmount;
+  if (!isPositiveAmount(action.amount)) return err('badAmount');
   const limit = loanLimit(player, world.market);
-  if (limit <= 0) return ERRORS.noCredit;
-  if (action.amount > limit) return loanOverLimit(limit);
+  if (limit <= 0) return err('noCredit');
+  if (action.amount > limit) return { code: 'loanOverLimit', limit };
   addLoan(world, player, action.amount, false);
   player.cash += action.amount;
   return null;
@@ -122,10 +121,10 @@ export function addLoan(world: WorldState, player: PlayerState, amount: number, 
 
 const repayLoan: Handler<Extract<PlayerAction, { type: 'repayLoan' }>> = (_world, player, action) => {
   const loan = player.loans.find((l) => l.uid === action.loanUid);
-  if (!loan) return ERRORS.noSuchLoan;
-  if (!isPositiveAmount(action.amount)) return ERRORS.badAmount;
+  if (!loan) return err('noSuchLoan');
+  if (!isPositiveAmount(action.amount)) return err('badAmount');
   const pay = Math.min(action.amount, loan.principal); // больше долга не берём
-  if (player.cash < pay) return notEnoughCash(pay - player.cash);
+  if (player.cash < pay) return missingCash(pay - player.cash);
   player.cash -= pay;
   loan.principal -= pay;
   if (loan.principal === 0) player.loans = player.loans.filter((l) => l.uid !== loan.uid);
@@ -138,17 +137,17 @@ const setInsurance: Handler<Extract<PlayerAction, { type: 'setInsurance' }>> = (
 };
 
 const setExtraShift: Handler<Extract<PlayerAction, { type: 'setExtraShift' }>> = (_world, player, action) => {
-  if (action.on && !player.employed) return ERRORS.shiftUnemployed;
-  if (action.on && player.restedThisWeek) return ERRORS.shiftAfterRest;
+  if (action.on && !player.employed) return err('shiftUnemployed');
+  if (action.on && player.restedThisWeek) return err('shiftAfterRest');
   player.extraShift = action.on;
   return null;
 };
 
 const study: Handler<Extract<PlayerAction, { type: 'study' }>> = (_world, player) => {
   const cost = studyCost(player);
-  if (cost === null) return ERRORS.maxKnowledge;
-  if (player.studiedThisWeek) return ERRORS.studiedThisWeek;
-  if (player.cash < cost) return notEnoughCash(cost - player.cash);
+  if (cost === null) return err('maxKnowledge');
+  if (player.studiedThisWeek) return err('studiedThisWeek');
+  if (player.cash < cost) return missingCash(cost - player.cash);
   player.cash -= cost;
   player.knowledge += 1;
   player.studiedThisWeek = true;
@@ -156,9 +155,9 @@ const study: Handler<Extract<PlayerAction, { type: 'study' }>> = (_world, player
 };
 
 const rest: Handler<Extract<PlayerAction, { type: 'rest' }>> = (_world, player) => {
-  if (player.restedThisWeek) return ERRORS.restedThisWeek;
-  if (player.extraShift) return ERRORS.restDuringShift;
-  if (player.cash < R.REST_COST) return notEnoughCash(R.REST_COST - player.cash);
+  if (player.restedThisWeek) return err('restedThisWeek');
+  if (player.extraShift) return err('restDuringShift');
+  if (player.cash < R.REST_COST) return missingCash(R.REST_COST - player.cash);
   player.cash -= R.REST_COST;
   player.happiness = Math.min(100, player.happiness + R.REST_JOY);
   player.restedThisWeek = true;
@@ -175,8 +174,8 @@ export function returnToJob(player: PlayerState): void {
 }
 
 const quitJob: Handler<Extract<PlayerAction, { type: 'quitJob' }>> = (_world, player) => {
-  if (player.freedomWeek === null) return ERRORS.quitBeforeFreedom;
-  if (!player.employed) return ERRORS.alreadyQuit;
+  if (player.freedomWeek === null) return err('quitBeforeFreedom');
+  if (!player.employed) return err('alreadyQuit');
   player.employed = false;
   player.extraShift = false;
   player.threatWeeks = 0;
@@ -184,19 +183,19 @@ const quitJob: Handler<Extract<PlayerAction, { type: 'quitJob' }>> = (_world, pl
 };
 
 const returnToWork: Handler<Extract<PlayerAction, { type: 'returnToWork' }>> = (_world, player) => {
-  if (player.employed) return ERRORS.alreadyEmployed;
+  if (player.employed) return err('alreadyEmployed');
   returnToJob(player);
   return null;
 };
 
 const buildDream: Handler<Extract<PlayerAction, { type: 'buildDream' }>> = (_world, player) => {
   const dream = player.dream;
-  if (!dream) return ERRORS.noDream;
-  if (player.freedomWeek === null) return ERRORS.dreamBeforeFreedom;
-  if (dream.doneWeek !== null) return ERRORS.dreamDone;
-  if (dream.building) return ERRORS.dreamBusy;
+  if (!dream) return err('noDream');
+  if (player.freedomWeek === null) return err('dreamBeforeFreedom');
+  if (dream.doneWeek !== null) return err('dreamDone');
+  if (dream.building) return err('dreamBusy');
   const stage = getDream(dream.id).stages[dream.built];
-  if (player.cash < stage.cost) return notEnoughCash(stage.cost - player.cash);
+  if (player.cash < stage.cost) return missingCash(stage.cost - player.cash);
   player.cash -= stage.cost;
   dream.building = true;
   dream.progress = 0;
@@ -210,10 +209,10 @@ const HANDLERS: { [T in PlayerAction['type']]: Handler<Extract<PlayerAction, { t
 
 export function applyPlayerAction(input: WorldState, action: PlayerAction): ActionResult {
   const handler = HANDLERS[action.type] as Handler<PlayerAction> | undefined;
-  if (!handler) return { world: input, error: ERRORS.unknownAction };
+  if (!handler) return { world: input, error: err('unknownAction') };
   const world = structuredClone(input);
   const player = world.players.find((p) => p.id === action.playerId);
-  if (!player) return { world: input, error: ERRORS.unknownPlayer };
+  if (!player) return { world: input, error: err('unknownPlayer') };
   const error = handler(world, player, action);
   return error ? { world: input, error } : { world };
 }

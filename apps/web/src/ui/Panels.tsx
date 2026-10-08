@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { financeView, offerViews } from '@arch/engine';
 import { HUMAN, useGame, type Tab } from '../store';
-import { signed } from '../format';
+import { useI18n } from '../i18n';
 import { DealsTab } from './DealsTab';
 import { IslandTab } from './IslandTab';
 import { ActionsTab } from './ActionsTab';
@@ -19,13 +19,6 @@ export function useMediaQuery(query: string) {
   return match;
 }
 
-const TAB_LABEL: Record<Tab, string> = {
-  report: 'Отчёт',
-  deals: 'Сделки',
-  island: 'Остров',
-  actions: 'Действия',
-};
-
 function TabContent({ tab }: { tab: Tab }) {
   switch (tab) {
     case 'deals': return <DealsTab />;
@@ -36,6 +29,7 @@ function TabContent({ tab }: { tab: Tab }) {
 }
 
 function Tabs({ tabs, extra }: { tabs: Tab[]; extra?: ReactNode }) {
+  const { t } = useI18n();
   const world = useGame((s) => s.world)!;
   const tab = useGame((s) => s.tab);
   const setTab = useGame((s) => s.setTab);
@@ -43,11 +37,11 @@ function Tabs({ tabs, extra }: { tabs: Tab[]; extra?: ReactNode }) {
   const tired = world.players[0].employed && world.players[0].happiness < 30;
   return (
     <nav className="tabs" role="tablist">
-      {tabs.map((t) => (
-        <button key={t} role="tab" aria-selected={tab === t} className={`tab ${tab === t ? 'active' : ''}`} onClick={() => setTab(t)}>
-          {TAB_LABEL[t]}
-          {t === 'deals' && affordable > 0 && <span className="badge-count">{affordable}</span>}
-          {t === 'actions' && tired && <span className="badge-count alert" title="Пора отдохнуть">!</span>}
+      {tabs.map((tabName) => (
+        <button key={tabName} role="tab" aria-selected={tab === tabName} className={`tab ${tab === tabName ? 'active' : ''}`} onClick={() => setTab(tabName)}>
+          {t.ui.tabs[tabName]}
+          {tabName === 'deals' && affordable > 0 && <span className="badge-count">{affordable}</span>}
+          {tabName === 'actions' && tired && <span className="badge-count alert" title={t.ui.restHint}>!</span>}
         </button>
       ))}
       {extra}
@@ -56,14 +50,15 @@ function Tabs({ tabs, extra }: { tabs: Tab[]; extra?: ReactNode }) {
 }
 
 export function NextWeekButton({ compact }: { compact?: boolean }) {
+  const { t, signed } = useI18n();
   const world = useGame((s) => s.world)!;
   const endWeek = useGame((s) => s.endWeek);
   const busy = useGame((s) => s.busy);
   const fin = financeView(world, HUMAN);
   return (
-    <button className={`btn next ${compact ? 'compact' : ''}`} onClick={endWeek} disabled={busy}>
-      <span className="next-main">Следующая неделя <span aria-hidden>→</span></span>
-      {!compact && <span className="next-sub">≈ {signed(fin.net)} к наличным</span>}
+    <button className={`btn next ${compact ? 'compact' : ''}`} onClick={endWeek} disabled={busy} data-coach="next-week">
+      <span className="next-main">{t.ui.nextWeek} <span aria-hidden>→</span></span>
+      {!compact && <span className="next-sub">{t.ui.nextCash(signed(fin.net))}</span>}
     </button>
   );
 }
@@ -90,12 +85,13 @@ export function DesktopLayout() {
 
 /** Телефон: компактная полоса свободы и выдвижная шторка со вкладками. */
 export function MobileLayout() {
+  const { t } = useI18n();
   const tab = useGame((s) => s.tab);
   const open = useGame((s) => s.sheetOpen);
   const setOpen = useGame((s) => s.setSheetOpen);
   return (
     <div className={`sheet panel ${open ? 'open' : ''}`}>
-      <button className="sheet-handle" onClick={() => setOpen(!open)} aria-label={open ? 'Свернуть' : 'Развернуть'}>
+      <button className="sheet-handle" onClick={() => setOpen(!open)} aria-label={open ? t.ui.collapse : t.ui.expand}>
         <span />
       </button>
       {!open && <div className="sheet-freedom"><FreedomBlock /></div>}

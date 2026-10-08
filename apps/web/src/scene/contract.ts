@@ -23,6 +23,13 @@ export interface FloatLabel {
 
 export type Weather = 'clear' | 'storm';
 
+export interface CameraPose {
+  target: [number, number, number];
+  az: number;
+  el: number;
+  d: number;
+}
+
 /** Мечта игрока (шхуна) на стапеле у берега. */
 export interface DreamProgress {
   /** Сколько этапов готово: 0 — пусто, stages — шхуна на воде. */
@@ -48,5 +55,7 @@ export interface IslandSceneProps {
    * Сцена центрирует остров в свободной полосе и немного отдаляет его.
    */
   sideInsets?: [number, number];
+  cameraPose?: () => CameraPose;
+  dpr?: number;
   onItemClick?: (uid: string) => void;
 }
