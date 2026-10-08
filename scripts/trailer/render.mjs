@@ -613,7 +613,7 @@ async function renderShot(
   return done;
 }
 
-function encodeSegment(frameDir, out, fps) {
+function encodeSegment(frameDir, out, fps, frames) {
   sh(ffmpeg, [
     '-y',
     '-v',
@@ -622,6 +622,8 @@ function encodeSegment(frameDir, out, fps) {
     String(fps),
     '-i',
     resolve(frameDir, '%05d.png'),
+    '-frames:v',
+    String(frames),
     '-c:v',
     'libx264',
     '-preset',
@@ -807,7 +809,7 @@ async function renderTarget(browser, url, edit, sourceHash, target) {
     for (const c of done.cueLog || []) cues.push({ ...c, t: (c.t ?? 0) + start / conf.fps });
     if (shot === 'storm') cues.push({ t: end / conf.fps, weather: 'clear' });
     const segment = resolve(segDir, `${String(si).padStart(2, '0')}-${shot}.mp4`);
-    encodeSegment(frameDir, segment, conf.fps);
+    encodeSegment(frameDir, segment, conf.fps, frames);
     timeline.push({
       shot,
       b0,
