@@ -287,7 +287,7 @@ function twoPassLoudnorm(input, output) {
       '-i',
       input,
       '-af',
-      'loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json',
+      'loudnorm=I=-14:TP=-2.5:LRA=11:print_format=json',
       '-f',
       'null',
       '-',
@@ -298,7 +298,7 @@ function twoPassLoudnorm(input, output) {
   const blocks = [...stderr.matchAll(/\{\s*"input_i"[\s\S]*?\}/g)];
   if (!blocks.length) throw new Error('loudnorm measurement JSON missing');
   const measured = JSON.parse(blocks.at(-1)[0]);
-  const filter = `loudnorm=I=-14:TP=-1.5:LRA=11:measured_I=${measured.input_i}:measured_TP=${measured.input_tp}:measured_LRA=${measured.input_lra}:measured_thresh=${measured.input_thresh}:offset=${measured.target_offset}:linear=true:print_format=summary`;
+  const filter = `loudnorm=I=-14:TP=-2.5:LRA=11:measured_I=${measured.input_i}:measured_TP=${measured.input_tp}:measured_LRA=${measured.input_lra}:measured_thresh=${measured.input_thresh}:offset=${measured.target_offset}:linear=true:print_format=summary`;
   run(['-y', '-v', 'error', '-i', input, '-af', filter, '-ar', '48000', '-ac', '2', '-c:a', 'pcm_s16le', output]);
 }
 
