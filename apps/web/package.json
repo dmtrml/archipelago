@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@arch/engine": "*",
+    "@fontsource/manrope": "^5.3.0",
+    "@fontsource/unbounded": "^5.3.0",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.1",
     "react": "^19.3.0",

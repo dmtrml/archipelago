@@ -33,7 +33,7 @@ function collectActions(world: WorldState) {
           branch = next;
         }
       }
-    } else if (result.error.startsWith('Не хватает')) remember('buyNoCash', world, action);
+    } else if (result.error.code === 'notEnoughCash') remember('buyNoCash', world, action);
   }
   for (const asset of world.players[0].owned) {
     for (const type of ['sellAsset', 'upgradeAsset', 'repairAsset'] as const) {

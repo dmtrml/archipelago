@@ -260,7 +260,7 @@ export function runBotTurn(world: WorldState, playerId: string, policy?: Policy)
     if (!action) break;
     const result = applyPlayerAction(turn.world, action);
     if (result.error) {
-      turn.errors.push(`${playerId} ${action.type}: ${result.error}`);
+      turn.errors.push(`${playerId} ${action.type}: ${result.error.code}`);
       break;
     }
     const item = describe(turn.world, me, action);

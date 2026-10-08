@@ -39,7 +39,7 @@ function noiseBuffer(context: BaseAudioContext, color: NoiseColor): AudioBuffer 
 }
 
 /** All sound scheduling uses the audio clock. Every source and control node has an owner. */
-export function synthesize(context: AudioContext, destination: AudioNode, recipe: SynthRecipe,
+export function synthesize(context: BaseAudioContext, destination: AudioNode, recipe: SynthRecipe,
   pitch = 1, variant = 0): SynthVoice {
   const start = context.currentTime;
   const end = start + recipe.duration;

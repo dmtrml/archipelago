@@ -1,3 +1,4 @@
+import { asset } from '../asset';
 import type { SynthRecipe } from './synth';
 
 export type AudioBus = 'music' | 'sfx' | 'ambience';
@@ -91,10 +92,10 @@ export const CUE_IDS = Object.keys(CUES) as CueId[];
 for (const cue of CUE_IDS) {
   if (CUES[cue].bus !== 'music') {
     const directory = CUES[cue].bus === 'sfx' ? 'sfx' : 'ambience';
-    CUES[cue].files = [`/audio/${directory}/${cue.replaceAll('.', '-')}.mp3`];
+    CUES[cue].files = [asset(`audio/${directory}/${cue.replaceAll('.', '-')}.mp3`)];
   }
 }
-CUES['ui.click'].files!.push('/audio/sfx/ui-click-2.mp3');
-CUES['music.island'].files = ['/audio/music/island-ukulele.mp3', '/audio/music/island-sicilian.mp3'];
-CUES['music.free'].files = ['/audio/music/free-apple-cider.mp3'];
-CUES['music.epilogue'].files = CUES.epilogue.files = ['/audio/music/epilogue-forest.mp3'];
+CUES['ui.click'].files!.push(asset('audio/sfx/ui-click-2.mp3'));
+CUES['music.island'].files = [asset('audio/music/island-ukulele.mp3'), asset('audio/music/island-sicilian.mp3')];
+CUES['music.free'].files = [asset('audio/music/free-apple-cider.mp3')];
+CUES['music.epilogue'].files = CUES.epilogue.files = [asset('audio/music/epilogue-forest.mp3')];

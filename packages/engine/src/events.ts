@@ -1,10 +1,8 @@
 // Случайные события: личные (для каждого игрока) и общие (для всего архипелага).
-import { FREEDOM_LEVEL_TITLES } from './content';
-import { assetTitle, getDef, happinessJoy } from './economy';
+import { getDef, happinessJoy } from './economy';
 import type { Rng } from './rng';
 import * as R from './rules';
-import { coins, weeksText } from './text';
-import type { DreamDef, GameEvent, PlayerState, PlayerWeekReport, WorldState } from './types';
+import type { DreamDef, EventParam, GameEvent, PlayerState, PlayerWeekReport, WorldState } from './types';
 
 /** Все id событий — чтобы UI мог подобрать иконки. */
 export type EventId =
@@ -13,17 +11,17 @@ export type EventId =
   | 'scamCollapse' | 'emergencyLoan' | 'freedom'
   | 'dreamStage' | 'dreamDone' | 'freedomLevel' | 'freedomThreat' | 'threatOver' | 'backToWork';
 
-function event(id: EventId, title: string, text: string, tone: GameEvent['tone'], extra: Partial<GameEvent> = {}): GameEvent {
-  return { id, title, text, tone, ...extra };
+/** Число текстовых вариантов. Порядок и количество синхронны со словарями UI. */
+export const EVENT_VARIANTS = { breakdown: 3, gift: 3 } as const;
+
+function event(
+  id: EventId, tone: GameEvent['tone'], params: Record<string, EventParam> = {}, extra: Partial<GameEvent> = {},
+): GameEvent {
+  return { id, tone, params, ...extra };
 }
 
-function roundTo5(n: number): number {
-  return Math.round(n / 5) * 5;
-}
-
-function pickText(rng: Rng, variants: string[]): string {
-  return variants[rng.int(0, variants.length - 1)];
-}
+function roundTo5(n: number): number { return Math.round(n / 5) * 5; }
+function pickVariant(rng: Rng, count: number): number { return rng.int(0, count - 1); }
 
 // ───────────── Выгорание ─────────────
 
@@ -33,11 +31,7 @@ export function rollBurnout(player: PlayerState, rng: Rng): boolean {
   return rng.chance(R.BURNOUT_CHANCE_MIN + (R.BURNOUT_CHANCE_MAX - R.BURNOUT_CHANCE_MIN) * depth);
 }
 
-export function burnoutEvent(): GameEvent {
-  return event('burnout', 'Выгорание',
-    'Сил совсем нет — работа на этой неделе шла вполсилы, и зарплата вдвое меньше. Отдых и маленькие радости помогают не доводить до такого.',
-    'bad');
-}
+export function burnoutEvent(): GameEvent { return event('burnout', 'bad'); }
 
 // ───────────── Личные события ─────────────
 
@@ -48,38 +42,25 @@ export function rollPersonalEvent(player: PlayerState, rng: Rng): GameEvent | nu
   switch (kind) {
     case 'illness': {
       const cost = roundTo5(rng.range(...R.ILLNESS_COST));
-      if (player.insured) {
-        return event('illness', 'Простуда',
-          'Пришлось идти к врачу, но страховка оплатила и приём, и лекарства — ни монетки из кармана.', 'neutral', { cashDelta: 0 });
-      }
-      return event('illness', 'Простуда',
-        `Пришлось потратиться на врача и лекарства: ${coins(cost)}. Страховка покрыла бы это.`, 'bad', { cashDelta: -cost });
+      return player.insured
+        ? event('illness', 'neutral', { insured: 1 }, { cashDelta: 0 })
+        : event('illness', 'bad', { cost }, { cashDelta: -cost });
     }
     case 'breakdown': {
       const cost = roundTo5(rng.range(...R.BREAKDOWN_COST));
-      const what = pickText(rng, [
-        'Сломался холодильник — пришлось срочно покупать новый.',
-        'Протекла крыша — позвали мастера с инструментами.',
-        'Велосипед развалился прямо по дороге на работу.',
-      ]);
-      return event('breakdown', 'Поломка', what, 'bad', { cashDelta: -cost });
+      const variant = pickVariant(rng, EVENT_VARIANTS.breakdown);
+      return { ...event('breakdown', 'bad', { cost }, { cashDelta: -cost }), variant };
     }
     case 'gift': {
       const amount = roundTo5(rng.range(...R.GIFT_AMOUNT));
-      const why = pickText(rng, [
-        'Бабушка прислала монеты ко дню рождения.',
-        'Сосед вернул старый долг — приятная неожиданность.',
-        'На пляже нашлась бутылка с монетами внутри!',
-      ]);
-      return event('gift', 'Подарок', why, 'good', { cashDelta: amount });
+      const variant = pickVariant(rng, EVENT_VARIANTS.gift);
+      return { ...event('gift', 'good', { amount }, { cashDelta: amount }), variant };
     }
     case 'raise': {
       if (!player.employed) return null; // повышение бывает только на работе
       player.salary += R.RAISE_SALARY;
       player.living += R.RAISE_LIVING;
-      return event('raise', 'Повышение!',
-        `Зарплата выросла на ${R.RAISE_SALARY}, но и привычки подорожали: расходы на жизнь +${R.RAISE_LIVING}. Так расходы догоняют доходы.`,
-        'good');
+      return event('raise', 'good', { salaryIncrease: R.RAISE_SALARY, livingIncrease: R.RAISE_LIVING });
     }
   }
 }
@@ -103,23 +84,17 @@ function applyStorm(world: WorldState, rng: Rng, reports: Record<string, PlayerW
       return !a.damaged && risk > 0 && rng.chance(risk);
     });
     if (hit.length === 0) continue;
-    const names = hit.map(assetTitle).join(', ');
     const uids = hit.map((a) => a.uid);
+    const assetRefs = hit.map((a) => `${a.defId}:${a.level}`);
     if (player.insured) {
-      reports[player.id].events.push(event('stormInsured', 'Страховка выручила',
-        `Шторм потрепал: ${names}. Страховка бесплатно оплатила ремонт — всё снова работает.`, 'good',
-        { affectedAssetUids: uids }));
+      reports[player.id].events.push(event('stormInsured', 'good', { assetRefs }, { affectedAssetUids: uids }));
       continue;
     }
     for (const a of hit) a.damaged = true;
     damagedAll.push(...uids);
-    reports[player.id].events.push(event('stormDamage', 'Шторм повредил имущество',
-      `Пострадали: ${names}. Пока не починишь (30% цены), они не приносят дохода.`, 'bad',
-      { affectedAssetUids: uids }));
+    reports[player.id].events.push(event('stormDamage', 'bad', { assetRefs }, { affectedAssetUids: uids }));
   }
-  return event('storm', 'Шторм',
-    'Над архипелагом пронёсся шторм. Лодкам и бунгало досталось сильнее всего.', 'bad',
-    { affectedAssetUids: damagedAll });
+  return event('storm', 'bad', {}, { affectedAssetUids: damagedAll });
 }
 
 /** Бросает общее событие недели (не больше одного). Мутирует рынок и имущество копии мира. */
@@ -128,83 +103,39 @@ export function rollWorldEvent(world: WorldState, rng: Rng, reports: Record<stri
   const kind = rng.weighted(R.WORLD_EVENT_WEIGHTS);
   const market = world.market;
   switch (kind) {
-    case 'storm':
-      return [applyStorm(world, rng, reports)];
+    case 'storm': return [applyStorm(world, rng, reports)];
     case 'fishShoal':
       market.fishShock += R.SHOAL_FISH_SHOCK;
-      return [event('fishShoal', 'Рыбный косяк',
-        'К архипелагу подошёл огромный косяк рыбы — лодки, коптильни и доли в артели заработают больше.', 'good')];
+      return [event('fishShoal', 'good')];
     case 'touristBoom':
       market.tourismShock += R.BOOM_TOURISM_SHOCK;
-      return [event('touristBoom', 'Туристический бум',
-        'На острова хлынули туристы — бунгало и кафе ждут хорошие недели.', 'good')];
+      return [event('touristBoom', 'good')];
     case 'crisis':
       market.tourismShock += R.CRISIS_TOURISM_SHOCK;
       market.fishShock += R.CRISIS_FISH_SHOCK;
-      return [event('crisis', 'Кризис',
-        'Туристы сидят дома, рыба дешевеет: доходы падают, и продать имущество дорого сейчас не выйдет.', 'bad')];
+      return [event('crisis', 'bad')];
   }
 }
 
 // ───────────── Аферы, долги, свобода ─────────────
 
 export function scamCollapseEvent(assetUid: string): GameEvent {
-  return event('scamCollapse', 'Ферма исчезла',
-    '«Жемчужная ферма» пропала вместе с деньгами. Это была пирамида: прежним вкладчикам платили из денег новых, а когда новые кончились — всё рухнуло.',
-    'bad', { affectedAssetUids: [assetUid] });
+  return event('scamCollapse', 'bad', {}, { affectedAssetUids: [assetUid] });
 }
-
 export function emergencyLoanEvent(amount: number): GameEvent {
-  return event('emergencyLoan', 'Заём у ростовщика',
-    `Монеты кончились, и пришлось занять у ростовщика ${coins(amount)} под ${Math.round(R.EMERGENCY_RATE * 100)}% в неделю. Такой долг лучше вернуть поскорее.`,
-    'bad');
+  return event('emergencyLoan', 'bad', { amount, rate: Math.round(R.EMERGENCY_RATE * 100) });
 }
-
-export function freedomEvent(): GameEvent {
-  return event('freedom', 'Финансовая свобода!',
-    'Пассивный доход покрывает все расходы. Теперь можно работать, потому что хочется, а не потому что надо.',
-    'good');
+export function freedomEvent(): GameEvent { return event('freedom', 'good'); }
+export function dreamStageEvent(dream: DreamDef, finishedStage: number): GameEvent {
+  return event('dreamStage', 'good', { dreamId: dream.id, finishedStage, nextStage: finishedStage + 1 < dream.stages.length ? finishedStage + 1 : -1 });
 }
-
+export function dreamDoneEvent(dream: DreamDef): GameEvent {
+  return event('dreamDone', 'good', { dreamId: dream.id, upkeep: dream.upkeep });
+}
 // ───────────── Второй акт ─────────────
 
-export function dreamStageEvent(dream: DreamDef, finishedStage: number): GameEvent {
-  const done = dream.stages[finishedStage];
-  const next = dream.stages[finishedStage + 1];
-  const tail = next ? `Впереди — «${next.title}».` : '';
-  return event('dreamStage', `Готово: ${done.title}`,
-    `Ещё один этап мечты позади — «${dream.title}» стала ближе. ${tail}`.trim(), 'good');
-}
-
-export function dreamDoneEvent(dream: DreamDef): GameEvent {
-  return event('dreamDone', 'Шхуна готова!',
-    `Шхуна сошла на воду и уходит в кругосветку! Теперь на её содержание уходит ${coins(dream.upkeep)} в неделю, зато она радует каждый день.`,
-    'good');
-}
-
 /** Уровень 1 («Свобода») празднует freedomEvent; здесь — запас прочности: 2 и выше. */
-export function freedomLevelEvent(level: number): GameEvent {
-  const title = FREEDOM_LEVEL_TITLES[level - 1];
-  const text = level >= 3
-    ? 'Пассивный доход вдвое больше расходов. Это уже богатство: даже плохой сезон не отнимет свободу.'
-    : 'Пассивный доход в полтора раза больше расходов — теперь у свободы есть запас прочности.';
-  return event('freedomLevel', title, text, 'good');
-}
-
-export function freedomThreatEvent(weeksLeft: number): GameEvent {
-  return event('freedomThreat', 'Свобода под угрозой',
-    `Без работы пассивного дохода не хватает на расходы. До возвращения на работу: ${weeksText(weeksLeft)}. Добавь доходных активов или убери лишние траты.`,
-    'bad');
-}
-
-export function threatOverEvent(): GameEvent {
-  return event('threatOver', 'Угроза миновала',
-    'Пассивный доход снова покрывает расходы — свобода на месте. Запас прочности делает её надёжнее.',
-    'good');
-}
-
-export function backToWorkEvent(salary: number): GameEvent {
-  return event('backToWork', 'Пришлось вернуться на работу',
-    `Свобода не удержалась: без работы доходов не хватало слишком долго. Новая зарплата — ${coins(salary)} в неделю, чуть меньше прежней. Копи запас, и свобода вернётся.`,
-    'bad');
-}
+export function freedomLevelEvent(level: number): GameEvent { return event('freedomLevel', 'good', { level }); }
+export function freedomThreatEvent(weeksLeft: number): GameEvent { return event('freedomThreat', 'bad', { weeksLeft }); }
+export function threatOverEvent(): GameEvent { return event('threatOver', 'good'); }
+export function backToWorkEvent(salary: number): GameEvent { return event('backToWork', 'bad', { salary }); }

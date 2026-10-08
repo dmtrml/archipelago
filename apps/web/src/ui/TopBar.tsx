@@ -1,11 +1,11 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { financeView, getPlayer } from '@arch/engine';
 import { HUMAN, useGame } from '../store';
-import { fmt } from '../format';
 import { Coin, ConfirmButton, Meter } from './common';
 import { NeighborsBar, type NeighborsSize } from './Neighbors';
 import { useMediaQuery } from './Panels';
 import { AudioControls } from '../audio/AudioControls';
+import { displayPlayer, useI18n } from '../i18n';
 
 /** Выбираем размер по свободному промежутку, независимо от аватаров в плашке. */
 function useNeighborsLayout(desktop: boolean, islandName: string, week: number, selected: string | null) {
@@ -84,26 +84,28 @@ export function Emblem() {
 }
 
 export function TopBar() {
+  const { t, fmt } = useI18n();
   const world = useGame((s) => s.world)!;
   const resetGame = useGame((s) => s.resetGame);
   const me = getPlayer(world, HUMAN);
+  const shown = displayPlayer(me);
   const fin = financeView(world, HUMAN);
   const desktop = useMediaQuery('(min-width: 1024px)');
   const selected = useGame((s) => s.neighborId);
-  const { topRef, size } = useNeighborsLayout(desktop, me.islandName, world.week, selected);
+  const { topRef, size } = useNeighborsLayout(desktop, shown.islandName, world.week, selected);
 
   return (
     <header className="top" ref={topRef} data-neighbors-size={desktop ? size : undefined}>
       <div className="panel badge">
         <Emblem />
         <div className="badge-text">
-          <div className="title">{me.islandName}</div>
-          <div className="sub">Неделя {world.week}<span className="badge-detail">{me.freedomWeek ? ` · свобода с ${me.freedomWeek}-й недели` : ''}{me.employed ? '' : ' · без работы'}</span></div>
+          <div className="title">{shown.islandName}</div>
+          <div className="sub">{t.ui.week} {world.week}<span className="badge-detail">{me.freedomWeek ? ` · ${t.ui.neighbors.freedom} ${t.ui.epilogue.since(me.freedomWeek)}` : ''}{me.employed ? '' : ` · ${t.ui.neighbors.withoutWork.toLowerCase()}`}</span></div>
         </div>
         <NeighborsBar compact />
         <AudioControls />
-        <ConfirmButton className="icon-btn" confirmText="Начать заново?" onConfirm={resetGame}>
-          <span aria-label="Новая игра">↺</span>
+        <ConfirmButton className="icon-btn" confirmText={t.ui.epilogue.resetConfirm} onConfirm={resetGame}>
+          <span aria-label={t.ui.epilogue.newGame}>↺</span>
         </ConfirmButton>
       </div>
 
@@ -112,20 +114,20 @@ export function TopBar() {
       <div className="stats">
         <div className="panel stat">
           <Coin />
-          <div><div className="label">Наличные</div><div className="value">{fmt(me.cash)}</div></div>
+          <div><div className="label">{t.ui.cash}</div><div className="value">{fmt(me.cash)}</div></div>
         </div>
         <div className="panel stat">
           <div>
-            <div className="label"><span className="long">Пассивный доход</span><span className="short">Доход</span></div>
-            <div className="value pos">+{fmt(fin.passiveIncome)} <small>/нед</small></div>
+            <div className="label"><span className="long">{t.ui.passiveIncome}</span><span className="short">{t.ui.income}</span></div>
+            <div className="value pos">+{fmt(fin.passiveIncome)} <small>{t.ui.perWeek}</small></div>
           </div>
         </div>
         <div className="panel stat">
-          <div><div className="label">Расходы</div><div className="value neg">−{fmt(fin.expenses.total)} <small>/нед</small></div></div>
+          <div><div className="label">{t.ui.expenses}</div><div className="value neg">−{fmt(fin.expenses.total)} <small>{t.ui.perWeek}</small></div></div>
         </div>
         <div className="panel stat happiness">
           <div>
-            <div className="label">Счастье</div>
+            <div className="label">{t.ui.happiness}</div>
             <div className="value">{Math.round(me.happiness)}</div>
             <Meter value={me.happiness} />
           </div>

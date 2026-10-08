@@ -3,19 +3,12 @@ import {
   EMERGENCY_RATE, LOAN_RATE, REST_COST, REST_JOY, THREAT_WEEKS,
 } from '@arch/engine';
 import { HUMAN, useGame } from '../store';
-import { fmt, weeks } from '../format';
 import { ConfirmButton, Pips, Section } from './common';
 import { returnSalary, speedUpText } from './text';
-
-const KNOWLEDGE_UNLOCKS = [
-  'Будете замечать аферы и сможете открыть пляжное кафе',
-  'Откроются доли в рыболовецкой артели',
-  '+10% к доходу всех активов',
-];
-
-const pct = (rate: number) => `${(rate * 100).toLocaleString('ru-RU', { maximumFractionDigits: 1 })}%`;
+import { useI18n, weeks } from '../i18n';
 
 export function ActionsTab() {
+  const { t, fmt, lang } = useI18n();
   const world = useGame((s) => s.world)!;
   const act = useGame((s) => s.act);
   const me = getPlayer(world, HUMAN);
@@ -26,21 +19,22 @@ export function ActionsTab() {
   const shiftBonus = Math.round(me.salary * 0.5);
   const free = me.freedomWeek !== null;
   const newSalary = returnSalary(me.salary);
+  const pct = (rate: number) => `${(rate * 100).toLocaleString(lang === 'ru' ? 'ru-RU' : 'en-US', { maximumFractionDigits: 1 })}%`;
 
   return (
     <div className="tab-body">
-      <Section title="Работа и отдых">
+      <Section title={t.ui.actions.workRest}>
         {me.employed && me.happiness < 30 && (
           <div className="warning">
-            Счастье на исходе. Ниже 20 начинается выгорание — зарплата падает вдвое. Пора отдохнуть.
+            {t.ui.actions.burnout}
           </div>
         )}
         {me.employed ? (
           <label className={`toggle-row ${me.restedThisWeek ? 'off' : ''}`}>
             <div>
-              <b>Подработка на этой неделе</b>
+              <b>{t.ui.actions.extraShift}</b>
               <span>
-                {me.restedThisWeek ? 'На этой неделе вы отдыхаете' : `+${fmt(shiftBonus)} монет, но −12 счастья`}
+                {me.restedThisWeek ? t.ui.actions.resting : t.ui.actions.shiftEffect(fmt(shiftBonus))}
               </span>
             </div>
             <input
@@ -54,25 +48,24 @@ export function ActionsTab() {
         ) : (
           <div className="action-row col job">
             <div>
-              <b>Вы не работаете</b>
+              <b>{t.ui.actions.notWorking}</b>
               <span>
-                Зарплаты и подработки нет, зато будни не отнимают счастье, а мечта строится {speedUpText()}.
-                Если {weeks(THREAT_WEEKS)} подряд пассивный доход будет ниже расходов, придётся вернуться на работу.
+                {t.ui.actions.notWorkingText(speedUpText(), weeks(THREAT_WEEKS))}
               </span>
               {me.threatWeeks > 0 && (
                 <span className="neg">
-                  Свобода под угрозой: через {Math.max(0, THREAT_WEEKS - me.threatWeeks)} нед. придётся вернуться на работу.
+                  {t.ui.actions.threat(Math.max(0, THREAT_WEEKS - me.threatWeeks))}
                 </span>
               )}
             </div>
             <div className="job-foot">
-              <span>Новая зарплата — <b>{fmt(newSalary)}</b> в неделю, ниже прежней ({fmt(me.salary)})</span>
+              <span>{t.ui.actions.newSalary(fmt(newSalary), fmt(me.salary))}</span>
               <ConfirmButton
                 className="btn ghost sm"
-                confirmText="Точно вернуться?"
-                onConfirm={() => act({ type: 'returnToWork', playerId: HUMAN }, 'Вы снова на работе')}
+                confirmText={t.ui.actions.returnConfirm}
+                onConfirm={() => act({ type: 'returnToWork', playerId: HUMAN }, t.ui.actions.returned)}
               >
-                Вернуться на работу
+                {t.ui.actions.returnWork}
               </ConfirmButton>
             </div>
           </div>
@@ -80,69 +73,68 @@ export function ActionsTab() {
         {me.employed && free && (
           <div className="action-row col job">
             <div>
-              <b>Уйти с работы</b>
+              <b>{t.ui.actions.quit}</b>
               <span>
-                Зарплаты не будет, зато будни больше не отнимают счастье, а мечта строится {speedUpText()}.
-                Если {weeks(THREAT_WEEKS)} подряд пассивный доход будет ниже расходов, придётся вернуться на работу.
+                {t.ui.actions.quitText(speedUpText(), weeks(THREAT_WEEKS))}
               </span>
               {fin.freedomRatio < 1 && (
-                <span className="neg">Сейчас пассивный доход ниже расходов — отсчёт начнётся сразу.</span>
+                <span className="neg">{t.ui.actions.shortfall}</span>
               )}
             </div>
             <ConfirmButton
               className="btn ghost sm"
-              confirmText="Точно уйти?"
-              onConfirm={() => act({ type: 'quitJob', playerId: HUMAN }, 'Вы больше не работаете')}
+              confirmText={t.ui.actions.quitConfirm}
+              onConfirm={() => act({ type: 'quitJob', playerId: HUMAN }, t.ui.actions.quitSuccess)}
             >
-              Уйти с работы
+              {t.ui.actions.quit}
             </ConfirmButton>
           </div>
         )}
         {me.employed && !free && (
-          <div className="muted-text">Уйти с работы можно будет после финансовой свободы.</div>
+          <div className="muted-text">{t.ui.actions.quitLocked}</div>
         )}
         <div className="action-row">
           <div>
-            <b>Отдохнуть с семьёй</b>
+            <b>{t.ui.actions.rest}</b>
             <span>
-              {me.extraShift ? 'В неделю подработки отдохнуть не выйдет' : `${fmt(REST_COST)} монет, +${REST_JOY} счастья. Раз в неделю`}
+              {me.extraShift ? t.ui.actions.noRestShift : t.ui.actions.restEffect(fmt(REST_COST), REST_JOY)}
             </span>
           </div>
           <button
             className="btn ghost sm"
             disabled={me.restedThisWeek || me.extraShift}
-            onClick={() => act({ type: 'rest', playerId: HUMAN }, 'Хорошо отдохнули!')}
+            onClick={() => act({ type: 'rest', playerId: HUMAN }, t.ui.actions.restedSuccess)}
           >
-            {me.restedThisWeek ? 'Уже отдыхали' : 'Отдохнуть'}
+            {me.restedThisWeek ? t.ui.actions.rested : t.ui.actions.restButton}
           </button>
         </div>
       </Section>
 
-      <Section title="Учёба" aside={<Pips value={me.knowledge} max={3} />}>
+      <Section title={t.ui.actions.study} aside={<Pips value={me.knowledge} max={3} />}>
         {cost !== null ? (
           <div className="action-row">
             <div>
-              <b>Курс финансовой грамотности</b>
-              <span>{KNOWLEDGE_UNLOCKS[me.knowledge]}</span>
+              <b>{t.ui.actions.course}</b>
+              <span>{t.ui.actions.knowledgeUnlocks[me.knowledge]}</span>
             </div>
             <button
               className="btn primary sm"
               disabled={me.studiedThisWeek}
-              onClick={() => act({ type: 'study', playerId: HUMAN }, 'Знания растут!')}
+              onClick={() => act({ type: 'study', playerId: HUMAN }, t.ui.actions.studiedSuccess)}
             >
-              {me.studiedThisWeek ? 'На след. неделе' : `Учиться ${fmt(cost)}`}
+              {me.studiedThisWeek ? t.ui.actions.nextWeek : t.ui.actions.studyButton(fmt(cost))}
             </button>
           </div>
         ) : (
-          <div className="muted-text">Вы прошли все курсы. Активы приносят на 10% больше.</div>
+          <div className="muted-text">{t.ui.actions.allCourses}</div>
         )}
       </Section>
 
-      <Section title="Страховка">
+      <Section title={t.ui.actions.insurance}>
         <label className="toggle-row">
           <div>
-            <b>Страховать имущество и здоровье</b>
-            <span>−{fmt(premium)} в неделю. Оплатит ремонт после шторма и лечение</span>
+            <b>{t.ui.actions.insure}</b>
+            <span>{t.ui.actions.insureText(fmt(premium))}</span>
           </div>
           <input
             type="checkbox"
@@ -153,20 +145,19 @@ export function ActionsTab() {
         </label>
       </Section>
 
-      <Section title="Банк архипелага">
+      <Section title={t.ui.actions.bank}>
         <div className="muted-text">
-          Кредит помогает купить актив раньше, но каждую неделю нужно платить {pct(LOAN_RATE)} от долга.
-          Если наличные уйдут в минус, придётся занять у ростовщика под {pct(EMERGENCY_RATE)} в неделю.
+          {t.ui.actions.bankText(pct(LOAN_RATE), pct(EMERGENCY_RATE))}
         </div>
         <div className="loan-take">
-          <span>Можно занять: <b>{fmt(limit)}</b></span>
+          <span>{t.ui.actions.borrow(fmt(limit))}</span>
           <div className="btn-group">
             {[100, 500].map((amount) => (
               <button
                 key={amount}
                 className="btn ghost sm"
                 disabled={limit < amount}
-                onClick={() => act({ type: 'takeLoan', playerId: HUMAN, amount }, `Взяли в кредит ${fmt(amount)}`)}
+                onClick={() => act({ type: 'takeLoan', playerId: HUMAN, amount }, t.ui.actions.creditTaken(fmt(amount)))}
               >
                 +{fmt(amount)}
               </button>
@@ -178,20 +169,20 @@ export function ActionsTab() {
           return (
             <div key={loan.uid} className={`action-row loan ${loan.emergency ? 'emergency' : ''}`}>
               <div>
-                <b>{loan.emergency ? 'Заём у ростовщика' : 'Кредит банка'}: {fmt(loan.principal)}</b>
-                <span>{pct(loan.weeklyRate)} в неделю = −{fmt(loan.principal * loan.weeklyRate)}</span>
+                <b>{loan.emergency ? t.ui.actions.shark : t.ui.actions.bankLoan}: {fmt(loan.principal)}</b>
+                <span>{pct(loan.weeklyRate)} {t.ui.inWeek} = −{fmt(loan.principal * loan.weeklyRate)}</span>
               </div>
               <button
                 className="btn ghost sm"
                 disabled={pay <= 0}
-                onClick={() => act({ type: 'repayLoan', playerId: HUMAN, loanUid: loan.uid, amount: pay }, 'Долг уменьшился')}
+                onClick={() => act({ type: 'repayLoan', playerId: HUMAN, loanUid: loan.uid, amount: pay }, t.ui.actions.debtReduced)}
               >
-                Погасить {fmt(pay)}
+                {t.ui.actions.repay(fmt(pay))}
               </button>
             </div>
           );
         })}
-        {fin.debt === 0 && <div className="muted-text">Долгов нет.</div>}
+        {fin.debt === 0 && <div className="muted-text">{t.ui.actions.noDebt}</div>}
       </Section>
     </div>
   );
