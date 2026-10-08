@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { ASSET_DEFS, financeView, offerViews, type WorldState } from '@arch/engine';
 import { PerspectiveCamera, Vector3 } from 'three';
 import { asset } from '../asset';
@@ -16,7 +16,7 @@ const App = lazy(() => import('../App'));
 type CueEntry =
   | { t: number; cue: CueId; pitchStep?: number; variant?: number }
   | { t: number; weather: 'clear' | 'storm' };
-type CaptionFrame = { visible: boolean; top: number | null; modalOverlap: boolean };
+type CaptionFrame = { visible: boolean; top: number | null; height: number | null; modalOverlap: boolean };
 type SubjectPoint = { name: string; x: number; y: number };
 type Save = { world: WorldState; news: unknown[]; history: Record<string, unknown[]> };
 type Fixtures = {
@@ -26,12 +26,24 @@ type Fixtures = {
   N: number;
   heroItemsByWeek: PlacedItem[][];
   scamCard: Save;
-  scamCollapse: Save;
   neighbors: Save;
   freedom: Save;
 };
 const fixtures = fixturesData as unknown as Fixtures;
 const DIRECTOR_EDIT = { ...EDIT, shotSpecs: SHOTS };
+const pearlOffer = (() => {
+  const offer = offerViews(fixtures.scamCard.world, 'p1').find((view) => view.def.id === 'pearlFarm');
+  if (!offer) throw new Error('scamCard fixture must contain a pearlFarm offer');
+  return offer;
+})();
+const pearlFarm: PlacedItem = {
+  uid: 'director-pearl',
+  model: 'pearlFarm',
+  slot: 'sea',
+  slotIndex: 0,
+  damaged: false,
+  level: 1,
+};
 
 const hookChanges = (() => {
   const changes: PlacedItem[][] = [];
@@ -69,6 +81,7 @@ declare global {
       captionLog: CaptionFrame[];
       captureCaption(): CaptionFrame;
       subjects(): SubjectPoint[];
+      sceneItems(): PlacedItem[];
       edit: typeof DIRECTOR_EDIT;
       errors: string[];
       frameOffset: number;
@@ -96,11 +109,14 @@ const director: Window['__director'] = (window.__director = {
       rect.bottom > modalRect.top &&
       rect.top < modalRect.bottom
     );
-    const frame = { visible: !!rect, top: rect?.top ?? null, modalOverlap };
+    const frame = { visible: !!rect, top: rect?.top ?? null, height: rect?.height ?? null, modalOverlap };
     director.captionLog.push(frame);
     return frame;
   },
   subjects() {
+    return [];
+  },
+  sceneItems() {
     return [];
   },
   edit: DIRECTOR_EDIT,
@@ -202,6 +218,10 @@ function subjectWorldPoints(id: ShotId): { name: string; point: [number, number,
       { name: 'yacht', point: [yacht.x, yacht.y, yacht.z] },
     ];
   }
+  if (id === 'scam-pays' || id === 'scam-collapse') {
+    const farm = slotPlace('sea', 0)!;
+    return [{ name: 'pearlFarm', point: [farm.x, farm.y + 1.1, farm.z] }];
+  }
   if (id === 'dream')
     return [
       { name: 'slipway', point: [16, 0.6, -6] },
@@ -239,7 +259,7 @@ function captionStyle(
   if (sec < startSec || sec > endSec) return null;
   if (id === 'freedom' && document.querySelector('.modal')) return null;
   const enter = cubicBezierEase(clamp01((sec - startSec) / 0.28));
-  const leave = clamp01((endSec - sec) / 0.18);
+  const leave = id === 'scam-collapse' ? 1 : clamp01((endSec - sec) / 0.18);
   const opacity = Math.min(1, Math.max(0, Math.min(enter, leave)));
   const progress = Math.min(1, Math.max(0, enter));
   const style: CSSProperties = {
@@ -250,7 +270,6 @@ function captionStyle(
   const defaultTop = format === 'v' ? (kind === 'scene' ? innerHeight * 0.13 : headerBottom + 14) : null;
   if (defaultTop !== null) style.top = defaultTop;
   else style.bottom = '9%';
-  if (id === 'scam-collapse' && format === 'h') return style;
   const modal = document.querySelector('.modal')?.getBoundingClientRect();
   const measure = document
     .querySelector<HTMLElement>('.director-caption[data-director-measure]')
@@ -343,9 +362,9 @@ function sceneState(id: ShotId, beats: number, durationBeats: number) {
     items = [...(fixtures.heroItemsByWeek[12] ?? [])];
     if (beats >= 0.5)
       items.push({ uid: 'director-statue', model: 'statue', slot: 'plaza', slotIndex: 0, damaged: false, level: 1 });
-    if (beats >= 2.5)
+    if (beats >= 2)
       items.push({ uid: 'director-yacht', model: 'yacht', slot: 'sea', slotIndex: 0, damaged: false, level: 1 });
-    if (beats >= 1.25 && beats < 2.4)
+    if (beats >= 1 && beats < 1.9)
       floats = [
         {
           id: 'l1',
@@ -354,7 +373,7 @@ function sceneState(id: ShotId, beats: number, durationBeats: number) {
           tone: 'neg',
         },
       ];
-    if (beats >= 3.25 && beats < 4.4)
+    if (beats >= 2.5 && beats < 3.4)
       floats = [
         {
           id: 'l2',
@@ -363,11 +382,22 @@ function sceneState(id: ShotId, beats: number, durationBeats: number) {
           tone: 'neg',
         },
       ];
-    if (beats >= 4.75)
+    if (beats >= 3.75)
       floats = [
         { id: 'l3', anchor: 'director-statue', text: `−${ASSET_DEFS.statue.upkeep}`, tone: 'neg' },
         { id: 'l4', anchor: 'director-yacht', text: `−${ASSET_DEFS.yacht.upkeep}`, tone: 'neg' },
       ];
+  }
+  if (id === 'scam-pays' || id === 'scam-collapse') {
+    items = [...(fixtures.heroItemsByWeek[fixtures.S] ?? []), ...(id === 'scam-collapse' && beats >= 0.5 ? [] : [pearlFarm])];
+    if (id === 'scam-pays') {
+      if (beats >= 0.5 && beats < 1.5)
+        floats.push({ id: 'pearl-income-1', anchor: pearlFarm.uid, text: `+${pearlOffer.expectedIncome}`, tone: 'pos' });
+      if (beats >= 2)
+        floats.push({ id: 'pearl-income-2', anchor: pearlFarm.uid, text: `+${pearlOffer.expectedIncome}`, tone: 'pos' });
+    } else if (beats >= 0.25) {
+      floats = [{ id: 'pearl-loss', anchor: pearlFarm.uid, text: `−${pearlOffer.offer.price}`, tone: 'neg' }];
+    }
   }
   if (id === 'storm') {
     items = (fixtures.heroItemsByWeek[fixtures.F] ?? []).map((x) => ({
@@ -417,14 +447,23 @@ function SceneShot({ id, format, durationBeats }: { id: ShotId; format: TrailerF
       cue(3.5 + 0.2 / BEAT, 'upgrade');
     }
     if (id === 'liability') {
-      for (const b of [0.5, 2.5]) {
+      for (const b of [0.5, 2]) {
         cue(b, 'coins.pay');
         cue(b + 0.07 / BEAT, 'build.pop');
         cue(b + 0.16 / BEAT, 'status.joy');
       }
-      cue(4.5, 'week.next');
-      cue(4.75, 'coin.minus');
-      cue(5, 'coin.minus');
+      cue(3.5, 'week.next');
+      cue(3.75, 'coin.minus');
+      cue(4, 'coin.minus');
+    }
+    if (id === 'scam-pays') {
+      cue(0, 'week.next');
+      cue(0.5, 'coin.tick', 0);
+      cue(1.5, 'week.next');
+      cue(2, 'coin.tick', 2);
+    }
+    if (id === 'scam-collapse') {
+      cue(0.25, 'scam.collapse');
     }
     if (id === 'storm') {
       cue(0, 'storm');
@@ -481,9 +520,7 @@ function GameShot({ id, lang, durationBeats }: { id: ShotId; lang: TrailerLang; 
   const save =
     id === 'scam-card'
       ? fixtures.scamCard
-      : id === 'scam-collapse'
-        ? fixtures.scamCollapse
-        : id === 'neighbors'
+      : id === 'neighbors'
           ? fixtures.neighbors
           : fixtures.freedom;
   useMemo(() => setFixture(save, lang), [save, lang]);
@@ -535,7 +572,7 @@ function GameShot({ id, lang, durationBeats }: { id: ShotId; lang: TrailerLang; 
           );
       });
     }
-    if (id === 'scam-collapse' || id === 'neighbors' || id === 'freedom')
+    if (id === 'neighbors' || id === 'freedom')
       schedule(id === 'neighbors' ? 0.5 : 0.25, () => useGame.getState().endWeek());
     if (id === 'neighbors')
       schedule(3, () => {
@@ -582,13 +619,20 @@ function GameShot({ id, lang, durationBeats }: { id: ShotId; lang: TrailerLang; 
     frame = requestAnimationFrame(keepFreedomHeadingVisible);
     return () => cancelAnimationFrame(frame);
   }, [id]);
-  const originRef = useRef<string | null>(null);
-  if (id === 'scam-card' && !originRef.current) {
-    const card = document.querySelector('[data-offer="pearlFarm"]')?.getBoundingClientRect();
-    if (card) originRef.current = `${card.left + card.width / 2}px ${card.top + card.height / 2}px`;
-  }
-  const zoom = id === 'scam-card' ? 1 + 0.08 * Math.max(0, Math.min(1, sec / (durationBeats * BEAT))) : 1;
-  const origin = originRef.current ?? 'center';
+  const [origin, setOrigin] = useState('center');
+  // Keep measuring while the initial card scroll settles, then lock the title center for the zoom.
+  useLayoutEffect(() => {
+    if (id !== 'scam-card' || started) return;
+    const stage = document.getElementById('director-stage');
+    const title = document.querySelector<HTMLElement>('[data-offer="pearlFarm"] h3');
+    if (!stage || !title) return;
+    const stageRect = stage.getBoundingClientRect();
+    const titleRect = title.getBoundingClientRect();
+    const nextOrigin = `${titleRect.left + titleRect.width / 2 - stageRect.left}px ${titleRect.top + titleRect.height / 2 - stageRect.top}px`;
+    if (nextOrigin !== origin) setOrigin(nextOrigin);
+  });
+  // Video frames sample 1/fps through N/fps, so the final captured frame must reach 1.15.
+  const zoom = id === 'scam-card' ? 1 + 0.15 * clamp01(sec / (durationBeats * BEAT - 1 / 30)) : 1;
   return (
     <div id="director-stage" style={{ transform: `scale(${zoom})`, transformOrigin: origin }}>
       <Suspense fallback={null}>
@@ -596,6 +640,31 @@ function GameShot({ id, lang, durationBeats }: { id: ShotId; lang: TrailerLang; 
         {storeReady && <ShotReady />}
       </Suspense>
     </div>
+  );
+}
+
+function ScamCardRing({ sec, durationBeats }: { sec: number; durationBeats: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const beats = sec / BEAT;
+  const visible = beats >= 0.5 && beats < durationBeats - 0.75;
+  useLayoutEffect(() => {
+    const ring = ref.current;
+    const heading = document.querySelector<HTMLElement>('[data-offer="pearlFarm"] h3');
+    if (!ring || !heading) return;
+    // Bounds are sampled after React applies the current frame's #director-stage transform.
+    const rect = heading.getBoundingClientRect();
+    ring.style.left = `${rect.left - 9}px`;
+    ring.style.top = `${rect.top - 9}px`;
+    ring.style.width = `${rect.width + 18}px`;
+    ring.style.height = `${rect.height + 18}px`;
+  }, [sec]);
+  return (
+    <div
+      ref={ref}
+      className="director-scam-ring"
+      style={{ opacity: visible ? 0.8 + 0.2 * Math.cos((2 * Math.PI * (sec - 0.5 * BEAT)) / 1.6) : 0 }}
+      aria-hidden="true"
+    />
   );
 }
 
@@ -737,9 +806,20 @@ export default function Director() {
   const spec = SHOTS[id];
   const showCaption = spec.caption && id !== 'end';
   const captionStartSec =
-    id === 'scam-collapse' ? 0.25 * BEAT + 1.2 : (id === 'asset' || id === 'liability' ? 0.5 : 0.25) * BEAT;
-  const captionEndSec = (durationBeats - 0.25) * BEAT;
+    (id === 'asset' || id === 'liability' ? 0.5 : 0.25) * BEAT;
+  const captionEndSec = (durationBeats - (id === 'scam-collapse' ? 0 : 0.25)) * BEAT;
   const capStyle = showCaption ? captionStyle(id, format, spec.kind, sec, captionStartSec, captionEndSec) : null;
+  const scamCaption = (measure: boolean) => (
+    <>
+      <span style={{ opacity: measure ? 1 : clamp01(((durationBeats - 0.25) * BEAT - sec) / 0.18) }}>{spec.caption?.[lang]}</span>
+      <span
+        className="director-caption-second"
+        style={{ opacity: measure ? 1 : cubicBezierEase(clamp01((sec - 1.5 * BEAT) / 0.28)) }}
+      >
+        {lang === 'ru' ? 'Это пирамида' : "It's a pyramid scheme"}
+      </span>
+    </>
+  );
   director.subjects =
     spec.kind === 'scene'
       ? () => {
@@ -749,6 +829,9 @@ export default function Director() {
           return subjectWorldPoints(id).map(({ name, point }) => ({ name, ...projectSubject(point, pose) }));
         }
       : () => [];
+  director.sceneItems = spec.kind === 'scene'
+    ? () => sceneState(id, (directorNow() - director.frameOffset) / BEAT, durationBeats).items
+    : () => [];
   return (
     <div className={`director-root ${format === 'v' ? 'vertical' : 'horizontal'} ${spec.kind}`} data-shot={id}>
       {id === 'end' ? (
@@ -764,12 +847,16 @@ export default function Director() {
           data-director-measure
           aria-hidden="true"
           style={{ visibility: 'hidden', top: 0, pointerEvents: 'none' }}
-          dangerouslySetInnerHTML={captionHtml(spec.caption![lang])}
-        />
+        >
+          {id === 'scam-collapse' ? scamCaption(true) : <span dangerouslySetInnerHTML={captionHtml(spec.caption![lang])} />}
+        </div>
       )}{' '}
       {capStyle && (
-        <div className="director-caption" style={capStyle} dangerouslySetInnerHTML={captionHtml(spec.caption![lang])} />
+        <div className="director-caption" style={capStyle}>
+          {id === 'scam-collapse' ? scamCaption(false) : <span dangerouslySetInnerHTML={captionHtml(spec.caption![lang])} />}
+        </div>
       )}{' '}
+      {id === 'scam-card' && <ScamCardRing sec={sec} durationBeats={durationBeats} />}
       {id === 'scam-card' && <ClickIndicator durationBeats={durationBeats} />}
     </div>
   );
