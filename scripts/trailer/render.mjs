@@ -246,6 +246,7 @@ async function renderShot(
   let captionBounds = null;
   const subjectSamples = [];
   const scamCardChecks = [];
+  const freedomChecks = [];
   const subjectFrames = new Set([0, Math.floor(frames / 2), frames - 1]);
   const clickFrame = Math.max(
     0,
@@ -256,6 +257,36 @@ async function renderShot(
     await page.evaluate(() => Promise.resolve());
     const captionFrame = await page.evaluate(() => window.__director.captureCaption());
     if (captionFrame.modalOverlap) throw new Error(`${shot}: caption overlaps .modal at frame ${i}`);
+    if (shot === 'freedom') {
+      const check = await page.evaluate(() => {
+        const modal = document.querySelector('.modal.freedom-modal');
+        if (!modal) return { modal: false };
+        const title = modal.querySelector('h2');
+        const rect = title?.getBoundingClientRect();
+        const windowRect = modal.getBoundingClientRect();
+        const caption = document.querySelector('.director-caption:not([data-director-measure])');
+        const captionVisible = !!caption && getComputedStyle(caption).display !== 'none' &&
+          getComputedStyle(caption).visibility !== 'hidden' && caption.getBoundingClientRect().width > 0;
+        return {
+          modal: true,
+          title: title?.textContent,
+          titleBounds: rect ? { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom } : null,
+          modalBounds: { left: windowRect.left, top: windowRect.top, right: windowRect.right, bottom: windowRect.bottom },
+          captionVisible,
+          scrollTop: modal.scrollTop,
+          viewport: { width: innerWidth, height: innerHeight },
+        };
+      });
+      freedomChecks.push({ frame: i, ...check });
+      if (check.modal) {
+        const t = check.titleBounds;
+        const m = check.modalBounds;
+        if (!t || t.left < -0.5 || t.top < -0.5 || t.right > check.viewport.width + 0.5 ||
+            t.bottom > check.viewport.height + 0.5 || t.top < m.top - 0.5 || t.bottom > m.bottom + 0.5)
+          throw new Error(`${shot}: modal title not fully visible at frame ${i}: ${JSON.stringify(check)}`);
+        if (check.captionVisible) throw new Error(`${shot}: caption visible after modal at frame ${i}`);
+      }
+    }
     if (i === Math.floor(frames / 2))
       captionBounds = await page.evaluate(() => {
         const r = document.querySelector('.director-caption:not([data-director-measure])')?.getBoundingClientRect();
@@ -314,6 +345,8 @@ async function renderShot(
     for (let i = first; i <= last; i++)
       if (!captionLog[i].visible) throw new Error(`${shot}: caption visibility interrupted at frame ${i}`);
   }
+  if (shot === 'freedom' && !freedomChecks.some((x) => x.modal))
+    throw new Error(`${shot}: freedom modal never appears`);
   for (const check of scamCardChecks) {
     if (!check.card || !check.list) throw new Error(`${shot}: pearlFarm card/list missing at frame ${check.frame}`);
     if (
@@ -337,6 +370,7 @@ async function renderShot(
     captionBounds,
     subjectSamples,
     scamCardChecks,
+    freedomChecks,
   };
   await writeFile(donePath, JSON.stringify(done, null, 2));
   return done;
@@ -540,6 +574,7 @@ async function renderTarget(browser, url, edit, sourceHash, target) {
       captionBounds: done.captionBounds,
       subjectSamples: done.subjectSamples,
       scamCardChecks: done.scamCardChecks,
+      freedomChecks: done.freedomChecks,
     });
   }
   if (selected) return { partial: true, timeline, cues };

@@ -237,6 +237,7 @@ function captionStyle(
   endSec: number,
 ): CSSProperties | null {
   if (sec < startSec || sec > endSec) return null;
+  if (id === 'freedom' && document.querySelector('.modal')) return null;
   const enter = cubicBezierEase(clamp01((sec - startSec) / 0.28));
   const leave = clamp01((endSec - sec) / 0.18);
   const opacity = Math.min(1, Math.max(0, Math.min(enter, leave)));
@@ -569,6 +570,17 @@ function GameShot({ id, lang, durationBeats }: { id: ShotId; lang: TrailerLang; 
       cancelled = true;
       cancelAnimationFrame(frame);
     };
+  }, [id]);
+  useEffect(() => {
+    if (id !== 'freedom') return;
+    let frame = 0;
+    const keepFreedomHeadingVisible = () => {
+      const modal = document.querySelector<HTMLElement>('.freedom-modal');
+      if (modal && modal.scrollTop !== 0) modal.scrollTop = 0;
+      frame = requestAnimationFrame(keepFreedomHeadingVisible);
+    };
+    frame = requestAnimationFrame(keepFreedomHeadingVisible);
+    return () => cancelAnimationFrame(frame);
   }, [id]);
   const originRef = useRef<string | null>(null);
   if (id === 'scam-card' && !originRef.current) {
