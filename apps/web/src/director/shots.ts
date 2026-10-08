@@ -12,6 +12,7 @@ export type ShotId =
   | 'upgrade'
   | 'liability'
   | 'scam-card'
+  | 'scam-pays'
   | 'scam-collapse'
   | 'storm'
   | 'neighbors'
@@ -59,8 +60,26 @@ export const SHOTS: Record<ShotId, ShotSpec> = {
       en: '**Liabilities** look great — but only take your money',
     },
   },
-  'scam-card': { id: 'scam-card', kind: 'game', caption: { ru: 'Купили бы?', en: 'Would you buy it?' } },
-  'scam-collapse': { id: 'scam-collapse', kind: 'game', caption: { ru: 'Это была афера', en: 'It was a scam' } },
+  'scam-card': {
+    id: 'scam-card',
+    kind: 'game',
+    caption: { ru: '+25% в неделю. Купили бы?', en: '+25% a week. Would you buy it?' },
+  },
+  'scam-pays': {
+    id: 'scam-pays',
+    kind: 'scene',
+    camera: pose([18.72, 0.3, 8.36], 55, 24, 24, 22, 63),
+    caption: { ru: 'Первые недели — платит…', en: 'At first, it pays…' },
+  },
+  'scam-collapse': {
+    id: 'scam-collapse',
+    kind: 'scene',
+    camera: pose([18.72, 0.3, 8.36], 63, 24, 22, 21, 70),
+    caption: {
+      ru: '…а потом исчезает со всеми деньгами',
+      en: '…then vanishes with all the money',
+    },
+  },
   storm: {
     id: 'storm',
     kind: 'scene',
@@ -95,13 +114,14 @@ export const EDIT = {
     shots: [
       ['hook', 0, 4],
       ['asset', 4, 10],
-      ['liability', 10, 16],
-      ['scam-card', 16, 19],
-      ['scam-collapse', 19, 24],
-      ['storm', 24, 28],
-      ['freedom', 28, 36],
-      ['dream', 36, 42],
-      ['end', 42, 49.5],
+      ['liability', 10, 15],
+      ['scam-card', 15, 19],
+      ['scam-pays', 19, 22],
+      ['scam-collapse', 22, 27],
+      ['storm', 27, 31],
+      ['freedom', 31, 38],
+      ['dream', 38, 44],
+      ['end', 44, 49.5],
     ],
   },
   h45: {
@@ -112,12 +132,13 @@ export const EDIT = {
       ['upgrade', 14, 20],
       ['liability', 20, 26],
       ['scam-card', 26, 31],
-      ['scam-collapse', 31, 37],
-      ['storm', 37, 42],
-      ['neighbors', 42, 50],
-      ['freedom', 50, 58],
-      ['dream', 58, 64],
-      ['end', 64, 74.25],
+      ['scam-pays', 31, 35],
+      ['scam-collapse', 35, 41],
+      ['storm', 41, 46],
+      ['neighbors', 46, 52],
+      ['freedom', 52, 60],
+      ['dream', 60, 66],
+      ['end', 66, 74.25],
     ],
   },
 } as const satisfies Record<string, { totalBeats: number; shots: readonly (readonly [ShotId, number, number])[] }>;
