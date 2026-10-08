@@ -57,8 +57,8 @@ export function rollPersonalEvent(player: PlayerState, rng: Rng): GameEvent | nu
       return { ...event('gift', 'good', { amount }, { cashDelta: amount }), variant };
     }
     case 'raise': {
-      if (!player.employed) return null;
-      player.salary += R.RAISE_SALARY; // повышение бывает только на работе
+      if (!player.employed) return null; // повышение бывает только на работе
+      player.salary += R.RAISE_SALARY;
       player.living += R.RAISE_LIVING;
       return event('raise', 'good', { salaryIncrease: R.RAISE_SALARY, livingIncrease: R.RAISE_LIVING });
     }
