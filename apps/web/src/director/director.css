@@ -44,6 +44,9 @@
 .director-root.vertical.game .director-caption {
   top: 116px;
 }
+.director-root.vertical[data-shot='scam-collapse'] .isl-float {
+  margin-top: 80px;
+}
 .director-root.vertical[data-shot='scam-card'] .sheet.open {
   height: 73vh;
   max-height: 73vh;

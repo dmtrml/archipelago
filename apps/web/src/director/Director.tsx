@@ -100,6 +100,9 @@ const director: Window['__director'] = (window.__director = {
     const caption = document.querySelector<HTMLElement>('.director-caption:not([data-director-measure])');
     const modal = document.querySelector<HTMLElement>('.modal');
     const rect = caption?.getBoundingClientRect();
+    const measuredRect = document
+      .querySelector<HTMLElement>('.director-root[data-shot="scam-collapse"] .director-caption[data-director-measure]')
+      ?.getBoundingClientRect();
     const modalRect = modal?.getBoundingClientRect();
     const modalOverlap = !!(
       rect &&
@@ -109,7 +112,7 @@ const director: Window['__director'] = (window.__director = {
       rect.bottom > modalRect.top &&
       rect.top < modalRect.bottom
     );
-    const frame = { visible: !!rect, top: rect?.top ?? null, height: rect?.height ?? null, modalOverlap };
+    const frame = { visible: !!rect, top: rect?.top ?? null, height: measuredRect?.height ?? rect?.height ?? null, modalOverlap };
     director.captionLog.push(frame);
     return frame;
   },
@@ -256,7 +259,7 @@ function captionStyle(
   startSec: number,
   endSec: number,
 ): CSSProperties | null {
-  if (sec < startSec || sec > endSec) return null;
+  if (sec < startSec || sec > endSec + (id === 'scam-collapse' ? 1 / 30 : 0)) return null;
   if (id === 'freedom' && document.querySelector('.modal')) return null;
   const enter = cubicBezierEase(clamp01((sec - startSec) / 0.28));
   const leave = id === 'scam-collapse' ? 1 : clamp01((endSec - sec) / 0.18);
@@ -560,7 +563,9 @@ function GameShot({ id, lang, durationBeats }: { id: ShotId; lang: TrailerLang; 
     };
     if (id === 'scam-card') {
       const clickBeat = durationBeats - 0.75,
-        buyBeat = clickBeat + 0.1 / BEAT;
+        // The paying farm is shown by the next shot's independent fixture.
+        // Commit the game purchase only after capture ends, keeping this offer readable through the cut.
+        buyBeat = durationBeats + 1 / BEAT;
       schedule(clickBeat, () => audio.play('ui.click'));
       schedule(buyBeat, () => {
         const current = useGame.getState();
