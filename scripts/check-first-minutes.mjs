@@ -38,17 +38,33 @@ async function expectedBest(page) {
 }
 
 async function assertCoachClear(page, label) {
-  const boxes = await page.evaluate(() => {
-    const bubble = document.querySelector('.coach-bubble')?.getBoundingClientRect();
-    const ring = document.querySelector('.coach-ring')?.getBoundingClientRect();
-    if (!bubble || !ring) return null;
-    return {
-      bubble: { left: bubble.left, top: bubble.top, right: bubble.right, bottom: bubble.bottom },
-      ring: { left: ring.left, top: ring.top, right: ring.right, bottom: ring.bottom },
-      viewport: { width: innerWidth, height: innerHeight },
-    };
+  const boxes = await page.evaluate(async () => {
+    let previous = null;
+    let repeats = 0;
+    for (let frame = 0; frame < 240; frame++) {
+      const bubbleEl = document.querySelector('.coach-bubble');
+      const ringEl = document.querySelector('.coach-ring');
+      const bubble = bubbleEl?.getBoundingClientRect();
+      const ring = ringEl?.getBoundingClientRect();
+      if (bubble && ring && getComputedStyle(bubbleEl).visibility === 'visible') {
+        const current = {
+          bubble: { left: bubble.left, top: bubble.top, right: bubble.right, bottom: bubble.bottom },
+          ring: { left: ring.left, top: ring.top, right: ring.right, bottom: ring.bottom },
+          viewport: { width: innerWidth, height: innerHeight },
+        };
+        const signature = JSON.stringify(current);
+        repeats = signature === previous ? repeats + 1 : 1;
+        if (repeats >= 2) return current;
+        previous = signature;
+      } else {
+        previous = null;
+        repeats = 0;
+      }
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+    }
+    return null;
   });
-  assert(boxes, `${label}: coach geometry is unavailable`);
+  assert(boxes, `${label}: coach geometry was not identical in two consecutive visible measurements`);
   const overlap = boxes.bubble.left < boxes.ring.right
     && boxes.bubble.right > boxes.ring.left
     && boxes.bubble.top < boxes.ring.bottom

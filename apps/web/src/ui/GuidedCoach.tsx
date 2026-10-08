@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useCoach } from './coach';
 import { useI18n } from '../i18n';
 
-interface Placement { target: DOMRect; bubbleTop: number; bubbleLeft: number; above: boolean; measured: boolean }
+interface Placement { step: number; targetUid: string | null; target: DOMRect; bubbleTop: number; bubbleLeft: number; above: boolean; measured: boolean }
 
 export function Coach() {
   const { t } = useI18n();
@@ -14,7 +14,8 @@ export function Coach() {
   const bubbleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!step) { setPlacement(null); return; }
+    setPlacement(null);
+    if (!step) return;
     let frame = 0;
     const update = () => {
       const selector = step === 1 && targetUid
@@ -42,7 +43,7 @@ export function Coach() {
           ? aboveTop
           : Math.max(12, Math.min(innerHeight - bubbleHeight - 12, belowTop));
         const bubbleLeft = Math.max(12, Math.min(innerWidth - width - 12, rect.left + rect.width / 2 - width / 2));
-        setPlacement({ target: rect, bubbleTop, bubbleLeft, above, measured });
+        setPlacement({ step, targetUid, target: rect, bubbleTop, bubbleLeft, above, measured });
       }
       frame = requestAnimationFrame(update);
     };
@@ -57,15 +58,17 @@ export function Coach() {
     return () => removeEventListener('keydown', onKey);
   }, [step, skip]);
 
-  if (!step || !placement) return null;
-  const r = placement.target;
+  if (!step) return null;
+  // При смене шага прежняя геометрия не применяется к новому тексту даже на один кадр.
+  const active = placement?.step === step && placement.targetUid === targetUid && placement.measured ? placement : null;
+  const r = active?.target;
   return (
     <div className="coach" role="dialog" aria-live="polite">
-      <div className="coach-ring" style={{ left: r.left - 6, top: r.top - 6, width: r.width + 12, height: r.height + 12, borderRadius: 18 }} />
+      {r && <div className="coach-ring" style={{ left: r.left - 6, top: r.top - 6, width: r.width + 12, height: r.height + 12, borderRadius: 18 }} />}
       <div
         ref={bubbleRef}
-        className={`coach-bubble ${placement.above ? 'above' : 'below'}`}
-        style={{ left: placement.bubbleLeft, top: placement.bubbleTop, visibility: placement.measured ? 'visible' : 'hidden' }}
+        className={`coach-bubble ${active?.above ? 'above' : 'below'}`}
+        style={{ left: active?.bubbleLeft ?? 12, top: active?.bubbleTop ?? 12, visibility: active ? 'visible' : 'hidden' }}
       >
         <div className="coach-kicker">{t.ui.coach.kicker(step)}</div>
         <p>{t.ui.coach.steps[step - 1]}</p>
