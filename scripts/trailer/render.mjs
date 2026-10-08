@@ -17,6 +17,50 @@ const vite = resolve(dirname(require.resolve('vite')), '../../bin/vite.js');
 const npmCli = process.env.npm_execpath;
 const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const epoch = Date.parse('2026-10-05T12:00:00Z');
+const BEAT = 60 / 99;
+const checkVersion = 'trailer-scam-story-v4';
+const scamOffer = require(resolve(root, 'apps/web/src/director/fixtures.json')).scamCard.world.offers.find(
+  (offer) => offer.defId === 'pearlFarm',
+);
+if (!scamOffer || !Number.isFinite(scamOffer.price) || !Number.isFinite(scamOffer.income))
+  throw new Error('scamCard pearlFarm offer missing price/income');
+const expectedMontage = {
+  v30: {
+    totalBeats: 49.5,
+    shots: [
+      ['hook', 0, 4], ['asset', 4, 10], ['liability', 10, 15],
+      ['scam-card', 15, 19], ['scam-pays', 19, 22], ['scam-collapse', 22, 27],
+      ['storm', 27, 31], ['freedom', 31, 38], ['dream', 38, 44], ['end', 44, 49.5],
+    ],
+  },
+  h45: {
+    totalBeats: 74.25,
+    shots: [
+      ['hook', 0, 6], ['asset', 6, 14], ['upgrade', 14, 20], ['liability', 20, 26],
+      ['scam-card', 26, 31], ['scam-pays', 31, 35], ['scam-collapse', 35, 41],
+      ['storm', 41, 46], ['neighbors', 46, 52], ['freedom', 52, 60],
+      ['dream', 60, 66], ['end', 66, 74.25],
+    ],
+  },
+};
+function validateMontage(edit) {
+  for (const [format, expected] of Object.entries(expectedMontage)) {
+    const actual = edit[format];
+    if (!actual || actual.totalBeats !== expected.totalBeats ||
+        JSON.stringify(actual.shots) !== JSON.stringify(expected.shots))
+      throw new Error(`${format} shot boundaries differ from trailer-scam-story.md: ${JSON.stringify(actual)}`);
+    for (const fps of [15, 30]) {
+      let next = 0;
+      for (const [shot, from, to] of actual.shots) {
+        const start = Math.round(from * BEAT * fps), end = Math.round(to * BEAT * fps);
+        if (start !== next || end <= start) throw new Error(`${format} ${shot} ${fps}fps: gap/overlap`);
+        next = end;
+      }
+      if (next !== cfg[format].duration * fps)
+        throw new Error(`${format} ${fps}fps: ${next} frames instead of ${cfg[format].duration * fps}`);
+    }
+  }
+}
 const args = process.argv.slice(2);
 const value = (name, def) => {
   const i = args.indexOf(`--${name}`);
@@ -92,6 +136,7 @@ function virtualClock(epochMs) {
     id = 1;
   const timers = new Map(),
     rafs = new Map();
+  const floatAnimationStarts = new WeakMap();
   let seed = 12345;
   const rnd = () => {
     seed |= 0;
@@ -150,10 +195,20 @@ function virtualClock(epochMs) {
       } catch (e) {
         console.error(e);
       }
-    for (const a of document.getAnimations())
+    const isScamScene = !!document.querySelector(
+      '.director-root[data-shot="scam-pays"], .director-root[data-shot="scam-collapse"]',
+    );
+    for (const a of document.getAnimations()) {
       try {
-        a.currentTime = now;
+        if (isScamScene && a.effect?.target?.classList?.contains('isl-float-inner')) {
+          if (!floatAnimationStarts.has(a)) floatAnimationStarts.set(a, now);
+          // Newly created payouts start at zero, not at the virtual page's elapsed time.
+          a.currentTime = now - floatAnimationStarts.get(a);
+        } else {
+          a.currentTime = now;
+        }
       } catch {}
+    }
     return now;
   };
 }
@@ -227,6 +282,116 @@ function pngSize(buffer) {
   if (buffer.toString('ascii', 1, 4) !== 'PNG') return null;
   return { width: buffer.readUInt32BE(16), height: buffer.readUInt32BE(20) };
 }
+function checkScamFrames(shot, frames, captionLog, conf, durationBeats, lang) {
+  if (!['scam-card', 'scam-pays', 'scam-collapse'].includes(shot)) return null;
+  const fail = (problem) => { throw new Error(`${shot}: ${problem}`); };
+  if (!frames.length) fail('no captured check frames');
+  const farmPresent = (x) => x.items?.some((item) => item.uid === 'director-pearl');
+  const labelCount = (x, tone, amount) => x.floats.filter(
+    (f) => f.tone === tone && f.opacity >= 0.6 && f.onScreen && f.unobstructed &&
+      f.text.includes(`${tone === 'neg' ? '−' : '+'}${amount}`),
+  ).length;
+  if (shot === 'scam-card') {
+    if (frames.at(-1).zoom < 1.15 - 0.0005)
+      fail(`last frame zoom ${frames.at(-1).zoom} < 1.15`);
+    const clickBeat = durationBeats - 0.75;
+    let ringChecked = 0;
+    for (const x of frames) {
+      const h = x.headline;
+      if (!h || h.width <= 0 || h.height <= 0 || h.left < -0.5 || h.top < -0.5 ||
+          h.right > conf.viewport.width + 0.5 || h.bottom > conf.viewport.height + 0.5)
+        fail(`pearlFarm headline clipped at frame ${x.frame}: ${JSON.stringify(h)}`);
+      if (x.beat >= 0.5 + 0.08 && x.beat < clickBeat - 0.08) {
+        const r = x.ring;
+        if (!r?.visible || !r.bounds || r.borderWidth !== '3px' ||
+            r.borderColor !== 'rgb(245, 184, 61)' || r.opacity < 0.58)
+          fail(`golden ring missing/incorrect at frame ${x.frame}: ${JSON.stringify(r)}`);
+        if (r.bounds.left > h.left - 5 || r.bounds.right < h.right + 5 ||
+            r.bounds.top > h.top - 5 || r.bounds.bottom < h.bottom + 5)
+          fail(`golden ring does not track headline at frame ${x.frame}`);
+        ringChecked++;
+      }
+    }
+    if (!ringChecked) fail('golden ring interval not sampled');
+    return { lastZoom: frames.at(-1).zoom, checkedHeadlineFrames: frames.length, checkedRingFrames: ringChecked };
+  }
+  if (frames.some((x) => !Array.isArray(x.items)))
+    fail('window.__director.sceneItems() is required to verify farm state');
+  if (!farmPresent(frames[0])) fail('farm missing from initial scene items');
+  if (shot === 'scam-pays') {
+    if (frames.some((x) => !farmPresent(x))) fail('farm disappears during paying weeks');
+    const firstFrames = frames.filter((x) => x.beat >= 0.5 && x.beat < 1.9 && labelCount(x, 'pos', scamOffer.income) >= 1).length;
+    const secondFrames = frames.filter((x) => x.beat >= 2 && labelCount(x, 'pos', scamOffer.income) >= 2).length;
+    const first = firstFrames / conf.fps >= 0.25;
+    const second = secondFrames / conf.fps >= 0.2;
+    if (!first || !second) fail(`two +${scamOffer.income} labels not visible at beats 0.5 and 2.0`);
+    return { farm: 'present throughout', firstIncomeSeconds: firstFrames / conf.fps,
+      secondIncomeSeconds: secondFrames / conf.fps, income: scamOffer.income };
+  }
+  if (frames.some((x) => x.beat < 0.5 - 0.08 && !farmPresent(x)))
+    fail('farm disappears before beat 0.5');
+  if (frames.some((x) => x.beat >= 0.5 + 0.16 && farmPresent(x)))
+    fail('farm still present after beat 0.5');
+  let visibleNegFrames = 0, maxVisibleNegFrames = 0;
+  for (const x of frames) {
+    visibleNegFrames = labelCount(x, 'neg', scamOffer.price) ? visibleNegFrames + 1 : 0;
+    maxVisibleNegFrames = Math.max(maxVisibleNegFrames, visibleNegFrames);
+  }
+  if (maxVisibleNegFrames / conf.fps < 1)
+    fail(`−${scamOffer.price} label visible for only ${(maxVisibleNegFrames / conf.fps).toFixed(2)}s`);
+  const expected = lang === 'ru' ? 'Это пирамида' : "It's a pyramid scheme";
+  if (frames.some((x) => x.beat < 1.5 - 0.08 && x.second?.visible && x.second.opacity > 0.05))
+    fail('second caption line appears before beat 1.5');
+  const secondStart = frames.find((x) => x.second?.visible && x.second.opacity > 0.05);
+  if (!secondStart || secondStart.beat < 1.5 - 0.08 || secondStart.beat > 1.5 + 0.2 ||
+      secondStart.second.text !== expected)
+    fail(`second caption line missing/late/wrong: ${JSON.stringify(secondStart)}`);
+  if (!frames.at(-1).second?.visible) fail('second caption line does not remain through end of shot');
+  const recordedHeights = captionLog.map((x) => x.height);
+  if (recordedHeights.some((height) => !Number.isFinite(height) || height <= 0))
+    fail('captionLog must record constant positive caption height on every frame');
+  if (Math.max(...recordedHeights) - Math.min(...recordedHeights) > 0.5)
+    fail(`captionLog height changes: ${Math.min(...recordedHeights)}..${Math.max(...recordedHeights)}px`);
+  const reservedHeights = frames.map((x) => x.reservedHeight);
+  if (reservedHeights.some((height) => !Number.isFinite(height) || height <= 0) ||
+      Math.max(...reservedHeights) - Math.min(...reservedHeights) > 0.5)
+    fail('two-line caption measuring box changes height during the shot');
+  return {
+    farm: 'present at first; gone after beat 0.5',
+    lost: scamOffer.price,
+    negativeLabelSeconds: maxVisibleNegFrames / conf.fps,
+    secondLineStartBeat: secondStart.beat,
+    captionHeight: recordedHeights[0],
+  };
+}
+function checkTimedCues(shot, log, frameOffset) {
+  const expected = {
+    liability: [
+      [0.5, 'coins.pay'], [2, 'coins.pay'], [3.5, 'week.next'],
+      [3.75, 'coin.minus'], [4, 'coin.minus'],
+    ],
+    'scam-pays': [
+      [0, 'week.next'], [0.5, 'coin.tick', 0],
+      [1.5, 'week.next'], [2, 'coin.tick', 2],
+    ],
+    'scam-collapse': [[0.25, 'scam.collapse']],
+  }[shot];
+  if (!expected) return;
+  for (const [beat, cue, pitch] of expected) {
+    if (!log.some((entry) => entry.cue === cue && Math.abs((entry.t - frameOffset) / BEAT - beat) < 0.01 &&
+      (pitch === undefined || entry.pitchStep === pitch)))
+      throw new Error(`${shot}: missing ${cue} at ${beat} beats${pitch === undefined ? '' : ` (pitch ${pitch})`}`);
+  }
+  if (shot === 'liability') {
+    for (const beat of [0.5, 2]) {
+      for (const [delay, cue] of [[0.07, 'build.pop'], [0.16, 'status.joy']]) {
+        if (!log.some((entry) => entry.cue === cue &&
+          Math.abs(entry.t - frameOffset - beat * BEAT - delay) < 0.01))
+          throw new Error(`${shot}: missing ${cue} at ${beat} beats + ${delay}s`);
+      }
+    }
+  }
+}
 async function renderShot(
   browser,
   url,
@@ -246,7 +411,10 @@ async function renderShot(
   let captionBounds = null;
   const subjectSamples = [];
   const scamCardChecks = [];
+  const scamFrames = [];
   const freedomChecks = [];
+  let neighborVisibleFrames = 0;
+  let endVisibleFrames = 0;
   const subjectFrames = new Set([0, Math.floor(frames / 2), frames - 1]);
   const clickFrame = Math.max(
     0,
@@ -287,6 +455,19 @@ async function renderShot(
         if (check.captionVisible) throw new Error(`${shot}: caption visible after modal at frame ${i}`);
       }
     }
+    if (shot === 'neighbors' || shot === 'end') {
+      const visible = await page.evaluate((id) => {
+        const el = document.querySelector(id === 'neighbors' ? '.neighbor-card[role="dialog"]' : '.director-end-card');
+        if (!el) return false;
+        const s = getComputedStyle(el), r = el.getBoundingClientRect();
+        return s.display !== 'none' && s.visibility !== 'hidden' && Number(s.opacity) > 0.1 &&
+          r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight;
+      }, shot);
+      if (visible) {
+        if (shot === 'neighbors') neighborVisibleFrames++;
+        else endVisibleFrames++;
+      }
+    }
     if (i === Math.floor(frames / 2))
       captionBounds = await page.evaluate(() => {
         const r = document.querySelector('.director-caption:not([data-director-measure])')?.getBoundingClientRect();
@@ -306,16 +487,63 @@ async function renderShot(
       });
       subjectSamples.push({ frame: i, ...sample });
     }
-    if (format === 'v30' && shot === 'scam-card' && (i === 0 || i === clickFrame)) {
+    if (shot === 'scam-card' || shot === 'scam-pays' || shot === 'scam-collapse') {
       const check = await page.evaluate(() => {
-        const card = document.querySelector('[data-offer="pearlFarm"]')?.getBoundingClientRect();
-        const list = document.querySelector('.tab-scroll')?.getBoundingClientRect();
+        const bounds = (el) => {
+          const r = el?.getBoundingClientRect();
+          return r ? { left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height } : null;
+        };
+        const visible = (el) => {
+          if (!el) return false;
+          const s = getComputedStyle(el), r = el.getBoundingClientRect();
+          return s.display !== 'none' && s.visibility !== 'hidden' && Number(s.opacity) > 0.05 &&
+            r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight &&
+            r.right > 0 && r.left < innerWidth;
+        };
+        const headline = document.querySelector('[data-offer="pearlFarm"] h3');
+        const card = document.querySelector('[data-offer="pearlFarm"]');
+        const ring = document.querySelector('.director-scam-ring, [data-director-scam-ring]');
+        const stage = document.querySelector('#director-stage');
+        const zoom = stage ? new DOMMatrixReadOnly(getComputedStyle(stage).transform).a : null;
+        const second = document.querySelector('.director-caption:not([data-director-measure]) .director-caption-second, .director-caption:not([data-director-measure]) [data-director-second-line]');
+        const caption = document.querySelector('.director-caption:not([data-director-measure])');
         return {
-          card: card ? { left: card.left, top: card.top, right: card.right, bottom: card.bottom } : null,
-          list: list ? { left: list.left, top: list.top, right: list.right, bottom: list.bottom } : null,
+          headline: bounds(headline),
+          card: bounds(card),
+          list: bounds(document.querySelector('.tab-scroll')),
+          zoom,
+          ring: ring ? {
+            bounds: bounds(ring), visible: visible(ring),
+            opacity: Number(getComputedStyle(ring).opacity),
+            borderWidth: getComputedStyle(ring).borderTopWidth,
+            borderColor: getComputedStyle(ring).borderTopColor,
+          } : null,
+          items: typeof window.__director.sceneItems === 'function' ? window.__director.sceneItems() : null,
+          floats: [...document.querySelectorAll('.isl-float')].filter(visible).map((el) => {
+            const inner = el.querySelector('.isl-float-inner');
+            const floatBounds = bounds(inner);
+            const captionBounds = bounds(caption);
+            const unobstructed = !captionBounds || !floatBounds ||
+              floatBounds.right <= captionBounds.left || floatBounds.left >= captionBounds.right ||
+              floatBounds.bottom <= captionBounds.top || floatBounds.top >= captionBounds.bottom;
+            return {
+              text: el.textContent?.trim() ?? '',
+              tone: el.classList.contains('neg') ? 'neg' : 'pos',
+              opacity: inner ? Number(getComputedStyle(inner).opacity) : 0,
+              onScreen: visible(inner),
+              unobstructed,
+              bounds: floatBounds,
+            };
+          }),
+          second: second ? { text: second.textContent?.trim(), visible: visible(second), opacity: Number(getComputedStyle(second).opacity) } : null,
+          captionHeight: bounds(caption)?.height ?? null,
+          reservedHeight: bounds(document.querySelector('.director-caption[data-director-measure]'))?.height ?? null,
         };
       });
-      scamCardChecks.push({ frame: i, ...check });
+      const localBeat = ((i + 1) / conf.fps - frameOffset) / BEAT;
+      scamFrames.push({ frame: i, beat: localBeat, ...check });
+      if (shot === 'scam-card' && (i === 0 || i === clickFrame))
+        scamCardChecks.push({ frame: i, card: check.card, list: check.list });
     }
     const path = resolve(frameDir, `${String(i).padStart(5, '0')}.png`);
     const image = await page.screenshot({ path, type: 'png', timeout: 0 });
@@ -332,6 +560,7 @@ async function renderShot(
     if (/[А-Яа-яЁё]/.test(txt)) throw new Error(`${shot}: Cyrillic in EN end`);
   }
   const log = await page.evaluate(() => window.__director.cueLog);
+  checkTimedCues(shot, log, frameOffset);
   const captionLog = await page.evaluate(() => window.__director.captionLog);
   let visibilityChanges = 0;
   for (let i = 1; i < captionLog.length; i++)
@@ -347,6 +576,12 @@ async function renderShot(
   }
   if (shot === 'freedom' && !freedomChecks.some((x) => x.modal))
     throw new Error(`${shot}: freedom modal never appears`);
+  if (shot === 'freedom' && freedomChecks.filter((x) => x.modal).length / conf.fps < 2.5)
+    throw new Error(`${shot}: freedom modal held under 2.5s`);
+  if (shot === 'neighbors' && neighborVisibleFrames / conf.fps < 1.5)
+    throw new Error(`${shot}: neighbor card held ${(neighborVisibleFrames / conf.fps).toFixed(2)}s < 1.5s`);
+  if (shot === 'end' && endVisibleFrames / conf.fps < 2.8)
+    throw new Error(`${shot}: end card held ${(endVisibleFrames / conf.fps).toFixed(2)}s < 2.8s`);
   for (const check of scamCardChecks) {
     if (!check.card || !check.list) throw new Error(`${shot}: pearlFarm card/list missing at frame ${check.frame}`);
     if (
@@ -357,6 +592,7 @@ async function renderShot(
     )
       throw new Error(`${shot}: pearlFarm card outside visible list at frame ${check.frame}: ${JSON.stringify(check)}`);
   }
+  const scamChecks = checkScamFrames(shot, scamFrames, captionLog, conf, durationBeats, lang);
   const dirErrors = await page.evaluate(() => window.__director.errors);
   await context.close();
   if (errs.length || dirErrors.length) throw new Error(`${shot}: ${[...errs, ...dirErrors].join('; ')}`);
@@ -370,6 +606,7 @@ async function renderShot(
     captionBounds,
     subjectSamples,
     scamCardChecks,
+    scamChecks,
     freedomChecks,
   };
   await writeFile(donePath, JSON.stringify(done, null, 2));
@@ -447,6 +684,12 @@ function compositionCheck(target, result) {
     target.format === 'v30' ? { x0: 0.08, x1: 0.88, y0: 0.3, y1: 0.78 } : { x0: 0.1, x1: 0.9, y0: 0.12, y1: 0.76 };
   const general = new Set(['hook', 'storm', 'end']);
   for (const item of result.timeline) {
+    if (item.shot === 'scam-pays' || item.shot === 'scam-collapse') {
+      const samples = item.subjectSamples || [];
+      if (samples.length !== 3 || samples.some((sample) =>
+        !(sample.subjects || []).some((subject) => /pearl|farm/i.test(subject.name))))
+        failures.push(`${item.shot} has no farm projection for each first/middle/last frame`);
+    }
     for (const sample of item.subjectSamples || []) {
       for (const subject of sample.subjects || []) {
         const minX = conf.viewport.width * (general.has(item.shot) ? 0.4 : zone.x0),
@@ -538,12 +781,15 @@ async function renderTarget(browser, url, edit, sourceHash, target) {
     selectedCount++;
     const start = Math.round(b0 * (60 / 99) * conf.fps);
     const end = Math.round(b1 * (60 / 99) * conf.fps);
+    const expected = expectedMontage[key].shots[si];
+    if (JSON.stringify([shot, b0, b1]) !== JSON.stringify(expected))
+      throw new Error(`${key} timeline differs at shot ${si}`);
     const frames = end - start;
     const frameOffset = b0 * (60 / 99) - start / conf.fps;
     const frameDir = resolve(work, shot);
     const cacheKey = createHash('sha256')
       .update(
-        JSON.stringify({ shot, b0, b1, montageHash, quality, lang: target.lang, format: key, sourceHash, frameOffset }),
+        JSON.stringify({ shot, b0, b1, montageHash, quality, lang: target.lang, format: key, sourceHash, frameOffset, checkVersion }),
       )
       .digest('hex');
     const done = await renderShot(browser, url, {
@@ -574,6 +820,7 @@ async function renderTarget(browser, url, edit, sourceHash, target) {
       captionBounds: done.captionBounds,
       subjectSamples: done.subjectSamples,
       scamCardChecks: done.scamCardChecks,
+      scamChecks: done.scamChecks,
       freedomChecks: done.freedomChecks,
     });
   }
@@ -742,6 +989,7 @@ async function main() {
   const browser = await chromium.launch({ headless: true, ...(channel ? { channel } : {}) });
   try {
     const edit = await loadEdit(browser, preview.url);
+    validateMontage(edit);
     const sourceHash = await hashTree(resolve(root, 'apps/web/src'));
     const results = {};
     const composition = {};
