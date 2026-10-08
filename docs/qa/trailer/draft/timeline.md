@@ -8,13 +8,14 @@ Beat: `60/99 = 0.6060606061 s`. Cuts are `round(beat × B × fps)`.
 |---|---:|---:|---:|---:|---|---|
 | hook | 0–4 | 0.000–2.424 | 36 | 0–35 | 600 монет и маленький остров | build.pop, build.pop, build.pop, build.pop, build.pop, build.pop, build.pop |
 | asset | 4–10 | 2.424–6.061 | 55 | 36–90 | **Активы** приносят деньги каждую неделю | coins.pay, build.pop, week.next, coin.tick |
-| liability | 10–16 | 6.061–9.697 | 54 | 91–144 | **Пассивы** красивые — но только забирают деньги | coins.pay, build.pop, status.joy, coins.pay, build.pop, status.joy, week.next, coin.minus, coin.minus |
-| scam-card | 16–19 | 9.697–11.515 | 28 | 145–172 | Купили бы? | ui.click, coins.pay, build.pop |
-| scam-collapse | 19–24 | 11.515–14.545 | 45 | 173–217 | Это была афера | week.next, coin.tick, coin.tick, coin.tick, coin.tick, coin.tick, coin.tick, coin.tick, ui.open, scam.collapse, coin.minus |
-| storm | 24–28 | 14.545–16.970 | 37 | 218–254 | Риски — настоящие | storm, weather:storm |
-| freedom | 28–36 | 16.970–21.818 | 72 | 255–326 | Когда активы покрывают все расходы… | weather:clear, week.next, coin.tick, coin.tick, coin.tick, coin.tick, coin.tick, coin.tick, coin.tick, ui.open, freedom, coin.minus |
-| dream | 36–42 | 21.818–25.455 | 55 | 327–381 | А потом — мечта | dream.stage, dream.stage, dream.launch |
-| end | 42–49.5 | 25.455–30.000 | 68 | 382–449 | — | freedom.level |
+| liability | 10–15 | 6.061–9.091 | 45 | 91–135 | **Пассивы** красивые — но только забирают деньги | coins.pay, build.pop, status.joy, coins.pay, build.pop, status.joy, week.next, coin.minus, coin.minus |
+| scam-card | 15–19 | 9.091–11.515 | 37 | 136–172 | +25% в неделю. Купили бы? | ui.click |
+| scam-pays | 19–22 | 11.515–13.333 | 27 | 173–199 | Первые недели — платит… | week.next, coin.tick, week.next, coin.tick |
+| scam-collapse | 22–27 | 13.333–16.364 | 45 | 200–244 | …а потом исчезает со всеми деньгами | scam.collapse |
+| storm | 27–31 | 16.364–18.788 | 37 | 245–281 | Риски — настоящие | storm, weather:storm |
+| freedom | 31–38 | 18.788–23.030 | 63 | 282–344 | Когда активы покрывают все расходы… | weather:clear, week.next, coin.tick, coin.tick, coin.tick, coin.tick, coin.tick, coin.tick, coin.tick, ui.open, freedom, coin.minus |
+| dream | 38–44 | 23.030–26.667 | 55 | 345–399 | А потом — мечта | dream.stage, dream.stage, dream.launch |
+| end | 44–49.5 | 26.667–30.000 | 50 | 400–449 | — | freedom.level |
 
 ## h45-ru
 
@@ -24,10 +25,11 @@ Beat: `60/99 = 0.6060606061 s`. Cuts are `round(beat × B × fps)`.
 | asset | 6–14 | 3.636–8.485 | 72 | 55–126 | **Активы** приносят деньги каждую неделю | coins.pay, build.pop, week.next, coin.tick |
 | upgrade | 14–20 | 8.485–12.121 | 55 | 127–181 | Улучшайте то, что уже есть | coins.pay, upgrade, coins.pay, upgrade |
 | liability | 20–26 | 12.121–15.758 | 54 | 182–235 | **Пассивы** красивые — но только забирают деньги | coins.pay, build.pop, status.joy, coins.pay, build.pop, status.joy, week.next, coin.minus, coin.minus |
-| scam-card | 26–31 | 15.758–18.788 | 46 | 236–281 | Купили бы? | ui.click, coins.pay, build.pop |
-| scam-collapse | 31–37 | 18.788–22.424 | 54 | 282–335 | Это была афера | week.next, coin.tick, coin.tick, coin.tick, coin.tick, coin.tick, coin.tick, coin.tick, ui.open, scam.collapse, coin.minus |
-| storm | 37–42 | 22.424–25.455 | 46 | 336–381 | Риски — настоящие | storm, weather:storm |
-| neighbors | 42–50 | 25.455–30.303 | 73 | 382–454 | Соседи идут к той же цели — каждый своим путём | weather:clear, week.next, coin.tick, coin.tick, coin.minus |
-| freedom | 50–58 | 30.303–35.152 | 72 | 455–526 | Когда активы покрывают все расходы… | week.next, coin.tick, coin.tick, coin.tick, coin.tick, coin.tick, coin.tick, coin.tick, ui.open, freedom, coin.minus |
-| dream | 58–64 | 35.152–38.788 | 55 | 527–581 | А потом — мечта | dream.stage, dream.stage, dream.launch |
-| end | 64–74.25 | 38.788–45.000 | 93 | 582–674 | — | freedom.level |
+| scam-card | 26–31 | 15.758–18.788 | 46 | 236–281 | +25% в неделю. Купили бы? | ui.click |
+| scam-pays | 31–35 | 18.788–21.212 | 36 | 282–317 | Первые недели — платит… | week.next, coin.tick, week.next, coin.tick |
+| scam-collapse | 35–41 | 21.212–24.848 | 55 | 318–372 | …а потом исчезает со всеми деньгами | scam.collapse |
+| storm | 41–46 | 24.848–27.879 | 45 | 373–417 | Риски — настоящие | storm, weather:storm, weather:clear |
+| neighbors | 46–52 | 27.879–31.515 | 55 | 418–472 | Соседи идут к той же цели — каждый своим путём | week.next, coin.tick, coin.tick, coin.minus |
+| freedom | 52–60 | 31.515–36.364 | 72 | 473–544 | Когда активы покрывают все расходы… | week.next, coin.tick, coin.tick, coin.tick, coin.tick, coin.tick, coin.tick, coin.tick, ui.open, freedom, coin.minus |
+| dream | 60–66 | 36.364–40.000 | 55 | 545–599 | А потом — мечта | dream.stage, dream.stage, dream.launch |
+| end | 66–74.25 | 40.000–45.000 | 75 | 600–674 | — | freedom.level |
